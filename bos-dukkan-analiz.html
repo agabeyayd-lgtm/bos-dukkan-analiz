@@ -102,7 +102,7 @@ const API='https://www.googleapis.com/youtube/v3/';
 const GUN=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
 let key=''; try{key=localStorage.getItem('yt_key')||''}catch(e){}
 $('#key').value=key;
-$('#saveKey').onclick=()=>{key=$('#key').value.trim();try{localStorage.setItem('yt_key',key)}catch(e){}flash('Anahtar kaydedildi.')};
+$('#saveKey').onclick=()=>{key=$('#key').value.trim();if(!key){flash('Önce YouTube API anahtarını gir.');return}try{localStorage.setItem('yt_key',key);flash('Anahtar bu tarayıcıya kaydedildi.')}catch(e){flash('Kaydedilemedi; tarayıcı depolama iznini kontrol et.')}};
 function flash(t){const d=document.createElement('div');d.className='msg';d.textContent=t;$('.note').after(d);setTimeout(()=>d.remove(),2000)}
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
