@@ -105,6 +105,7 @@ let key=''; try{key=localStorage.getItem('yt_key')||''}catch(e){}
 $('#key').value=key;
 $('#saveKey').onclick=()=>{key=$('#key').value.trim();try{localStorage.setItem('yt_key',key)}catch(e){}flash('Anahtar kaydedildi.')};
 function flash(t){const d=document.createElement('div');d.className='msg';d.textContent=t;$('.note').after(d);setTimeout(()=>d.remove(),2000)}
+async function copyTable(tableSelector,buttonSelector){const table=$(tableSelector),btn=$(buttonSelector);if(!table||!btn)return;const text=Array.from(table.rows).map(row=>Array.from(row.cells).map(cell=>cell.innerText.trim().replace(/\\s+/g,' ')).join('\\t')).join('\\n');try{await navigator.clipboard.writeText(text);btn.textContent='Kopyalandı ✓';}catch(e){const area=document.createElement('textarea');area.value=text;area.style.position='fixed';area.style.opacity='0';document.body.appendChild(area);area.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}area.remove();btn.textContent=ok?'Kopyalandı ✓':'Tabloyu seçip kopyala';if(!ok){const visible=document.createElement('textarea');visible.value=text;visible.rows=8;visible.style.width='100%';visible.style.marginTop='8px';table.parentElement.after(visible);visible.focus();visible.select();}}}
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id===b.dataset.p));
@@ -222,7 +223,7 @@ $('#goGen').onclick=async()=>{
     const md=median(vs.map(v=>v.views));
     el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(md),'medyan izlenme')}${stat(fmt(Math.max(...vs.map(v=>v.vpd))),'en yüksek günlük izlenme')}${stat(vs.filter(v=>v.brk>=5).length,'fırlayan video (≥5x abone)')}${stat(avg(vs.map(v=>v.sec)).toFixed(1)+' sn','ortalama süre')}${stat(Math.round(vs.filter(v=>v.sec>=7&&v.sec<=9).length/vs.length*100)+'%','8 sn civarı')}</div>
     <h2>Başlıklarda sık geçen kelimeler</h2><div class="chips">${top.map(([w,c])=>`<span class="chip">${esc(w)} · ${c}</span>`).join('')}</div>
-    <h2>Videolar</h2><div class="wrap"><table><tr><th>Başlık</th><th>Kanal</th><th>Abone</th><th>İzlenme</th><th>Fırlama</th><th>İzl./gün</th><th>Beğeni %</th><th>Yorum</th><th>Süre</th><th>Gün-saat</th></tr>
+    <h2>Videolar</h2><p><button class="ghost" id="copyGen">Tabloyu kopyala</button></p><div class="wrap"><table id="tg"><tr><th>Başlık</th><th>Kanal</th><th>Abone</th><th>İzlenme</th><th>Fırlama</th><th>İzl./gün</th><th>Beğeni %</th><th>Yorum</th><th>Süre</th><th>Gün-saat</th></tr>
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${esc(v.channel)}</td><td>${v.subs==null?'–':fmt(v.subs)}</td><td>${fmt(v.views)}</td><td class="${v.brk>=5?'y':''}">${v.brk==null?'–':v.brk.toFixed(1)+'x'}</td><td>${fmt(v.vpd)}</td><td>${v.views?(v.likes/v.views*100).toFixed(1):'–'}</td><td>${fmt(v.comments)}</td><td>${v.sec} sn</td><td>${GUN[v.date.getDay()]} ${String(v.date.getHours()).padStart(2,'0')}:00</td></tr>`).join('')}</table></div>
     <p class="note">Fırlama = izlenme ÷ kanalın abone sayısı. 5x ve üstü, videonun kanal boyuna göre çok iyi tuttuğunu gösterir. Abone sayısı gizli kanallarda boş kalır. Arama başına 100 kota birimi harcanır (günlük ücretsiz kota 10.000).</p>
     <h2>Önceki fikirler / tekrar filtresi</h2>
@@ -230,6 +231,7 @@ $('#goGen').onclick=async()=>{
     <textarea id="avoidIdeas" rows="3" placeholder="Örn. gevşek somun, küçük hata→şaşkın tepki, aynı final tipi..." style="width:100%;max-width:100%;margin:4px 0 10px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
     <p><button id="ask">Güçlü fikir istemi oluştur ve kopyala</button></p>
     <textarea id="askTxt" readonly rows="10" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
+    $('#copyGen').onclick=()=>copyTable('#tg','#copyGen');
     $('#ask').onclick=()=>askClaude(vs,q);
   }catch(e){fail(el,e)}
 };
@@ -271,7 +273,8 @@ $('#goKan').onclick=async()=>{
     <h2>Videolar</h2><div class="wrap"><table id="tk"><tr><th>Başlık</th><th>İzlenme</th><th>İzl./gün</th><th>Beğeni %</th><th>Süre</th><th>Yayın</th><th>8 sn</th><th>EN</th><th>Slot</th></tr>
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${fmt(v.vpd)}</td><td>${v.views?(v.likes/v.views*100).toFixed(1):'–'}</td><td>${v.sec} sn</td><td>${GUN[v.date.getDay()]} ${v.date.toLocaleDateString('tr-TR')} ${String(v.date.getHours()).padStart(2,'0')}:00</td>${[v.ok8,v.en,v.slot].map(x=>`<td class="${x?'y':'n'}">${x?'✓':'✗'}</td>`).join('')}</tr>`).join('')}</table></div>
     <p class="note">Tutma oranı (retention) ve loop verisi yalnızca kanal sahibi girişiyle YouTube Analytics API'den alınabilir; bunun için 3. sekmeyi kullan. Yayın saatleri tarayıcının yerel saat dilimine göredir.</p>
-    <p><button class="ghost" id="csv">CSV indir</button></p>`;
+    <p><button class="ghost" id="copyKan">Tabloyu kopyala</button> <button class="ghost" id="csv">CSV indir</button></p>`;
+    $('#copyKan').onclick=()=>copyTable('#tk','#copyKan');
     $('#csv').onclick=()=>{
       const rows=[['baslik','izlenme','begeni','yorum','sure_sn','yayin','8sn','ingilizce','slot','url'],
         ...vs.map(v=>[v.title,v.views,v.likes,v.comments,v.sec,v.date.toISOString(),v.ok8,v.en,v.slot,'https://youtu.be/'+v.id])];
@@ -390,7 +393,7 @@ $('#goOwn').onclick=async()=>{
       <p class="note">Bir sonraki aşamada bu karşılaştırmaların başlık/konu ve görsel olay özellikleriyle eşleştirilmesi gerekir; mevcut API verileri tek başına videonun sahne içeriğini açıklamaz.</p>`;
     el.innerHTML=`${comparisonHtml}<div class="stats">${stat(vs.length,'video')}${stat(fmt(tv),'toplam izlenme')}${stat(Number.isFinite(wpct)?wpct.toFixed(0)+'%':'—','ağırlıklı ort. izlenen kısım')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct>=55).length+'/'+vs.filter(v=>v.hasAnalytics).length,'video ≥55% (raporlu)')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct>100).length,'%100 üstü (loop sinyali)')}</div>
     <p class="note">Analytics verisi henüz gelmeyen videolarda herkese açık izlenme sayısı gösterilir; ortalama izleme ve izlenen yüzde için — görünür. %100'ün üstü, izleyicilerin videoyu ortalama bir kereden fazla izlediği anlamına gelir.</p>
-    <h2>Videolar (en yeni önce)</h2><div class="wrap"><table><tr><th>Başlık</th><th>İzlenme</th><th>Ort. izleme</th><th>İzlenen kısım</th><th>Süre</th><th>Beğeni</th><th>Yeni abone</th></tr>
+    <h2>Videolar (en yeni önce)</h2><p><button class="ghost" id="copyOwn">Tabloyu kopyala</button></p><div class="wrap"><table id="to"><tr><th>Başlık</th><th>İzlenme</th><th>Ort. izleme</th><th>İzlenen kısım</th><th>Süre</th><th>Beğeni</th><th>Yeni abone</th></tr>
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${v.avgSec==null?'—':v.avgSec.toFixed(1)+' sn'}</td><td class="${v.pct==null?'':pctCls(v.pct)}">${v.pct==null?'—':v.pct.toFixed(0)+'%'}</td><td>${v.sec} sn</td><td>${v.likes==null?'—':fmt(v.likes)}</td><td>${v.subs==null?'—':v.subs}</td></tr>`).join('')}</table></div>
     <details class="note"><summary>Teknik teşhis (istatistikler neden 0?)</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(analyticsDebug,null,2)}</pre></details>
     <p class="note">%55 eşiği senin hedefin olarak işaretlendi. Bu eşik YouTube dağıtımını garanti etmez; yalnızca kendi videolarını kıyaslamak için kullan.</p>
@@ -399,6 +402,7 @@ $('#goOwn').onclick=async()=>{
     <p><button id="copyCompare">Hazır analiz paketini oluştur ve kopyala</button> <button id="downloadCompare" class="ghost" disabled>Analiz paketini indir (.txt)</button></p>
     <div id="commentDiag" class="note" aria-live="polite">Yorum teşhisi henüz çalıştırılmadı. Yukarıdaki düğmeye bastığında yorumların alınıp alınmadığı ve varsa API hatası burada gösterilecek.</div>
     <textarea id="compareTxt" readonly rows="8" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
+    $('#copyOwn').onclick=()=>copyTable('#to','#copyOwn');
     $('#copyCompare').onclick=async()=>{
       const btn=$('#copyCompare');
       const commentDiag=$('#commentDiag');
