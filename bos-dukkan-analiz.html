@@ -147,7 +147,7 @@ async function subsMap(ids){
 }
 function askClaude(vs,q){
   const pool=vs.filter(v=>v.brk!=null).sort((a,b)=>b.brk-a.brk).slice(0,10);
-  const lines=pool.map((v,i)=>\`\${i+1}. "\${v.title}" | \${v.channel} | \${fmt(v.subs)} abone | \${fmt(v.views)} izlenme | \${v.sec} sn | \${v.brk.toFixed(1)}x\`).join('\\n');
+  const lines=pool.map((v,i)=>(i+1)+'. "'+v.title+'" | '+v.channel+' | '+fmt(v.subs)+' abone | '+fmt(v.views)+' izlenme | '+v.sec+' sn | '+v.brk.toFixed(1)+'x').join('\n');
   const avoid=$('#avoidIdeas')?.value.trim()||'Belirtilmedi.';
   const txt=[
     "ROLÜN: Boş Dükkân için yaratıcı yönetmen ve acımasız kalite hakemisin. Fikir üretmekle kalma; her fikri test et ve zayıfları reddet.",
@@ -157,7 +157,7 @@ function askClaude(vs,q){
     "İnsan davranışı, beklenti, karar ve sonuç mizahı taşımalı. Karakterler olan biteni doğal karşılamalı.",
     "İlk 0,3 saniyede güçlü görsel kanca; olay 8 saniyede anlaşılır; doğal yükseliş ve tamamlanmış somut final. Sırf loop için sonu yarım bırakma.",
     "",
-    "ARAŞTIRMA VERİSİ — arama: \""+q+"\". Yüksek izlenme/abone oranıyla seçilen videolar; bu oran tek başına neden-sonuç kanıtı değildir:",
+    'ARAŞTIRMA VERİSİ — arama: "'+q+'". Yüksek izlenme/abone oranıyla seçilen videolar; bu oran tek başına neden-sonuç kanıtı değildir:',
     lines,
     "",
     "ÖNCEKİ FİKİRLER / KAÇINILACAK TEKRARLAR:",
@@ -171,9 +171,9 @@ function askClaude(vs,q){
     "5) 22/25 altındaki, açıklama gerektiren, fiziksel olarak inandırıcı olmayan, yalnızca nesneye dayanan veya başka fikirle aynı mekanizmayı kullanan fikri SUNMA. Yerine daha iyisini bul ve yeniden test et.",
     "6) Sonunda beş mekanizmanın gerçekten farklı olduğunu kontrol et; değilse fikirleri yeniden yaz.",
     "7) Örneklem ve arama sonuçlarının seçilim yanlılığını not et. Tam manifesto dosyası bu panele bağlı değil; yalnızca yukarıdaki kuralları kullan ve bunu gizleme."
-  ].join('\\n');
+  ].join('\n');
   const ta=$('#askTxt');ta.value=txt;ta.style.display='block';ta.select();
-  const done=ok=>{$('#ask').textContent=ok?'Kopyalandı ✓ Claude\\'a yapıştır':'Metni elle kopyala (aşağıda)'};
+  const done=ok=>{$('#ask').textContent=ok?"Kopyalandı ✓ Claude'a yapıştır":'Metni elle kopyala (aşağıda)'};
   const old=()=>{try{done(document.execCommand('copy'))}catch(e){done(false)}};
   if(navigator.clipboard)navigator.clipboard.writeText(txt).then(()=>done(true)).catch(old);else old();
 }
