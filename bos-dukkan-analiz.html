@@ -397,6 +397,7 @@ $('#goOwn').onclick=async()=>{
     <h2>Araştırma videolarıyla karşılaştır</h2>
     <p class="note">Önce Genel Analiz bölümünde aramayı çalıştır; sonra burada bu düğmeye bas. Kanal metrikleri, izlenme/tutma sinyalleri ve erişilebilen videolardan yorum örnekleri tek bir hazır istemde birleştirilir. CSV indirmene gerek yok. Yorum örneği kapalı videolarda alınamayabilir.</p>
     <p><button id="copyCompare">Kanal + araştırma verisini karşılaştır ve kopyala</button></p>
+    <div id="commentDiag" class="note" aria-live="polite">Yorum teşhisi henüz çalıştırılmadı. Yukarıdaki düğmeye bastığında yorumların alınıp alınmadığı ve varsa API hatası burada gösterilecek.</div>
     <textarea id="compareTxt" readonly rows="8" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
     $('#copyCompare').onclick=async()=>{
       const btn=$('#copyCompare');
@@ -406,12 +407,19 @@ $('#goOwn').onclick=async()=>{
       const researchComments=research?await sampleComments([...research.videos].sort((a,b)=>(b.viewsPerSub??-1)-(a.viewsPerSub??-1)),5,8):[];
       const ownComments=await sampleComments([...vs].sort((a,b)=>b.views-a.views),5,8);
       if(research) research.commentSamples=researchComments;
+      const commentDiag=$('#commentDiag');
+      const renderCommentGroup=(label,items)=>'<h3>'+esc(label)+'</h3>'+((items&&items.length)?items.map(v=>'<div style="margin:8px 0;padding:8px;border:1px solid var(--line);border-radius:8px"><strong>'+esc(v.title||v.videoId)+'</strong><p>'+ (v.available ? ('API yanıtı başarılı · '+v.sampled+' yorum bulundu') : ('API HATASI: '+esc(v.reason||'Bilinmeyen hata'))) +'</p>'+((v.comments||[]).length?'<ul>'+v.comments.map(c=>'<li>'+esc(c.text)+' <small>('+fmt(c.likes)+' beğeni)</small></li>').join('')+'</ul>':(v.available?'<p>Bu videoda dönen sonuçlarda gösterilebilir yorum yok.</p>':''))+'</div>').join(''):'<p>Bu grupta yorum örneği alınmadı.</p>');
+      const failures=[...ownComments,...researchComments].filter(v=>!v.available);
+      commentDiag.innerHTML='<h2>Yorum çekme teşhisi</h2><p>Kanal: '+ownComments.filter(v=>v.available).length+'/'+ownComments.length+' videoda istek başarılı. Araştırma: '+researchComments.filter(v=>v.available).length+'/'+researchComments.length+' videoda istek başarılı.</p>'+(failures.length?'<p><strong>Hata ayrıntıları aşağıda.</strong> Bunlar API yanıtından alınmıştır.</p>':'<p>Seçilen videolarda API isteği hata vermedi. Sıfır yorum, o videolar için sonuç dönmediği anlamına gelir.</p>')+renderCommentGroup('Kendi kanalın',ownComments)+renderCommentGroup('Araştırma videoları',researchComments);
       const txt=[
         "ROL: Boş Dükkân için veri analisti ve yaratıcı yönetmen. Veriye dayalı karşılaştırma yap; korelasyonu nedensellik diye sunma.",
         "KANAL SABİTLERİ: 8 saniye, dikey 9:16, diyalogsuz, doğal ASMR, İngilizce başlık. Mizah gerçekçi insan davranışından doğmalı; güçlü ilk 0,3 saniye ve tamamlanmış final olmalı.",
         "",
         "BOŞ DÜKKÂN KANAL VERİSİ (YouTube Analytics API ve video metaverisi):",
         JSON.stringify({channel:c.snippet.title,subscriberCount:+c.statistics.subscriberCount||0,periodDays:+$('#odays').value,summary:{videos:vs.length,totalViews:tv,medianViews:viewMedian,medianViewedPercent:Number.isFinite(retentionMedian)?retentionMedian:null,weightedAverageViewedPercent:Number.isFinite(wpct)?wpct:null},videos:own},null,2),
+        "",
+        "BOŞ DÜKKÂN VİDEOLARINDAN YORUM ÖRNEKLERİ (API'den çekilen gerçek sonuçlar; hata varsa reason alanında):",
+        JSON.stringify(ownComments,null,2),
         "",
         "ARAŞTIRMA VİDEOLARI:",
         research?JSON.stringify(research,null,2):"Bu oturumda Genel Analiz araştırma sonuçları henüz alınmamış. Kanal verisi var; rakip karşılaştırmasını eksik veri diye açıkça belirt.",
