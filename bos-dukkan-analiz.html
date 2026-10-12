@@ -266,6 +266,9 @@ $('#goOwn').onclick=async()=>{
     const j=await r.json();
     if(!r.ok){if(r.status===401)tok='';throw new Error((j.error&&j.error.message)||('Hata '+r.status))}
     const rows=j.rows||[];
+    if(!rows.length){
+      throw new Error('Video listesi alınabiliyor ama YouTube Analytics bu tarih aralığı için hiçbir istatistik satırı döndürmedi. Bu yüzden önceki sürüm videoların istatistiklerini yanlış biçimde 0 gösteriyordu. Son 90 günü seçip tekrar dene; yine aynıysa Google hesabının Boş Dükkan kanalının sahibi/yöneticisi olduğundan ve YouTube Analytics API erişiminin açık olduğundan emin olmamız gerekiyor.');
+    }
     // Analytics raporu yalnızca seçili dönemde ölçümü olan videoları döndürebilir.
     // Son yüklenen videoları ayrıca alıp raporla birleştir; böylece yeni video listede kaybolmaz.
     const cr=await fetch(API+'channels?part=contentDetails&mine=true',au);
