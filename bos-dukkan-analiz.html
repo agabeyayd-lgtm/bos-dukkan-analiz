@@ -182,14 +182,14 @@ function askClaude(vs,q){
     "ÖNCEKİ FİKİRLER / KAÇINILACAK TEKRARLAR:",
     avoid,
     "",
-    "GÖREV:",
-    "1) Ortak izleyici kancalarını ve başlık kalıplarını çıkar; sahneleri/nesneleri kopyalama.",
-    "2) Tam 5 fikir üret. Her biri farklı bir TEMEL MİZAH MEKANİZMASI kullanmalı; yalnızca nesne veya mekân değişikliği farklılık sayılmaz. Hepsi 'küçük hata → şaşkın tepki' şablonuna düşmesin.",
-    "3) Her fikirde ver: İngilizce başlık; ilk kare (0–0,3 sn); zaman aralıklarıyla 8 saniyelik akış; doğal ASMR sesi; neden komik olduğu; tamamlanmış final görüntüsü.",
-    "4) Her fikri beş ölçütte 1–5 puanla ve gerekçelendir: ilk karede durdurma, doğallık/fizik, mizahın anlaşılması, yükseliş, final tatmini. Toplam /25.",
-    "5) 22/25 altındaki, açıklama gerektiren, fiziksel olarak inandırıcı olmayan, yalnızca nesneye dayanan veya başka fikirle aynı mekanizmayı kullanan fikri SUNMA. Yerine daha iyisini bul ve yeniden test et.",
-    "6) Sonunda beş mekanizmanın gerçekten farklı olduğunu kontrol et; değilse fikirleri yeniden yaz.",
-    "7) Örneklem ve arama sonuçlarının seçilim yanlılığını not et. Tam manifesto dosyası bu panele bağlı değil; yalnızca yukarıdaki kuralları kullan ve bunu gizleme."
+    "GÖREV — ÖNCEDEN BELİRLENMİŞ FİKİR LİSTESİ VE MİZAH MEKANİZMASI KATALOĞU KULLANMA:",
+    "1) Önce gerçek ölçümleri göster: veri kaynağı, örneklem sayısı, zaman aralığı ve eksik alanlar. İzlenme/abone oranını, izlenen yüzdeyi ve ortalama izleme süresini farklı metrikler olarak tut; birbirinin yerine kullanma.",
+    "2) Başarılı ve zayıf videoları kendi uygun karşılaştırma grubuyla kıyasla. Video yaşı, süre, kanal büyüklüğü ve dağıtım farklarını hesaba kat. Tek örnekten kural çıkarma; korelasyonu neden-sonuç gibi sunma.",
+    "3) Yorumları yalnızca doğru video ID'sine bağlı olduklarında kullan. Yorum örneklerini tüm izleyicilerin temsili sayma; sahne ayrıntılarını başlık veya yorumdan uydurma.",
+    "4) Sabit bir mizah mekanizması listesi, önceden seçilmiş konu ailesi, elle yazılmış başarı formülü veya keyfî puan eşiği dayatma. Verilerde görülen örüntüleri kanıt gücüyle birlikte çıkar; veri desteklemiyorsa 'bilinmiyor' de.",
+    "5) Birden fazla seçenek listesi verme. Ölçülmüş kanıt, yorumlarla desteklenen yorum ve test edilmemiş hipotezi ayrı göster; sonra kanıta göre tek bir en güçlü sonraki video testi seç. Veri zayıfsa seçimin geçici olduğunu açıkça belirt.",
+    "6) Seçilen testi çekime hazır yaz: İngilizce başlık; ilk kare; 0.0–1.0, 1.0–2.5, 2.5–5.5 ve 5.5–8.0 saniyelerde eylem/kamera/doğal ASMR; nedensel ilerleyiş ve tamamlanmış final. Bu yaratıcı kısıtlar kullanıcı tarafından belirlenmiştir; performansın işe yarayacağına dair veri kanıtı değildir.",
+    "7) Yayın sonrası ölçüm planı ver: hangi metrikleri mevcut kanal tabanıyla karşılaştıracağımızı ve hangi sonucun yeniden test gerektireceğini belirt. Başarı garantisi verme; tam kanal manifestosu bu panele bağlı değilse bunu saklama."
   ].join('\n');
   const ta=$('#askTxt');ta.value=txt;ta.style.display='block';ta.select();
   const done=ok=>{$('#ask').textContent=ok?"Kopyalandı ✓ Claude'a yapıştır":'Metni elle kopyala (aşağıda)'};
