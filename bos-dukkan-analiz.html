@@ -62,6 +62,7 @@ a{color:var(--acc)}
 <div class="tabs" role="tablist">
   <button class="tab on" role="tab" data-p="gen">1. Genel analiz</button>
   <button class="tab" role="tab" data-p="kan">2. Kanal analizi</button>
+  <button class="tab" role="tab" data-p="own">3. Tutma oranı</button>
 </div>
 
 <section id="gen" class="pane on">
@@ -84,8 +85,17 @@ a{color:var(--acc)}
   <div id="outKan"></div>
 </section>
 
+<section id="own" class="pane">
+  <div class="bar">
+    <input id="cid" value="810971097341-ocf9uaj2mo25ofdf5tfre7v0c5tub8ak.apps.googleusercontent.com" placeholder="OAuth istemci kimliği (...apps.googleusercontent.com)">
+    <select id="odays"><option value="28" selected>Son 28 gün</option><option value="90">Son 90 gün</option><option value="365">Son 365 gün</option></select>
+    <button id="goOwn">Google ile bağlan ve getir</button>
+  </div>
+  <p class="note">Yalnızca kendi kanalın için çalışır. Google Cloud'da OAuth istemcisini "Web uygulaması" olarak oluştur, yetkili JavaScript kaynağı olarak <code>https://agabeyayd-lgtm.github.io</code> ekle ve "YouTube Analytics API"yi de etkinleştir.</p>
+  <div id="outOwn"></div>
+</section>
 
-
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
 const $=s=>document.querySelector(s);
 const API='https://www.googleapis.com/youtube/v3/';
@@ -201,6 +211,107 @@ $('#goKan').onclick=async()=>{
   }catch(e){fail(el,e)}
 };
 
+/* ---------- 3. TUTMA ORANI (kanal sahibi, OAuth) ---------- */
+let cid='',tok='';try{cid=localStorage.getItem('yt_cid')||''}catch(e){}
+$('#cid').value=cid || $('#cid').value;
+function connect(){
+  return new Promise((res,rej)=>{
+    cid=$('#cid').value.trim();
+    if(!cid) return rej(new Error('OAuth istemci kimliğini gir.'));
+    try{localStorage.setItem('yt_cid',cid)}catch(e){}
+    if(!window.google||!google.accounts) return rej(new Error('Google giriş kütüphanesi yüklenemedi. İnternet bağlantını kontrol edip sayfayı yenile.'));
+    google.accounts.oauth2.initTokenClient({
+      client_id:cid,
+      scope:'https://www.googleapis.com/auth/yt-analytics.readonly https://www.googleapis.com/auth/youtube.readonly',
+      callback:r=>r.access_token?res(r.access_token):rej(new Error(r.error_description||r.error||'Giriş başarısız.')),
+      error_callback:e=>rej(new Error('Giriş penceresi kapandı veya engellendi ('+(e.type||'hata')+').'))
+    }).requestAccessToken();
+  });
+}
+const pctCls=p=>p>=55?'y':'n';
+$('#goOwn').onclick=async()=>{
+  const el=$('#outOwn'); busy(el,'Google ile bağlanılıyor…');
+  try{
+    if(!tok) tok=await connect();
+    busy(el,'Rapor alınıyor…');
+    const au={headers:{Authorization:'Bearer '+tok}};
+    const day=x=>x.toISOString().slice(0,10);
+    const q=new URLSearchParams({ids:'channel==MINE',startDate:day(new Date(Date.now()-$('#odays').value*864e5)),endDate:day(new Date()),
+      metrics:'views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,subscribersGained',dimensions:'video',sort:'-views',maxResults:200});
+    const r=await fetch('https://youtubeanalytics.googleapis.com/v2/reports?'+q,au);
+    const j=await r.json();
+    if(!r.ok){if(r.status===401)tok='';throw new Error((j.error&&j.error.message)||('Hata '+r.status))}
+    const rows=j.rows||[];
+    // Seçili dönemde ortalama izleme verisi olmayan videolar için ömür boyu raporu dene.
+    // Böylece tabloda gerçek Analytics değeri varsa gösterilir; uydurma 0 yazılmaz.
+    const analyticsIdsInitial=new Set(rows.map(x=>x[0]));
+    const missingForPeriod=new Set();
+    // Eksik video kimlikleri yükleme listesi alındıktan sonra tamamlanacak.
+    // Son yüklenen herkese açık videoları yükleme listesinden de alıp raporla birleştir.
+    const chRes=await fetch(API+'channels?part=contentDetails&mine=true',au);
+    const chJson=await chRes.json();
+    if(!chRes.ok) throw new Error(chJson.error&&chJson.error.message||'Kanalın yükleme listesi alınamadı.');
+    const uploads=chJson.items&&chJson.items[0]&&chJson.items[0].contentDetails.relatedPlaylists.uploads;
+    const recentIds=[];
+    if(uploads){
+      let pageToken='';
+      for(let page=0;page<10;page++){
+        const pp=new URLSearchParams({part:'contentDetails,snippet',playlistId:uploads,maxResults:'50'});
+        if(pageToken) pp.set('pageToken',pageToken);
+        const pr=await fetch(API+'playlistItems?'+pp,au);
+        const pj=await pr.json();
+        if(!pr.ok) throw new Error(pj.error&&pj.error.message||'Kanal videoları alınamadı.');
+        const items=pj.items||[];
+        for(const item of items){
+          const published=new Date(item.snippet.publishedAt);
+          recentIds.push(item.contentDetails.videoId);
+        }
+        const last=items[items.length-1];
+        if(!pj.nextPageToken) break;
+        pageToken=pj.nextPageToken;
+      }
+    }
+    const knownBeforeFallback=new Set(rows.map(x=>x[0]));
+    const missingIds=recentIds.filter(id=>!knownBeforeFallback.has(id));
+    if(missingIds.length){
+      const allQ=new URLSearchParams({ids:'channel==MINE',startDate:'2006-01-01',endDate:day(new Date()),
+        metrics:'views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,subscribersGained',dimensions:'video',maxResults:200});
+      const ar=await fetch('https://youtubeanalytics.googleapis.com/v2/reports?'+allQ,au);
+      const aj=await ar.json();
+      if(ar.ok){
+        const allRows=aj.rows||[];
+        const allById=new Map(allRows.map(x=>[x[0],x]));
+        for(const id of missingIds){const found=allById.get(id);if(found) rows.push(found);}
+      }
+    }
+    const known=new Set(rows.map(x=>x[0]));
+    const analyticsIds=new Set(known);
+    for(const id of recentIds) if(!known.has(id)) rows.push([id,0,0,0,0,0,0]);
+    if(!rows.length){busy(el,'Bu dönemde veri yok. Daha uzun bir süre dene.');return}
+    const meta={};
+    for(let i=0;i<rows.length;i+=50){
+      const ids=rows.slice(i,i+50).map(x=>x[0]).join(',');
+      const vr=await fetch(API+'videos?part=snippet,contentDetails,statistics&id='+ids,au);
+      const vj=await vr.json();
+      (vj.items||[]).forEach(v=>meta[v.id]={title:v.snippet.title,sec:dur(v.contentDetails.duration),date:new Date(v.snippet.publishedAt),totalViews:Number(v.statistics&&v.statistics.viewCount||0)});
+    }
+    const vs=rows.map(x=>({id:x[0],analyticsViews:x[1],views:(meta[x[0]]||{}).totalViews??x[1],min:x[2],avgSec:x[3],pct:x[4],likes:x[5],subs:x[6],analyticsAvailable:analyticsIds.has(x[0]),...(meta[x[0]]||{title:x[0],sec:0})}))
+      .filter(v=>v.sec<=180).sort((a,b)=>b.views-a.views);
+    if(!vs.length){busy(el,'Bu dönemde Shorts benzeri (≤3 dk) video yok.');return}
+    const tv=vs.reduce((a,v)=>a+v.views,0)||1;
+    const analyticsTv=vs.reduce((a,v)=>a+v.analyticsViews,0)||1;
+    const wpct=vs.reduce((a,v)=>a+v.pct*v.analyticsViews,0)/analyticsTv;
+    const available=vs.filter(v=>v.analyticsAvailable);
+    const good=available.filter(v=>v.pct>=55).length, loop=available.filter(v=>v.pct>100).length;
+    const best=available.length?[...available].sort((a,b)=>b.pct-a.pct)[0]:null;
+    el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(tv),'toplam izlenme')}${stat(available.length?wpct.toFixed(0)+'%':'—',available.length?'ağırlıklı ort. izlenen kısım':'Analytics verisi bekleniyor')}${stat(good+'/'+available.length,'%55 ve üstü (raporlu)')}${stat(loop,'%100 üstü (loop sinyali)')}</div>
+    <p class="note">${best?`En yüksek izlenen kısım: ${link(best)} (${best.pct.toFixed(0)}%).`:'Tutma/izleme yüzdesi için Analytics verisi henüz gelmedi.'} %100'ün üstü, izleyicilerin videoyu ortalama bir kereden fazla izlediği anlamına gelir.</p>
+    <h2>Videolar (izlenmeye göre)</h2><div class="wrap"><table><tr><th>Başlık</th><th>Toplam izlenme</th><th>Ort. izleme</th><th>İzlenen kısım</th><th>Süre</th><th>Beğeni</th><th>Yeni abone</th></tr>
+    ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${v.analyticsAvailable?v.avgSec.toFixed(1)+' sn':'Veri bekleniyor'}</td><td class="${pctCls(v.pct)}">${v.analyticsAvailable?v.pct.toFixed(0)+'%':'Veri bekleniyor'}</td><td>${v.sec} sn</td><td>${v.analyticsAvailable?fmt(v.likes):'Bekleniyor'}</td><td>${v.analyticsAvailable?v.subs:'Bekleniyor'}</td></tr>`).join('')}</table></div>
+    <p class="note">Toplam izlenme sayısı YouTube Data API'den gelir. Son 50 yüklenen video kontrol edilir; Analytics raporu henüz olmayan videoların tutma, beğeni ve abone metrikleri “Bekleniyor” görünür. Ortalama izleme, izlenen kısım, beğeni ve abone verileri seçilen dönemin Analytics raporudur; Analytics satırı henüz gelmeyen videolarda tutma verisi “Veri bekleniyor” gösterilir. %55 eşiği senin hedefin olarak işaretlendi. YouTube'un bu eşiğe göre dağıtım yaptığı garanti değil, kendi videolarını birbiriyle kıyaslamak için kullan.</p>
+`;
+  }catch(e){fail(el,e)}
+};
 </script>
 </body>
 </html>
