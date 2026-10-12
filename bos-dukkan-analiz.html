@@ -266,17 +266,32 @@ $('#goOwn').onclick=async()=>{
     const j=await r.json();
     if(!r.ok){if(r.status===401)tok='';throw new Error((j.error&&j.error.message)||('Hata '+r.status))}
     const rows=j.rows||[];
-    if(!rows.length){busy(el,'Bu dönemde veri yok. Daha uzun bir süre dene.');return}
+    // Analytics raporu yalnızca seçili dönemde ölçümü olan videoları döndürebilir.
+    // Son yüklenen videoları ayrıca alıp raporla birleştir; böylece yeni video listede kaybolmaz.
+    const cr=await fetch(API+'channels?part=contentDetails&mine=true',au);
+    const cj=await cr.json();
+    if(!cr.ok)throw new Error((cj.error&&cj.error.message)||('Kanal listesi alınamadı: '+cr.status));
+    const uploads=cj.items&&cj.items[0]&&cj.items[0].contentDetails.relatedPlaylists.uploads;
+    if(!uploads)throw new Error('Kanalın yüklenen videolar oynatma listesi bulunamadı.');
+    const pr=await fetch(API+'playlistItems?part=contentDetails&playlistId='+encodeURIComponent(uploads)+'&maxResults=50',au);
+    const pj=await pr.json();
+    if(!pr.ok)throw new Error((pj.error&&pj.error.message)||('Son videolar alınamadı: '+pr.status));
+    const ids=[...new Set([...rows.map(x=>x[0]),...(pj.items||[]).map(x=>x.contentDetails.videoId)])];
+    if(!ids.length){busy(el,'Bu dönemde veya kanalda video bulunamadı.');return}
     const meta={};
-    for(let i=0;i<rows.length;i+=50){
-      const ids=rows.slice(i,i+50).map(x=>x[0]).join(',');
-      const vr=await fetch(API+'videos?part=snippet,contentDetails&id='+ids,au);
+    for(let i=0;i<ids.length;i+=50){
+      const batch=ids.slice(i,i+50).join(',');
+      const vr=await fetch(API+'videos?part=snippet,contentDetails&id='+batch,au);
       const vj=await vr.json();
+      if(!vr.ok)throw new Error((vj.error&&vj.error.message)||('Video bilgileri alınamadı: '+vr.status));
       (vj.items||[]).forEach(v=>meta[v.id]={title:v.snippet.title,sec:dur(v.contentDetails.duration),date:new Date(v.snippet.publishedAt)});
     }
-    const vs=rows.map(x=>({id:x[0],views:x[1],min:x[2],avgSec:x[3],pct:x[4],likes:x[5],subs:x[6],...(meta[x[0]]||{title:x[0],sec:0})}))
-      .filter(v=>v.sec<=180);
-    if(!vs.length){busy(el,'Bu dönemde Shorts benzeri (≤3 dk) video yok.');return}
+    const metrics=new Map(rows.map(x=>[x[0],x]));
+    const vs=ids.map(id=>{
+      const x=metrics.get(id)||[];
+      return {id,views:+(x[1]||0),min:+(x[2]||0),avgSec:+(x[3]||0),pct:+(x[4]||0),likes:+(x[5]||0),subs:+(x[6]||0),...(meta[id]||{title:id,sec:0})};
+    }).filter(v=>v.sec<=180).sort((a,b)=>b.views-a.views);
+    if(!vs.length){busy(el,'Kanalda analiz edilecek video bulunamadı.');return}
     const tv=vs.reduce((a,v)=>a+v.views,0)||1;
     const wpct=vs.reduce((a,v)=>a+v.pct*v.views,0)/tv;
     const good=vs.filter(v=>v.pct>=55).length, loop=vs.filter(v=>v.pct>100).length;
