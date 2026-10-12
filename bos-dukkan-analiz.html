@@ -306,9 +306,21 @@ $('#goOwn').onclick=async()=>{
     const best=available.length?[...available].sort((a,b)=>b.pct-a.pct)[0]:null;
     el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(tv),'toplam izlenme')}${stat(available.length?wpct.toFixed(0)+'%':'—',available.length?'ağırlıklı ort. izlenen kısım':'Analytics verisi bekleniyor')}${stat(good+'/'+available.length,'%55 ve üstü (raporlu)')}${stat(loop,'%100 üstü (loop sinyali)')}</div>
     <p class="note">${best?`En yüksek izlenen kısım: ${link(best)} (${best.pct.toFixed(0)}%).`:'Tutma/izleme yüzdesi için Analytics verisi henüz gelmedi.'} %100'ün üstü, izleyicilerin videoyu ortalama bir kereden fazla izlediği anlamına gelir.</p>
-    <h2>Videolar (izlenmeye göre)</h2><div class="wrap"><table><tr><th>Başlık</th><th>Toplam izlenme</th><th>Ort. izleme</th><th>İzlenen kısım</th><th>Süre</th><th>Beğeni</th><th>Yeni abone</th></tr>
+    <h2>Videolar (izlenmeye göre)</h2><p><button class="ghost" id="copyOwnTable">Tablonun tamamını kopyala</button></p><div class="wrap"><table id="ownDataTable"><tr><th>Başlık</th><th>Toplam izlenme</th><th>Ort. izleme</th><th>İzlenen kısım</th><th>Süre</th><th>Beğeni</th><th>Yeni abone</th></tr>
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${v.analyticsAvailable?v.avgSec.toFixed(1)+' sn':'Veri bekleniyor'}</td><td class="${pctCls(v.pct)}">${v.analyticsAvailable?v.pct.toFixed(0)+'%':'Veri bekleniyor'}</td><td>${v.sec} sn</td><td>${v.analyticsAvailable?fmt(v.likes):'Bekleniyor'}</td><td>${v.analyticsAvailable?v.subs:'Bekleniyor'}</td></tr>`).join('')}</table></div>
-    <p class="note">Toplam izlenme sayısı YouTube Data API'den gelir. Son 50 yüklenen video kontrol edilir; Analytics raporu henüz olmayan videoların tutma, beğeni ve abone metrikleri “Bekleniyor” görünür. Ortalama izleme, izlenen kısım, beğeni ve abone verileri seçilen dönemin Analytics raporudur; Analytics satırı henüz gelmeyen videolarda tutma verisi “Veri bekleniyor” gösterilir. %55 eşiği senin hedefin olarak işaretlendi. YouTube'un bu eşiğe göre dağıtım yaptığı garanti değil, kendi videolarını birbiriyle kıyaslamak için kullan.</p>`;
+    <p class="note">Toplam izlenme sayısı YouTube Data API'den gelir. Son 50 yüklenen video kontrol edilir; Analytics raporu henüz olmayan videoların tutma, beğeni ve abone metrikleri “Bekleniyor” görünür. Ortalama izleme, izlenen kısım, beğeni ve abone verileri seçilen dönemin Analytics raporudur; Analytics satırı henüz gelmeyen videolarda tutma verisi “Veri bekleniyor” gösterilir. %55 eşiği senin hedefin olarak işaretlendi. YouTube'un bu eşiğe göre dağıtım yaptığı garanti değil, kendi videolarını birbiriyle kıyaslamak için kullan.</p>
+    $('#copyOwnTable').onclick=async()=>{
+      const table=$('#ownDataTable');
+      const text=Array.from(table.rows).map(row=>Array.from(row.cells).map(cell=>cell.innerText.trim().replace(/\\s+/g,' ')).join('\\t')).join('\\n');
+      try{
+        await navigator.clipboard.writeText(text);
+        $('#copyOwnTable').textContent='Kopyalandı ✓';
+      }catch(err){
+        const area=document.createElement('textarea');area.value=text;area.style.position='fixed';area.style.opacity='0';document.body.appendChild(area);area.select();
+        const ok=document.execCommand('copy');area.remove();
+        $('#copyOwnTable').textContent=ok?'Kopyalandı ✓':'Kopyalanamadı; tabloyu seçip kopyala';
+      }
+    };`;
   }catch(e){fail(el,e)}
 };
 </script>
