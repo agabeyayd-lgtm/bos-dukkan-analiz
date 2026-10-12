@@ -292,15 +292,20 @@ $('#goOwn').onclick=async()=>{
     }
     const metrics=new Map(rows.map(x=>[x[0],x]));
     // OAuth video metadata's statistics can be absent for an item; retry missing/zero public counts with the saved Data API key.
-    const fallbackIds=ids.filter(id=>!meta[id]||!meta[id].publicViews);
+    const fallbackIds=ids.filter(id=>!meta[id]||!meta[id].publicViews||!meta[id].sec);
     if(fallbackIds.length&&key){
       for(let i=0;i<fallbackIds.length;i+=50){
         try{
           const fj=await yt('videos',{part:'snippet,statistics,contentDetails',id:fallbackIds.slice(i,i+50).join(',')});
           (fj.items||[]).forEach(v=>{
             const date=new Date(v.snippet.publishedAt),prev=meta[v.id]||{};
-            meta[v.id]={title:v.snippet.title,sec:dur(v.contentDetails.duration),date,publicViews:+(v.statistics&&v.statistics.viewCount||0),...prev};
-            if(!(prev.publicViews>0))meta[v.id].publicViews=+(v.statistics&&v.statistics.viewCount||0);
+            const fallbackSec=dur(v.contentDetails&&v.contentDetails.duration||'');
+            meta[v.id]={
+              title:prev.title||v.snippet.title,
+              sec:prev.sec>0?prev.sec:fallbackSec,
+              date:prev.date||date,
+              publicViews:prev.publicViews>0?prev.publicViews:+(v.statistics&&v.statistics.viewCount||0)
+            };
           });
         }catch(e){/* Keep OAuth response; diagnostics below expose missing metadata. */}
       }
