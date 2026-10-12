@@ -242,6 +242,34 @@ $('#goOwn').onclick=async()=>{
     const j=await r.json();
     if(!r.ok){if(r.status===401)tok='';throw new Error((j.error&&j.error.message)||('Hata '+r.status))}
     const rows=j.rows||[];
+    // Analytics API yalnızca seçilen dönemde rapor verisi olan videoları döndürebilir.
+    // Son yüklenen herkese açık videoları yükleme listesinden de alıp raporla birleştir.
+    const startDate=new Date(Date.now()-$('#odays').value*864e5);
+    const chRes=await fetch(API+'channels?part=contentDetails&mine=true',au);
+    const chJson=await chRes.json();
+    if(!chRes.ok) throw new Error(chJson.error&&chJson.error.message||'Kanalın yükleme listesi alınamadı.');
+    const uploads=chJson.items&&chJson.items[0]&&chJson.items[0].contentDetails.relatedPlaylists.uploads;
+    const recentIds=[];
+    if(uploads){
+      let pageToken='';
+      for(let page=0;page<10;page++){
+        const pp=new URLSearchParams({part:'contentDetails,snippet',playlistId:uploads,maxResults:'50'});
+        if(pageToken) pp.set('pageToken',pageToken);
+        const pr=await fetch(API+'playlistItems?'+pp,au);
+        const pj=await pr.json();
+        if(!pr.ok) throw new Error(pj.error&&pj.error.message||'Kanal videoları alınamadı.');
+        const items=pj.items||[];
+        for(const item of items){
+          const published=new Date(item.snippet.publishedAt);
+          if(published>=startDate) recentIds.push(item.contentDetails.videoId);
+        }
+        const last=items[items.length-1];
+        if(!pj.nextPageToken || !last || new Date(last.snippet.publishedAt)<startDate) break;
+        pageToken=pj.nextPageToken;
+      }
+    }
+    const known=new Set(rows.map(x=>x[0]));
+    for(const id of recentIds) if(!known.has(id)) rows.push([id,0,0,0,0,0,0]);
     if(!rows.length){busy(el,'Bu dönemde veri yok. Daha uzun bir süre dene.');return}
     const meta={};
     for(let i=0;i<rows.length;i+=50){
