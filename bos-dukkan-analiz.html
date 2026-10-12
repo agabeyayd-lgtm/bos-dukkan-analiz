@@ -321,7 +321,7 @@ $('#goOwn').onclick=async()=>{
     }
     // Analytics raporu yalnızca seçili dönemde ölçümü olan videoları döndürebilir.
     // Son yüklenen videoları ayrıca alıp raporla birleştir; böylece yeni video listede kaybolmaz.
-    const cr=await fetch(API+'channels?part=contentDetails&mine=true',au);
+    const cr=await fetch(API+'channels?part=snippet,statistics,contentDetails&mine=true',au);
     const cj=await cr.json();
     if(!cr.ok)throw new Error((cj.error&&cj.error.message)||('Kanal listesi alınamadı: '+cr.status));
     const uploads=cj.items&&cj.items[0]&&cj.items[0].contentDetails.relatedPlaylists.uploads;
@@ -434,7 +434,7 @@ $('#goOwn').onclick=async()=>{
           "KANAL SABİTLERİ: 8 saniye, dikey 9:16, diyalogsuz, doğal ASMR, İngilizce başlık. Mizah gerçekçi insan davranışından doğmalı; güçlü ilk 0,3 saniye ve tamamlanmış final olmalı.",
           "",
           "BOŞ DÜKKÂN KANAL VERİSİ (YouTube Analytics API ve video metaverisi):",
-          JSON.stringify({channel:c.snippet.title,subscriberCount:+c.statistics.subscriberCount||0,periodDays:+$('#odays').value,summary:{videos:vs.length,totalViews:tv,medianViews:viewMedian,medianViewedPercent:Number.isFinite(retentionMedian)?retentionMedian:null,weightedAverageViewedPercent:Number.isFinite(wpct)?wpct:null},videos:ownMatched},null,2),
+          JSON.stringify({channel:((cj.items&&cj.items[0]&&cj.items[0].snippet&&cj.items[0].snippet.title)||'Kanal adı alınamadı'),subscriberCount:+(cj.items&&cj.items[0]&&cj.items[0].statistics&&cj.items[0].statistics.subscriberCount||0),periodDays:+$('#odays').value,summary:{videos:vs.length,totalViews:tv,medianViews:viewMedian,medianViewedPercent:Number.isFinite(retentionMedian)?retentionMedian:null,weightedAverageViewedPercent:Number.isFinite(wpct)?wpct:null},videos:ownMatched},null,2),
           "",
           "BOŞ DÜKKÂN VİDEOLARINDAN YORUM ÖRNEKLERİ (API'den çekilen gerçek sonuçlar; hata varsa reason alanında):",
           JSON.stringify(ownComments,null,2),
