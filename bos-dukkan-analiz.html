@@ -291,10 +291,25 @@ $('#goOwn').onclick=async()=>{
       (vj.items||[]).forEach(v=>meta[v.id]={title:v.snippet.title,sec:dur(v.contentDetails.duration),date:new Date(v.snippet.publishedAt),publicViews:+(v.statistics&&v.statistics.viewCount||0)});
     }
     const metrics=new Map(rows.map(x=>[x[0],x]));
+    // OAuth video metadata's statistics can be absent for an item; retry missing/zero public counts with the saved Data API key.
+    const fallbackIds=ids.filter(id=>!meta[id]||!meta[id].publicViews);
+    if(fallbackIds.length&&key){
+      for(let i=0;i<fallbackIds.length;i+=50){
+        try{
+          const fj=await yt('videos',{part:'snippet,statistics,contentDetails',id:fallbackIds.slice(i,i+50).join(',')});
+          (fj.items||[]).forEach(v=>{
+            const date=new Date(v.snippet.publishedAt),prev=meta[v.id]||{};
+            meta[v.id]={title:v.snippet.title,sec:dur(v.contentDetails.duration),date,publicViews:+(v.statistics&&v.statistics.viewCount||0),...prev};
+            if(!(prev.publicViews>0))meta[v.id].publicViews=+(v.statistics&&v.statistics.viewCount||0);
+          });
+        }catch(e){/* Keep OAuth response; diagnostics below expose missing metadata. */}
+      }
+    }
     const vs=ids.map(id=>{
       const x=metrics.get(id)||[];
       const m=meta[id]||{title:id,sec:0,publicViews:0}; const hasAnalytics=metrics.has(id); return {id,views:hasAnalytics?+(x[1]||0):m.publicViews,min:hasAnalytics?+(x[2]||0):null,avgSec:hasAnalytics?+(x[3]||0):null,pct:hasAnalytics?+(x[4]||0):null,likes:hasAnalytics?+(x[5]||0):null,subs:hasAnalytics?+(x[6]||0):null,hasAnalytics,...m};
     }).filter(v=>v.sec<=180).sort((a,b)=>b.date-a.date);
+    analyticsDebug.sonVideolar=vs.slice(0,10).map(v=>({id:v.id,title:v.title,views:v.views,publicViews:v.publicViews,hasAnalytics:v.hasAnalytics,metadataFound:!!meta[v.id],seconds:v.sec}));
     if(!vs.length){busy(el,'Kanalda analiz edilecek video bulunamadı.');return}
     const tv=vs.reduce((a,v)=>a+v.views,0)||1;
     const reported=vs.filter(v=>v.hasAnalytics&&v.pct!=null&&v.views>0);
