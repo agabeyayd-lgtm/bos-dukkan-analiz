@@ -147,10 +147,33 @@ async function subsMap(ids){
 }
 function askClaude(vs,q){
   const pool=vs.filter(v=>v.brk!=null).sort((a,b)=>b.brk-a.brk).slice(0,10);
-  const lines=pool.map((v,i)=>`${i+1}. "${v.title}" | ${v.channel} | ${fmt(v.subs)} abone | ${fmt(v.views)} izlenme | ${v.sec} sn | ${v.brk.toFixed(1)}x`).join('\n');
-  const txt=`Kanalım "Boş Dükkân": 8 saniyelik, dikey, diyaloğu olmayan, ASMR sesli Shorts. Komedi hayatın doğal akışından gelir, yapay tezat yok. Başlıklar İngilizce. Çarşamba ve Pazar 19:00'da yayın yapıyorum.\n\nYouTube'da "${q}" aramasında son dönemde en çok fırlayan (izlenme/abone oranı yüksek) videolar:\n${lines}\n\nGörevin: Bu videolardaki ortak kalıpları (konu, başlık yapısı, süre) çıkar. Sonra manifestoma uygun, Çarşamba ve Pazar için 5 video konusu ve her biri için İngilizce bir başlık öner. Kopyalama yapma, kalıbı kendi sahnelerime uyarla.`;
+  const lines=pool.map((v,i)=>\`\${i+1}. "\${v.title}" | \${v.channel} | \${fmt(v.subs)} abone | \${fmt(v.views)} izlenme | \${v.sec} sn | \${v.brk.toFixed(1)}x\`).join('\\n');
+  const avoid=$('#avoidIdeas')?.value.trim()||'Belirtilmedi.';
+  const txt=[
+    "ROLÜN: Boş Dükkân için yaratıcı yönetmen ve acımasız kalite hakemisin. Fikir üretmekle kalma; her fikri test et ve zayıfları reddet.",
+    "",
+    "SABİT SINIRLAR: 8 saniye, dikey 9:16, diyalog yok, doğal ASMR sesleri. İngilizce başlık. Yayın Çarşamba ve Pazar 19:00.",
+    "Mizah gerçekçi gündelik akıştan doğmalı. Zorlama tezat, rastgele absürtlük, imkânsız fizik, yalnızca nesneyi büyütme/değiştirme ve açıklama yazısı yok.",
+    "İnsan davranışı, beklenti, karar ve sonuç mizahı taşımalı. Karakterler olan biteni doğal karşılamalı.",
+    "İlk 0,3 saniyede güçlü görsel kanca; olay 8 saniyede anlaşılır; doğal yükseliş ve tamamlanmış somut final. Sırf loop için sonu yarım bırakma.",
+    "",
+    "ARAŞTIRMA VERİSİ — arama: \""+q+"\". Yüksek izlenme/abone oranıyla seçilen videolar; bu oran tek başına neden-sonuç kanıtı değildir:",
+    lines,
+    "",
+    "ÖNCEKİ FİKİRLER / KAÇINILACAK TEKRARLAR:",
+    avoid,
+    "",
+    "GÖREV:",
+    "1) Ortak izleyici kancalarını ve başlık kalıplarını çıkar; sahneleri/nesneleri kopyalama.",
+    "2) Tam 5 fikir üret. Her biri farklı bir TEMEL MİZAH MEKANİZMASI kullanmalı; yalnızca nesne veya mekân değişikliği farklılık sayılmaz. Hepsi 'küçük hata → şaşkın tepki' şablonuna düşmesin.",
+    "3) Her fikirde ver: İngilizce başlık; ilk kare (0–0,3 sn); zaman aralıklarıyla 8 saniyelik akış; doğal ASMR sesi; neden komik olduğu; tamamlanmış final görüntüsü.",
+    "4) Her fikri beş ölçütte 1–5 puanla ve gerekçelendir: ilk karede durdurma, doğallık/fizik, mizahın anlaşılması, yükseliş, final tatmini. Toplam /25.",
+    "5) 22/25 altındaki, açıklama gerektiren, fiziksel olarak inandırıcı olmayan, yalnızca nesneye dayanan veya başka fikirle aynı mekanizmayı kullanan fikri SUNMA. Yerine daha iyisini bul ve yeniden test et.",
+    "6) Sonunda beş mekanizmanın gerçekten farklı olduğunu kontrol et; değilse fikirleri yeniden yaz.",
+    "7) Örneklem ve arama sonuçlarının seçilim yanlılığını not et. Tam manifesto dosyası bu panele bağlı değil; yalnızca yukarıdaki kuralları kullan ve bunu gizleme."
+  ].join('\\n');
   const ta=$('#askTxt');ta.value=txt;ta.style.display='block';ta.select();
-  const done=ok=>{$('#ask').textContent=ok?'Kopyalandı ✓ Claude\'a yapıştır':'Metni elle kopyala (aşağıda)'};
+  const done=ok=>{$('#ask').textContent=ok?'Kopyalandı ✓ Claude\\'a yapıştır':'Metni elle kopyala (aşağıda)'};
   const old=()=>{try{done(document.execCommand('copy'))}catch(e){done(false)}};
   if(navigator.clipboard)navigator.clipboard.writeText(txt).then(()=>done(true)).catch(old);else old();
 }
@@ -182,8 +205,11 @@ $('#goGen').onclick=async()=>{
     <h2>Videolar</h2><div class="wrap"><table><tr><th>Başlık</th><th>Kanal</th><th>Abone</th><th>İzlenme</th><th>Fırlama</th><th>İzl./gün</th><th>Beğeni %</th><th>Süre</th><th>Gün-saat</th></tr>
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${esc(v.channel)}</td><td>${v.subs==null?'–':fmt(v.subs)}</td><td>${fmt(v.views)}</td><td class="${v.brk>=5?'y':''}">${v.brk==null?'–':v.brk.toFixed(1)+'x'}</td><td>${fmt(v.vpd)}</td><td>${v.views?(v.likes/v.views*100).toFixed(1):'–'}</td><td>${v.sec} sn</td><td>${GUN[v.date.getDay()]} ${String(v.date.getHours()).padStart(2,'0')}:00</td></tr>`).join('')}</table></div>
     <p class="note">Fırlama = izlenme ÷ kanalın abone sayısı. 5x ve üstü, videonun kanal boyuna göre çok iyi tuttuğunu gösterir. Abone sayısı gizli kanallarda boş kalır. Arama başına 100 kota birimi harcanır (günlük ücretsiz kota 10.000).</p>
-    <p><button id="ask">Claude'a sor (metni kopyala)</button></p>
-    <textarea id="askTxt" readonly rows="8" style="display:none;width:100%"></textarea>`;
+    <h2>Önceki fikirler / tekrar filtresi</h2>
+    <p class="note">Daha önce üretilen fikirleri veya kaçınılacak mizah mekanizmalarını buraya yapıştır. Yeni istem bunların tekrar edilmemesini şart koşar.</p>
+    <textarea id="avoidIdeas" rows="3" placeholder="Örn. gevşek somun, küçük hata→şaşkın tepki, aynı final tipi..." style="width:100%;max-width:100%;margin:4px 0 10px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
+    <p><button id="ask">Güçlü fikir istemi oluştur ve kopyala</button></p>
+    <textarea id="askTxt" readonly rows="10" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
     $('#ask').onclick=()=>askClaude(vs,q);
   }catch(e){fail(el,e)}
 };
