@@ -271,8 +271,8 @@ $('#goOwn').onclick=async()=>{
         pageToken=pj.nextPageToken;
       }
     }
-    const known=new Set(rows.map(x=>x[0]));
-    const missingIds=recentIds.filter(id=>!known.has(id));
+    const knownBeforeFallback=new Set(rows.map(x=>x[0]));
+    const missingIds=recentIds.filter(id=>!knownBeforeFallback.has(id));
     if(missingIds.length){
       const allQ=new URLSearchParams({ids:'channel==MINE',startDate:'2006-01-01',endDate:day(new Date()),
         metrics:'views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,subscribersGained',dimensions:'video',maxResults:200});
