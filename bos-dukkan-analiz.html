@@ -266,6 +266,7 @@ $('#goOwn').onclick=async()=>{
     const j=await r.json();
     if(!r.ok){if(r.status===401)tok='';throw new Error((j.error&&j.error.message)||('Hata '+r.status))}
     const rows=j.rows||[];
+    const analyticsDebug={satirSayisi:rows.length,ilkSatirlar:rows.slice(0,3)};
     if(!rows.length){
       throw new Error('Video listesi alınabiliyor ama YouTube Analytics bu tarih aralığı için hiçbir istatistik satırı döndürmedi. Bu yüzden önceki sürüm videoların istatistiklerini yanlış biçimde 0 gösteriyordu. Son 90 günü seçip tekrar dene; yine aynıysa Google hesabının Boş Dükkan kanalının sahibi/yöneticisi olduğundan ve YouTube Analytics API erişiminin açık olduğundan emin olmamız gerekiyor.');
     }
@@ -303,6 +304,7 @@ $('#goOwn').onclick=async()=>{
     <p class="note">En yüksek izlenen kısım: ${link(best)} (${best.pct.toFixed(0)}%). %100'ün üstü, izleyicilerin videoyu ortalama bir kereden fazla izlediği anlamına gelir.</p>
     <h2>Videolar (en yeni önce)</h2><div class="wrap"><table><tr><th>Başlık</th><th>İzlenme</th><th>Ort. izleme</th><th>İzlenen kısım</th><th>Süre</th><th>Beğeni</th><th>Yeni abone</th></tr>
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${v.avgSec.toFixed(1)} sn</td><td class="${pctCls(v.pct)}">${v.pct.toFixed(0)}%</td><td>${v.sec} sn</td><td>${fmt(v.likes)}</td><td>${v.subs}</td></tr>`).join('')}</table></div>
+    <details class="note"><summary>Teknik teşhis (istatistikler neden 0?)</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(analyticsDebug,null,2)}</pre></details>
     <p class="note">%55 eşiği senin hedefin olarak işaretlendi. YouTube'un bu eşiğe göre dağıtım yaptığı garanti değil, kendi videolarını birbiriyle kıyaslamak için kullan.</p>`;
   }catch(e){fail(el,e)}
 };
