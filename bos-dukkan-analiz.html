@@ -321,8 +321,28 @@ $('#goOwn').onclick=async()=>{
     const reportedViews=reported.reduce((a,v)=>a+v.views,0);
     const wpct=reportedViews?reported.reduce((a,v)=>a+v.pct*v.views,0)/reportedViews:NaN;
     const good=reported.filter(v=>v.pct>=55).length, loop=reported.filter(v=>v.pct>100).length;
-    const best=[...vs].sort((a,b)=>b.pct-a.pct)[0];
-    el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(tv),'toplam izlenme')}${stat(Number.isFinite(wpct)?wpct.toFixed(0)+'%':'—','ağırlıklı ort. izlenen kısım')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct>=55).length+'/'+vs.filter(v=>v.hasAnalytics).length,'video ≥55% (raporlu)')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct>100).length,'%100 üstü (loop sinyali)')}</div>
+    const best=[...vs].sort((a,b)=>(b.pct??-1)-(a.pct??-1))[0];
+    // Stage 3: compare the channel's own videos against robust baselines; treat patterns as correlations, not causes.
+    const withViews=vs.filter(v=>v.views>0);
+    const viewMedian=median(withViews.map(v=>v.views));
+    const retentionMedian=median(reported.map(v=>v.pct));
+    const aboveBaseline=withViews.filter(v=>v.views>=viewMedian);
+    const belowBaseline=withViews.filter(v=>v.views<viewMedian);
+    const retentionGroups=[
+      {label:'Kısa (0–9 sn)',items:reported.filter(v=>v.sec<=9)},
+      {label:'Orta (10–20 sn)',items:reported.filter(v=>v.sec>=10&&v.sec<=20)},
+      {label:'Uzun (21–180 sn)',items:reported.filter(v=>v.sec>=21)}
+    ].filter(g=>g.items.length);
+    const durationFindings=retentionGroups.map(g=>({label:g.label,n:g.items.length,avgViews:avg(g.items.map(v=>v.views)),avgRetention:avg(g.items.map(v=>v.pct))}));
+    const bestRetention=reported.length?[...reported].sort((a,b)=>b.pct-a.pct)[0]:null;
+    const weakRetention=reported.length?[...reported].sort((a,b)=>a.pct-b.pct)[0]:null;
+    const comparisonHtml=`<h2>Aşama 3 · Performans karşılaştırması</h2>
+      <div class="stats">${stat(fmt(viewMedian),'medyan video izlenmesi')}${stat(aboveBaseline.length,'medyanı yakalayan/aşan')}${stat(Number.isFinite(retentionMedian)?retentionMedian.toFixed(0)+'%':'—','medyan izlenen kısım')}${stat(reported.length,'tutma verisi bulunan video')}</div>
+      <p class="note">Karşılaştırma yalnızca bu listede bulunan videolara dayanır. Medyan, birkaç aşırı yüksek izlenmeli videonun ortalamayı bozmasını azaltır. Bu ilişkiler tek başına neden-sonuç kanıtlamaz.</p>
+      ${durationFindings.length?`<h3>Süre grupları · raporlu videolar</h3><div class="wrap"><table><tr><th>Süre grubu</th><th>Video</th><th>Ort. izlenme</th><th>Ort. izlenen kısım</th></tr>${durationFindings.map(g=>`<tr><td>${g.label}</td><td>${g.n}</td><td>${fmt(g.avgViews)}</td><td>${g.avgRetention.toFixed(1)}%</td></tr>`).join('')}</table></div>`:'<p class="note">Süre gruplarını karşılaştırmak için henüz yeterli raporlu video yok.</p>'}
+      ${bestRetention&&weakRetention&&reported.length>1?`<h3>Uç örnekler</h3><ul><li>En yüksek izlenen kısım: ${link(bestRetention)} — ${bestRetention.pct.toFixed(1)}%.</li><li>En düşük izlenen kısım: ${link(weakRetention)} — ${weakRetention.pct.toFixed(1)}%.</li></ul>`:''}
+      <p class="note">Bir sonraki aşamada bu karşılaştırmaların başlık/konu ve görsel olay özellikleriyle eşleştirilmesi gerekir; mevcut API verileri tek başına videonun sahne içeriğini açıklamaz.</p>`;
+    el.innerHTML=`${comparisonHtml}<div class="stats">${stat(vs.length,'video')}${stat(fmt(tv),'toplam izlenme')}${stat(Number.isFinite(wpct)?wpct.toFixed(0)+'%':'—','ağırlıklı ort. izlenen kısım')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct>=55).length+'/'+vs.filter(v=>v.hasAnalytics).length,'video ≥55% (raporlu)')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct>100).length,'%100 üstü (loop sinyali)')}</div>
     <p class="note">Analytics verisi henüz gelmeyen videolarda herkese açık izlenme sayısı gösterilir; ortalama izleme ve izlenen yüzde için — görünür. %100'ün üstü, izleyicilerin videoyu ortalama bir kereden fazla izlediği anlamına gelir.</p>
     <h2>Videolar (en yeni önce)</h2><div class="wrap"><table><tr><th>Başlık</th><th>İzlenme</th><th>Ort. izleme</th><th>İzlenen kısım</th><th>Süre</th><th>Beğeni</th><th>Yeni abone</th></tr>
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${v.avgSec==null?'—':v.avgSec.toFixed(1)+' sn'}</td><td class="${v.pct==null?'':pctCls(v.pct)}">${v.pct==null?'—':v.pct.toFixed(0)+'%'}</td><td>${v.sec} sn</td><td>${v.likes==null?'—':fmt(v.likes)}</td><td>${v.subs==null?'—':v.subs}</td></tr>`).join('')}</table></div>
