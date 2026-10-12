@@ -395,8 +395,8 @@ $('#goOwn').onclick=async()=>{
     <details class="note"><summary>Teknik teşhis (istatistikler neden 0?)</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(analyticsDebug,null,2)}</pre></details>
     <p class="note">%55 eşiği senin hedefin olarak işaretlendi. Bu eşik YouTube dağıtımını garanti etmez; yalnızca kendi videolarını kıyaslamak için kullan.</p>
     <h2>Araştırma videolarıyla karşılaştır</h2>
-    <p class="note">Önce Genel Analiz bölümünde aramayı çalıştır; sonra burada bu düğmeye bas. Kanal metrikleri, izlenme/tutma sinyalleri ve erişilebilen videolardan yorum örnekleri tek bir hazır istemde birleştirilir. CSV indirmene gerek yok. Yorum örneği kapalı videolarda alınamayabilir.</p>
-    <p><button id="copyCompare">Kanal + araştırma verisini karşılaştır ve kopyala</button></p>
+    <p class="note">Sıra: önce <b>Genel Analiz</b> bölümünde aramayı çalıştır, sonra bu bölümde Google ile kanal verisini getir, en son aşağıdaki düğmeye bas. Panel kanal metriklerini, araştırma videolarını ve erişilebilen yorum örneklerini tek bir ChatGPT analiz paketinde birleştirir. Paket otomatik kopyalanır; istersen dosya olarak da indirebilirsin. Bu sayfa kendi başına yapay zekâ sonucu üretmez; paketi bu sohbete gönderdiğinde analizi ben yaparım. Yorumlar kapalıysa örnek alınamayabilir.</p>
+    <p><button id="copyCompare">Hazır analiz paketini oluştur ve kopyala</button> <button id="downloadCompare" class="ghost" disabled>Analiz paketini indir (.txt)</button></p>
     <div id="commentDiag" class="note" aria-live="polite">Yorum teşhisi henüz çalıştırılmadı. Yukarıdaki düğmeye bastığında yorumların alınıp alınmadığı ve varsa API hatası burada gösterilecek.</div>
     <textarea id="compareTxt" readonly rows="8" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
     $('#copyCompare').onclick=async()=>{
@@ -457,8 +457,9 @@ $('#goOwn').onclick=async()=>{
           "16) Bu veri tek başına başarıyı garanti etmez. Tam manifesto dosyası panele bağlı değil; yalnızca yukarıdaki verileri kullan."
         ].join("\n");
         const ta=$('#compareTxt');ta.value=txt;ta.style.display='block';ta.select();
-        try{await navigator.clipboard.writeText(txt);btn.textContent='Kopyalandı ✓ Claude’a yapıştır';}
-        catch(e){try{const ok=document.execCommand('copy');btn.textContent=ok?'Kopyalandı ✓ Claude’a yapıştır':'Metni aşağıdan elle kopyala';}catch(_){btn.textContent='Metni aşağıdan elle kopyala';}}
+        const downloadBtn=$('#downloadCompare');downloadBtn.disabled=false;downloadBtn.onclick=()=>{const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='bos-dukkan-analiz-paketi.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+        try{await navigator.clipboard.writeText(txt);btn.textContent='Paket hazır ve kopyalandı ✓ Buraya yapıştır';}
+        catch(e){try{const ok=document.execCommand('copy');btn.textContent=ok?'Paket hazır ve kopyalandı ✓ Buraya yapıştır':'Paket hazır — metni aşağıdan kopyala';}catch(_){btn.textContent='Metni aşağıdan elle kopyala';}}
       } catch(e) {
         commentDiag.innerHTML='<h2>Yorum çekme teşhisi</h2><p><strong>İşlem sırasında hata oluştu:</strong> '+esc(String(e&&e.message||e))+'</p><p>Bu hata yorum isteğinden önce veya analiz verisi hazırlanırken oluşmuş olabilir.</p>';
         btn.textContent='Hata oluştu — tekrar dene';
