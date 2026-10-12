@@ -311,7 +311,7 @@ $('#goOwn').onclick=async()=>{
     <p class="note">Toplam izlenme sayısı YouTube Data API'den gelir. Son 50 yüklenen video kontrol edilir; Analytics raporu henüz olmayan videoların tutma, beğeni ve abone metrikleri “Bekleniyor” görünür. Ortalama izleme, izlenen kısım, beğeni ve abone verileri seçilen dönemin Analytics raporudur; Analytics satırı henüz gelmeyen videolarda tutma verisi “Veri bekleniyor” gösterilir. %55 eşiği senin hedefin olarak işaretlendi. YouTube'un bu eşiğe göre dağıtım yaptığı garanti değil, kendi videolarını birbiriyle kıyaslamak için kullan.</p>
     $('#copyOwnTable').onclick=async()=>{
       const table=$('#ownDataTable');
-      const text=Array.from(table.rows).map(row=>Array.from(row.cells).map(cell=>cell.innerText.trim().replace(/\\s+/g,' ')).join('\\t')).join('\\n');
+      const text=Array.from(table.rows).map(row=>Array.from(row.cells).map(cell=>cell.innerText.trim().replace(/\s+/g,' ')).join('\t')).join('\n');
       try{
         await navigator.clipboard.writeText(text);
         $('#copyOwnTable').textContent='Kopyalandı ✓';
