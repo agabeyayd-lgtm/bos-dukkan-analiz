@@ -242,7 +242,11 @@ $('#goOwn').onclick=async()=>{
     const j=await r.json();
     if(!r.ok){if(r.status===401)tok='';throw new Error((j.error&&j.error.message)||('Hata '+r.status))}
     const rows=j.rows||[];
-    // Analytics API yalnızca seçilen dönemde rapor verisi olan videoları döndürebilir.
+    // Seçili dönemde ortalama izleme verisi olmayan videolar için ömür boyu raporu dene.
+    // Böylece tabloda gerçek Analytics değeri varsa gösterilir; uydurma 0 yazılmaz.
+    const analyticsIdsInitial=new Set(rows.map(x=>x[0]));
+    const missingForPeriod=new Set();
+    // Eksik video kimlikleri yükleme listesi alındıktan sonra tamamlanacak.
     // Son yüklenen herkese açık videoları yükleme listesinden de alıp raporla birleştir.
     const chRes=await fetch(API+'channels?part=contentDetails&mine=true',au);
     const chJson=await chRes.json();
@@ -265,6 +269,19 @@ $('#goOwn').onclick=async()=>{
         const last=items[items.length-1];
         if(!pj.nextPageToken) break;
         pageToken=pj.nextPageToken;
+      }
+    }
+    const known=new Set(rows.map(x=>x[0]));
+    const missingIds=recentIds.filter(id=>!known.has(id));
+    if(missingIds.length){
+      const allQ=new URLSearchParams({ids:'channel==MINE',startDate:'2006-01-01',endDate:day(new Date()),
+        metrics:'views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,subscribersGained',dimensions:'video',maxResults:200});
+      const ar=await fetch('https://youtubeanalytics.googleapis.com/v2/reports?'+allQ,au);
+      const aj=await ar.json();
+      if(ar.ok){
+        const allRows=aj.rows||[];
+        const allById=new Map(allRows.map(x=>[x[0],x]));
+        for(const id of missingIds){const found=allById.get(id);if(found) rows.push(found);}
       }
     }
     const known=new Set(rows.map(x=>x[0]));
