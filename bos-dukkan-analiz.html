@@ -244,7 +244,6 @@ $('#goOwn').onclick=async()=>{
     const rows=j.rows||[];
     // Analytics API yalnızca seçilen dönemde rapor verisi olan videoları döndürebilir.
     // Son yüklenen herkese açık videoları yükleme listesinden de alıp raporla birleştir.
-    const startDate=new Date(Date.now()-$('#odays').value*864e5);
     const chRes=await fetch(API+'channels?part=contentDetails&mine=true',au);
     const chJson=await chRes.json();
     if(!chRes.ok) throw new Error(chJson.error&&chJson.error.message||'Kanalın yükleme listesi alınamadı.');
@@ -261,10 +260,10 @@ $('#goOwn').onclick=async()=>{
         const items=pj.items||[];
         for(const item of items){
           const published=new Date(item.snippet.publishedAt);
-          if(published>=startDate) recentIds.push(item.contentDetails.videoId);
+          recentIds.push(item.contentDetails.videoId);
         }
         const last=items[items.length-1];
-        if(!pj.nextPageToken || !last || new Date(last.snippet.publishedAt)<startDate) break;
+        if(!pj.nextPageToken) break;
         pageToken=pj.nextPageToken;
       }
     }
@@ -288,11 +287,11 @@ $('#goOwn').onclick=async()=>{
     const available=vs.filter(v=>v.analyticsAvailable);
     const good=available.filter(v=>v.pct>=55).length, loop=available.filter(v=>v.pct>100).length;
     const best=available.length?[...available].sort((a,b)=>b.pct-a.pct)[0]:null;
-    el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(tv),'toplam izlenme')}${stat(wpct.toFixed(0)+'%','ağırlıklı ort. izlenen kısım')}${stat(good+'/'+available.length,'%55 ve üstü (raporlu)')}${stat(loop,'%100 üstü (loop sinyali)')}</div>
+    el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(tv),'toplam izlenme')}${stat(available.length?wpct.toFixed(0)+'%':'—',available.length?'ağırlıklı ort. izlenen kısım':'Analytics verisi bekleniyor')}${stat(good+'/'+available.length,'%55 ve üstü (raporlu)')}${stat(loop,'%100 üstü (loop sinyali)')}</div>
     <p class="note">${best?`En yüksek izlenen kısım: ${link(best)} (${best.pct.toFixed(0)}%).`:'Tutma/izleme yüzdesi için Analytics verisi henüz gelmedi.'} %100'ün üstü, izleyicilerin videoyu ortalama bir kereden fazla izlediği anlamına gelir.</p>
     <h2>Videolar (izlenmeye göre)</h2><div class="wrap"><table><tr><th>Başlık</th><th>Toplam izlenme</th><th>Ort. izleme</th><th>İzlenen kısım</th><th>Süre</th><th>Beğeni</th><th>Yeni abone</th></tr>
-    ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${v.analyticsAvailable?v.avgSec.toFixed(1)+' sn':'Veri bekleniyor'}</td><td class="${pctCls(v.pct)}">${v.analyticsAvailable?v.pct.toFixed(0)+'%':'Veri bekleniyor'}</td><td>${v.sec} sn</td><td>${fmt(v.likes)}</td><td>${v.subs}</td></tr>`).join('')}</table></div>
-    <p class="note">Toplam izlenme sayısı YouTube Data API'den güncel toplam olarak gelir. Ortalama izleme, izlenen kısım, beğeni ve abone verileri seçilen dönemin Analytics raporudur; Analytics satırı henüz gelmeyen videolarda tutma verisi “Veri bekleniyor” gösterilir. %55 eşiği senin hedefin olarak işaretlendi. YouTube'un bu eşiğe göre dağıtım yaptığı garanti değil, kendi videolarını birbiriyle kıyaslamak için kullan.</p>`;
+    ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${v.analyticsAvailable?v.avgSec.toFixed(1)+' sn':'Veri bekleniyor'}</td><td class="${pctCls(v.pct)}">${v.analyticsAvailable?v.pct.toFixed(0)+'%':'Veri bekleniyor'}</td><td>${v.sec} sn</td><td>${v.analyticsAvailable?fmt(v.likes):'Bekleniyor'}</td><td>${v.analyticsAvailable?v.subs:'Bekleniyor'}</td></tr>`).join('')}</table></div>
+    <p class="note">Toplam izlenme sayısı YouTube Data API'den gelir. Son 50 yüklenen video kontrol edilir; Analytics raporu henüz olmayan videoların tutma, beğeni ve abone metrikleri “Bekleniyor” görünür. Ortalama izleme, izlenen kısım, beğeni ve abone verileri seçilen dönemin Analytics raporudur; Analytics satırı henüz gelmeyen videolarda tutma verisi “Veri bekleniyor” gösterilir. %55 eşiği senin hedefin olarak işaretlendi. YouTube'un bu eşiğe göre dağıtım yaptığı garanti değil, kendi videolarını birbiriyle kıyaslamak için kullan.</p>`;
   }catch(e){fail(el,e)}
 };
 </script>
