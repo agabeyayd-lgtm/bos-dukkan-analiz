@@ -145,6 +145,25 @@ async function subsMap(ids){
   }
   return m;
 }
+
+/* Yalnızca karşılaştırma düğmesine basıldığında yorum örneği alır.
+   Yorumlar kapalı/silinmiş veya API erişimi engelliyse analiz yine devam eder. */
+async function sampleComments(videos,maxVideos=5,perVideo=8){
+  const chosen=[...videos].filter(v=>v&&v.id).slice(0,maxVideos),out=[];
+  for(const v of chosen){
+    try{
+      const j=await yt('commentThreads',{part:'snippet',videoId:v.id,maxResults:Math.min(perVideo,100),order:'relevance',textFormat:'plainText'});
+      const comments=(j.items||[]).map(x=>{
+        const c=x.snippet?.topLevelComment?.snippet||{};
+        return {text:String(c.textDisplay||c.textOriginal||'').slice(0,700),likes:+c.likeCount||0,published:c.publishedAt||null};
+      }).filter(c=>c.text.trim());
+      out.push({videoId:v.id,title:v.title,available:true,sampled:comments.length,comments});
+    }catch(e){
+      out.push({videoId:v.id,title:v.title,available:false,reason:String(e.message||e).slice(0,180),sampled:0,comments:[]});
+    }
+  }
+  return out;
+}
 function askClaude(vs,q){
   const pool=vs.filter(v=>v.brk!=null).sort((a,b)=>b.brk-a.brk).slice(0,10);
   const lines=pool.map((v,i)=>(i+1)+'. "'+v.title+'" | '+v.channel+' | '+fmt(v.subs)+' abone | '+fmt(v.views)+' izlenme | '+v.sec+' sn | '+v.brk.toFixed(1)+'x').join('\n');
@@ -192,10 +211,10 @@ $('#goGen').onclick=async()=>{
     let vs=await details(s.items.map(i=>i.id.videoId));
     if($('#only60').checked) vs=vs.filter(v=>v.sec<=60);
     if(!vs.length){busy(el,'Sonuç yok. Süreyi genişlet veya ≤60 sn filtresini kapat.');return}
-    window.bosResearchSnapshot={query:q,videos:vs.map(v=>({title:v.title,channel:v.channel,subs:v.subs,views:v.views,seconds:v.sec,viewsPerSub:v.brk,viewsPerDay:v.vpd}))};
     busy(el,'Kanal büyüklükleri alınıyor…');
     const sm=await subsMap([...new Set(vs.map(v=>v.channelId))]);
     vs.forEach(v=>{v.subs=sm[v.channelId]??null;v.brk=v.subs?v.views/v.subs:null});
+    window.bosResearchSnapshot={query:q,videos:vs.map(v=>({id:v.id,title:v.title,channel:v.channel,subs:v.subs,views:v.views,likes:v.likes,comments:v.comments,seconds:v.sec,viewsPerSub:v.brk,viewsPerDay:v.vpd}))};
     if($('#srt').value==='brk') vs.sort((a,b)=>(b.brk??-1)-(a.brk??-1)); else vs.sort((a,b)=>b.vpd-a.vpd);
     const words={};const stop=new Set('this that with from your what when they have just video shorts short funny'.split(' '));
     vs.forEach(v=>v.title.toLowerCase().replace(/[^a-z0-9ğüşöçı\s]/g,'').split(/\s+/).forEach(w=>{if(w.length>3&&!stop.has(w))words[w]=(words[w]||0)+1}));
@@ -376,12 +395,17 @@ $('#goOwn').onclick=async()=>{
     <details class="note"><summary>Teknik teşhis (istatistikler neden 0?)</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(analyticsDebug,null,2)}</pre></details>
     <p class="note">%55 eşiği senin hedefin olarak işaretlendi. Bu eşik YouTube dağıtımını garanti etmez; yalnızca kendi videolarını kıyaslamak için kullan.</p>
     <h2>Araştırma videolarıyla karşılaştır</h2>
-    <p class="note">Önce Genel Analiz bölümünde aramayı çalıştır; sonra burada bu düğmeye bas. Kanal verin ve araştırma örneklemi tek bir hazır istemde birleştirilip kopyalanır. CSV indirmene gerek yok.</p>
+    <p class="note">Önce Genel Analiz bölümünde aramayı çalıştır; sonra burada bu düğmeye bas. Kanal metrikleri, izlenme/tutma sinyalleri ve erişilebilen videolardan yorum örnekleri tek bir hazır istemde birleştirilir. CSV indirmene gerek yok. Yorum örneği kapalı videolarda alınamayabilir.</p>
     <p><button id="copyCompare">Kanal + araştırma verisini karşılaştır ve kopyala</button></p>
     <textarea id="compareTxt" readonly rows="8" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
     $('#copyCompare').onclick=async()=>{
-      const own=vs.map(v=>({title:v.title,published:v.date.toISOString().slice(0,10),seconds:v.sec,views:v.views,averageViewSeconds:v.avgSec,averageViewedPercent:v.pct,likes:v.likes,subscribersGained:v.subs,analyticsAvailable:v.hasAnalytics}));
+      const btn=$('#copyCompare');
+      btn.disabled=true;btn.textContent='Yorum örnekleri alınıyor…';
+      const own=vs.map(v=>({id:v.id,title:v.title,published:v.date.toISOString().slice(0,10),seconds:v.sec,views:v.views,averageViewSeconds:v.avgSec,averageViewedPercent:v.pct,likes:v.likes,comments:v.comments,subscribersGained:v.subs,analyticsAvailable:v.hasAnalytics}));
       const research=window.bosResearchSnapshot||null;
+      const researchComments=research?await sampleComments([...research.videos].sort((a,b)=>(b.viewsPerSub??-1)-(a.viewsPerSub??-1)),5,8):[];
+      const ownComments=await sampleComments([...vs].sort((a,b)=>b.views-a.views),5,8);
+      if(research) research.commentSamples=researchComments;
       const txt=[
         "ROL: Boş Dükkân için veri analisti ve yaratıcı yönetmen. Veriye dayalı karşılaştırma yap; korelasyonu nedensellik diye sunma.",
         "KANAL SABİTLERİ: 8 saniye, dikey 9:16, diyalogsuz, doğal ASMR, İngilizce başlık. Mizah gerçekçi insan davranışından doğmalı; güçlü ilk 0,3 saniye ve tamamlanmış final olmalı.",
@@ -396,14 +420,18 @@ $('#goOwn').onclick=async()=>{
         "1) Kendi kanalımda yüksek/düşük performanslı videoları yalnızca mevcut veriye göre ayır. Ortalama izleme süresi ve izlenen yüzde eksik olanları tahmin etme.",
         "2) Araştırma videolarındaki görüntülenme/abone oranını yalnızca keşif sinyali say; bunun neden-sonuç kanıtı olmadığını açıkla. Kanalımın retention verisiyle birebir aynı metrikmiş gibi kıyaslama.",
         "3) Ortak olası kancaları, başlık örüntülerini ve farklılıkları çıkar. Video başlığı/izlenme sayısı tek başına sahne mekanizmasını kanıtlamaz; emin olmadığın yerde belirsizliği belirt.",
-        "4) Video süresi, görüntülenme, izlenen yüzde ve ortalama izleme süresi arasındaki örüntüleri, örneklem boyutunu ve olası seçilim yanlılığını hesaba katarak karşılaştır.",
-        "5) Sonuçta Boş Dükkân için test edilmeye değer en fazla 3 farklı mizah mekanizması öner; her birini hangi kanal verisinin desteklediğiyle ilişkilendir. Verinin desteklemediği iddiaları yazma.",
-        "6) 8 saniyelik format için somut sonraki test planı ver: neyi değiştireceğiz, hangi metriği ölçeceğiz, hangi sonuç tekrar test etmeyi hak edecek.",
-        "7) Bu veri tek başına başarıyı garanti etmez. Tam manifesto dosyası panele bağlı değil; yalnızca yukarıdaki verileri kullan."
+        "4) Video süresi, görüntülenme, izlenen yüzde, ortalama izleme süresi ve beğeni/yorum sayıları arasındaki örüntüleri; örneklem boyutunu ve seçilim yanlılığını hesaba katarak karşılaştır.",
+        "5) YORUM ANALİZİ: Araştırma ve kanal yorum örneklerindeki tekrar eden izleyici tepkilerini, izleyicinin açıkça belirttiği komik anları, şaşkınlık/duygu ifadelerini, alıntılanan replik veya meme referanslarını ve kafa karışıklığını ayrı kümelere ayır. Yorumların sahneyi gerçekten açıklayıp açıklamadığını değerlendir; yorumlarda bulunmayan sahne ayrıntılarını uydurma.",
+        "6) Yorum örnekleri en fazla 5 video başına 8 yorumdur ve YouTube'un relevance sıralamasına dayanır; temsili anket değildir. Beğeniler ve yorumlar sessiz izleyicileri temsil etmez. Alay, spam, bot, dil ve kültür farkı ile seçilim yanlılığını belirt. Tek bir yorumdan genelleme yapma; tekrar eden örüntüleri kanıt düzeyine göre etiketle.",
+        "7) Ortalama izlenme yüzdesi %100'ü aşıyorsa bunu tekrar izleme/loop için olası sinyal olarak not et; doğrudan tekrar sayısı diye adlandırma. API'de doğrudan tekrar oynatma sayısı yoksa bunu açıkça söyle. Eksik metrikleri tahmin etme.",
+        "8) Sonuçta Boş Dükkân için test edilmeye değer en fazla 3 farklı mizah mekanizması öner; her birini hangi kanal metriği ve hangi yorum örüntüsünün desteklediğiyle ilişkilendir. Sadece yorumlarda insanların 'komik' demesini mekanizma kanıtı sayma.",
+        "9) 8 saniyelik format için somut sonraki test planı ver: neyi değiştireceğiz, hangi metriği ölçeceğiz, hangi sonuç tekrar test etmeyi hak edecek.",
+        "10) Bu veri tek başına başarıyı garanti etmez. Tam manifesto dosyası panele bağlı değil; yalnızca yukarıdaki verileri kullan."
       ].join("\n");
       const ta=$('#compareTxt');ta.value=txt;ta.style.display='block';ta.select();
-      try{await navigator.clipboard.writeText(txt);$('#copyCompare').textContent='Kopyalandı ✓ Claude’a yapıştır';}
-      catch(e){try{const ok=document.execCommand('copy');$('#copyCompare').textContent=ok?'Kopyalandı ✓ Claude’a yapıştır':'Metni aşağıdan elle kopyala';}catch(_){$('#copyCompare').textContent='Metni aşağıdan elle kopyala';}}
+      try{await navigator.clipboard.writeText(txt);btn.textContent='Kopyalandı ✓ Claude’a yapıştır';}
+      catch(e){try{const ok=document.execCommand('copy');btn.textContent=ok?'Kopyalandı ✓ Claude’a yapıştır':'Metni aşağıdan elle kopyala';}catch(_){btn.textContent='Metni aşağıdan elle kopyala';}}
+      finally{btn.disabled=false;}
     };
   }catch(e){fail(el,e)}
 };
