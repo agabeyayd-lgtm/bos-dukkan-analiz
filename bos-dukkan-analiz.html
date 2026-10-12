@@ -213,7 +213,7 @@ $('#goKan').onclick=async()=>{
 
 /* ---------- 3. TUTMA ORANI (kanal sahibi, OAuth) ---------- */
 let cid='',tok='';try{cid=localStorage.getItem('yt_cid')||''}catch(e){}
-$('#cid').value=cid;
+$('#cid').value=cid || $('#cid').value;
 function connect(){
   return new Promise((res,rej)=>{
     cid=$('#cid').value.trim();
