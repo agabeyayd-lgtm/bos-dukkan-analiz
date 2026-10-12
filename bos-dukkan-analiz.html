@@ -285,25 +285,25 @@ $('#goOwn').onclick=async()=>{
     const meta={};
     for(let i=0;i<ids.length;i+=50){
       const batch=ids.slice(i,i+50).join(',');
-      const vr=await fetch(API+'videos?part=snippet,contentDetails&id='+batch,au);
+      const vr=await fetch(API+'videos?part=snippet,contentDetails,statistics&id='+batch,au);
       const vj=await vr.json();
       if(!vr.ok)throw new Error((vj.error&&vj.error.message)||('Video bilgileri alınamadı: '+vr.status));
-      (vj.items||[]).forEach(v=>meta[v.id]={title:v.snippet.title,sec:dur(v.contentDetails.duration),date:new Date(v.snippet.publishedAt)});
+      (vj.items||[]).forEach(v=>meta[v.id]={title:v.snippet.title,sec:dur(v.contentDetails.duration),date:new Date(v.snippet.publishedAt),publicViews:+(v.statistics&&v.statistics.viewCount||0)});
     }
     const metrics=new Map(rows.map(x=>[x[0],x]));
     const vs=ids.map(id=>{
       const x=metrics.get(id)||[];
-      return {id,views:+(x[1]||0),min:+(x[2]||0),avgSec:+(x[3]||0),pct:+(x[4]||0),likes:+(x[5]||0),subs:+(x[6]||0),...(meta[id]||{title:id,sec:0})};
+      const m=meta[id]||{title:id,sec:0,publicViews:0}; const hasAnalytics=metrics.has(id); return {id,views:hasAnalytics?+(x[1]||0):m.publicViews,min:hasAnalytics?+(x[2]||0):null,avgSec:hasAnalytics?+(x[3]||0):null,pct:hasAnalytics?+(x[4]||0):null,likes:hasAnalytics?+(x[5]||0):null,subs:hasAnalytics?+(x[6]||0):null,hasAnalytics,...m};
     }).filter(v=>v.sec<=180).sort((a,b)=>b.date-a.date);
     if(!vs.length){busy(el,'Kanalda analiz edilecek video bulunamadı.');return}
     const tv=vs.reduce((a,v)=>a+v.views,0)||1;
     const wpct=vs.reduce((a,v)=>a+v.pct*v.views,0)/tv;
     const good=vs.filter(v=>v.pct>=55).length, loop=vs.filter(v=>v.pct>100).length;
     const best=[...vs].sort((a,b)=>b.pct-a.pct)[0];
-    el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(tv),'toplam izlenme')}${stat(wpct.toFixed(0)+'%','ağırlıklı ort. izlenen kısım')}${stat(good+'/'+vs.length,'%55 ve üstü video')}${stat(loop,'%100 üstü (loop sinyali)')}</div>
-    <p class="note">En yüksek izlenen kısım: ${link(best)} (${best.pct.toFixed(0)}%). %100'ün üstü, izleyicilerin videoyu ortalama bir kereden fazla izlediği anlamına gelir.</p>
+    el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(tv),'toplam izlenme')}${stat(Number.isFinite(wpct)?wpct.toFixed(0)+'%':'—','ağırlıklı ort. izlenen kısım')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct>=55).length+'/'+vs.filter(v=>v.hasAnalytics).length,'video ≥55% (raporlu)')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct>100).length,'%100 üstü (loop sinyali)')}</div>
+    <p class="note">Analytics verisi henüz gelmeyen videolarda herkese açık izlenme sayısı gösterilir; ortalama izleme ve izlenen yüzde için — görünür. %100'ün üstü, izleyicilerin videoyu ortalama bir kereden fazla izlediği anlamına gelir.</p>
     <h2>Videolar (en yeni önce)</h2><div class="wrap"><table><tr><th>Başlık</th><th>İzlenme</th><th>Ort. izleme</th><th>İzlenen kısım</th><th>Süre</th><th>Beğeni</th><th>Yeni abone</th></tr>
-    ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${v.avgSec.toFixed(1)} sn</td><td class="${pctCls(v.pct)}">${v.pct.toFixed(0)}%</td><td>${v.sec} sn</td><td>${fmt(v.likes)}</td><td>${v.subs}</td></tr>`).join('')}</table></div>
+    ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${v.avgSec==null?'—':v.avgSec.toFixed(1)+' sn'}</td><td class="${v.pct==null?'':pctCls(v.pct)}">${v.pct==null?'—':v.pct.toFixed(0)+'%'}</td><td>${v.sec} sn</td><td>${v.likes==null?'—':fmt(v.likes)}</td><td>${v.subs==null?'—':v.subs}</td></tr>`).join('')}</table></div>
     <details class="note"><summary>Teknik teşhis (istatistikler neden 0?)</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(analyticsDebug,null,2)}</pre></details>
     <p class="note">%55 eşiği senin hedefin olarak işaretlendi. YouTube'un bu eşiğe göre dağıtım yaptığı garanti değil, kendi videolarını birbiriyle kıyaslamak için kullan.</p>`;
   }catch(e){fail(el,e)}
