@@ -297,8 +297,10 @@ $('#goOwn').onclick=async()=>{
     }).filter(v=>v.sec<=180).sort((a,b)=>b.date-a.date);
     if(!vs.length){busy(el,'Kanalda analiz edilecek video bulunamadı.');return}
     const tv=vs.reduce((a,v)=>a+v.views,0)||1;
-    const wpct=vs.reduce((a,v)=>a+v.pct*v.views,0)/tv;
-    const good=vs.filter(v=>v.pct>=55).length, loop=vs.filter(v=>v.pct>100).length;
+    const reported=vs.filter(v=>v.hasAnalytics&&v.pct!=null&&v.views>0);
+    const reportedViews=reported.reduce((a,v)=>a+v.views,0);
+    const wpct=reportedViews?reported.reduce((a,v)=>a+v.pct*v.views,0)/reportedViews:NaN;
+    const good=reported.filter(v=>v.pct>=55).length, loop=reported.filter(v=>v.pct>100).length;
     const best=[...vs].sort((a,b)=>b.pct-a.pct)[0];
     el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(tv),'toplam izlenme')}${stat(Number.isFinite(wpct)?wpct.toFixed(0)+'%':'—','ağırlıklı ort. izlenen kısım')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct>=55).length+'/'+vs.filter(v=>v.hasAnalytics).length,'video ≥55% (raporlu)')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct>100).length,'%100 üstü (loop sinyali)')}</div>
     <p class="note">Analytics verisi henüz gelmeyen videolarda herkese açık izlenme sayısı gösterilir; ortalama izleme ve izlenen yüzde için — görünür. %100'ün üstü, izleyicilerin videoyu ortalama bir kereden fazla izlediği anlamına gelir.</p>
