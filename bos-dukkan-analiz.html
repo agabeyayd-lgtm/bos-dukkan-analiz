@@ -401,45 +401,54 @@ $('#goOwn').onclick=async()=>{
     <textarea id="compareTxt" readonly rows="8" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
     $('#copyCompare').onclick=async()=>{
       const btn=$('#copyCompare');
-      btn.disabled=true;btn.textContent='Yorum örnekleri alınıyor…';
-      const own=vs.map(v=>({id:v.id,title:v.title,published:v.date.toISOString().slice(0,10),seconds:v.sec,views:v.views,averageViewSeconds:v.avgSec,averageViewedPercent:v.pct,likes:v.likes,comments:v.comments,subscribersGained:v.subs,analyticsAvailable:v.hasAnalytics}));
-      const research=window.bosResearchSnapshot||null;
-      const researchComments=research?await sampleComments([...research.videos].sort((a,b)=>(b.viewsPerSub??-1)-(a.viewsPerSub??-1)),5,8):[];
-      const ownComments=await sampleComments([...vs].sort((a,b)=>b.views-a.views),5,8);
-      if(research) research.commentSamples=researchComments;
       const commentDiag=$('#commentDiag');
-      const renderCommentGroup=(label,items)=>'<h3>'+esc(label)+'</h3>'+((items&&items.length)?items.map(v=>'<div style="margin:8px 0;padding:8px;border:1px solid var(--line);border-radius:8px"><strong>'+esc(v.title||v.videoId)+'</strong><p>'+ (v.available ? ('API yanıtı başarılı · '+v.sampled+' yorum bulundu') : ('API HATASI: '+esc(v.reason||'Bilinmeyen hata'))) +'</p>'+((v.comments||[]).length?'<ul>'+v.comments.map(c=>'<li>'+esc(c.text)+' <small>('+fmt(c.likes)+' beğeni)</small></li>').join('')+'</ul>':(v.available?'<p>Bu videoda dönen sonuçlarda gösterilebilir yorum yok.</p>':''))+'</div>').join(''):'<p>Bu grupta yorum örneği alınmadı.</p>');
-      const failures=[...ownComments,...researchComments].filter(v=>!v.available);
-      commentDiag.innerHTML='<h2>Yorum çekme teşhisi</h2><p>Kanal: '+ownComments.filter(v=>v.available).length+'/'+ownComments.length+' videoda istek başarılı. Araştırma: '+researchComments.filter(v=>v.available).length+'/'+researchComments.length+' videoda istek başarılı.</p>'+(failures.length?'<p><strong>Hata ayrıntıları aşağıda.</strong> Bunlar API yanıtından alınmıştır.</p>':'<p>Seçilen videolarda API isteği hata vermedi. Sıfır yorum, o videolar için sonuç dönmediği anlamına gelir.</p>')+renderCommentGroup('Kendi kanalın',ownComments)+renderCommentGroup('Araştırma videoları',researchComments);
-      const txt=[
-        "ROL: Boş Dükkân için veri analisti ve yaratıcı yönetmen. Veriye dayalı karşılaştırma yap; korelasyonu nedensellik diye sunma.",
-        "KANAL SABİTLERİ: 8 saniye, dikey 9:16, diyalogsuz, doğal ASMR, İngilizce başlık. Mizah gerçekçi insan davranışından doğmalı; güçlü ilk 0,3 saniye ve tamamlanmış final olmalı.",
-        "",
-        "BOŞ DÜKKÂN KANAL VERİSİ (YouTube Analytics API ve video metaverisi):",
-        JSON.stringify({channel:c.snippet.title,subscriberCount:+c.statistics.subscriberCount||0,periodDays:+$('#odays').value,summary:{videos:vs.length,totalViews:tv,medianViews:viewMedian,medianViewedPercent:Number.isFinite(retentionMedian)?retentionMedian:null,weightedAverageViewedPercent:Number.isFinite(wpct)?wpct:null},videos:own},null,2),
-        "",
-        "BOŞ DÜKKÂN VİDEOLARINDAN YORUM ÖRNEKLERİ (API'den çekilen gerçek sonuçlar; hata varsa reason alanında):",
-        JSON.stringify(ownComments,null,2),
-        "",
-        "ARAŞTIRMA VİDEOLARI:",
-        research?JSON.stringify(research,null,2):"Bu oturumda Genel Analiz araştırma sonuçları henüz alınmamış. Kanal verisi var; rakip karşılaştırmasını eksik veri diye açıkça belirt.",
-        "",
-        "GÖREV:",
-        "1) Kendi kanalımda yüksek/düşük performanslı videoları yalnızca mevcut veriye göre ayır. Ortalama izleme süresi ve izlenen yüzde eksik olanları tahmin etme.",
-        "2) Araştırma videolarındaki görüntülenme/abone oranını yalnızca keşif sinyali say; bunun neden-sonuç kanıtı olmadığını açıkla. Kanalımın retention verisiyle birebir aynı metrikmiş gibi kıyaslama.",
-        "3) Ortak olası kancaları, başlık örüntülerini ve farklılıkları çıkar. Video başlığı/izlenme sayısı tek başına sahne mekanizmasını kanıtlamaz; emin olmadığın yerde belirsizliği belirt.",
-        "4) Video süresi, görüntülenme, izlenen yüzde, ortalama izleme süresi ve beğeni/yorum sayıları arasındaki örüntüleri; örneklem boyutunu ve seçilim yanlılığını hesaba katarak karşılaştır.",
-        "5) YORUM ANALİZİ: Araştırma ve kanal yorum örneklerindeki tekrar eden izleyici tepkilerini, izleyicinin açıkça belirttiği komik anları, şaşkınlık/duygu ifadelerini, alıntılanan replik veya meme referanslarını ve kafa karışıklığını ayrı kümelere ayır. Yorumların sahneyi gerçekten açıklayıp açıklamadığını değerlendir; yorumlarda bulunmayan sahne ayrıntılarını uydurma.",
-        "6) Yorum örnekleri en fazla 5 video başına 8 yorumdur ve YouTube'un relevance sıralamasına dayanır; temsili anket değildir. Beğeniler ve yorumlar sessiz izleyicileri temsil etmez. Alay, spam, bot, dil ve kültür farkı ile seçilim yanlılığını belirt. Tek bir yorumdan genelleme yapma; tekrar eden örüntüleri kanıt düzeyine göre etiketle.",
-        "7) Ortalama izlenme yüzdesi %100'ü aşıyorsa bunu tekrar izleme/loop için olası sinyal olarak not et; doğrudan tekrar sayısı diye adlandırma. API'de doğrudan tekrar oynatma sayısı yoksa bunu açıkça söyle. Eksik metrikleri tahmin etme.",
-        "8) Sonuçta Boş Dükkân için test edilmeye değer en fazla 3 farklı mizah mekanizması öner; her birini hangi kanal metriği ve hangi yorum örüntüsünün desteklediğiyle ilişkilendir. Sadece yorumlarda insanların 'komik' demesini mekanizma kanıtı sayma.",
-        "9) 8 saniyelik format için somut sonraki test planı ver: neyi değiştireceğiz, hangi metriği ölçeceğiz, hangi sonuç tekrar test etmeyi hak edecek.",
-        "10) Bu veri tek başına başarıyı garanti etmez. Tam manifesto dosyası panele bağlı değil; yalnızca yukarıdaki verileri kullan."
-      ].join("\n");
-      const ta=$('#compareTxt');ta.value=txt;ta.style.display='block';ta.select();
-      try{await navigator.clipboard.writeText(txt);btn.textContent='Kopyalandı ✓ Claude’a yapıştır';}
-      catch(e){try{const ok=document.execCommand('copy');btn.textContent=ok?'Kopyalandı ✓ Claude’a yapıştır':'Metni aşağıdan elle kopyala';}catch(_){btn.textContent='Metni aşağıdan elle kopyala';}}
-      finally{btn.disabled=false;}
+      btn.disabled=true;
+      btn.textContent='Yorum örnekleri alınıyor…';
+      commentDiag.innerHTML='<h2>Yorum çekme teşhisi</h2><p>İşlem başladı. Videolar ve yorum erişimi kontrol ediliyor…</p>';
+      try {
+        const own=vs.map(v=>({id:v.id,title:v.title,published:v.date.toISOString().slice(0,10),seconds:v.sec,views:v.views,averageViewSeconds:v.avgSec,averageViewedPercent:v.pct,likes:v.likes,comments:v.comments,subscribersGained:v.subs,analyticsAvailable:v.hasAnalytics}));
+        const research=window.bosResearchSnapshot||null;
+        const researchVideos=research&&Array.isArray(research.videos)?research.videos:[];
+        const researchComments=researchVideos.length?await sampleComments([...researchVideos].sort((a,b)=>(b.viewsPerSub??-1)-(a.viewsPerSub??-1)),5,8):[];
+        const ownComments=await sampleComments([...vs].sort((a,b)=>b.views-a.views),5,8);
+        if(research) research.commentSamples=researchComments;
+        const renderCommentGroup=(label,items)=>'<h3>'+esc(label)+'</h3>'+((items&&items.length)?items.map(v=>'<div style="margin:8px 0;padding:8px;border:1px solid var(--line);border-radius:8px"><strong>'+esc(v.title||v.videoId)+'</strong><p>'+(v.available?('API yanıtı başarılı · '+v.sampled+' yorum bulundu'):('API HATASI: '+esc(v.reason||'Bilinmeyen hata')) )+'</p>'+((v.comments||[]).length?'<ul>'+v.comments.map(c=>'<li>'+esc(c.text)+' <small>('+fmt(c.likes)+' beğeni)</small></li>').join('')+'</ul>':(v.available?'<p>Bu videoda dönen sonuçlarda gösterilebilir yorum yok.</p>':''))+'</div>').join(''):'<p>Bu grupta yorum örneği alınmadı.</p>');
+        const failures=[...ownComments,...researchComments].filter(v=>!v.available);
+        commentDiag.innerHTML='<h2>Yorum çekme teşhisi</h2><p>Kanal: '+ownComments.filter(v=>v.available).length+'/'+ownComments.length+' videoda istek başarılı. Araştırma: '+researchComments.filter(v=>v.available).length+'/'+researchComments.length+' videoda istek başarılı.</p>'+(failures.length?'<p><strong>Hata ayrıntıları aşağıda.</strong> Bunlar API yanıtından alınmıştır.</p>':'<p>Seçilen videolarda API isteği hata vermedi. Sıfır yorum, o videolar için sonuç dönmediği anlamına gelir.</p>')+renderCommentGroup('Kendi kanalın',ownComments)+renderCommentGroup('Araştırma videoları',researchComments);
+        const txt=[
+          "ROL: Boş Dükkân için veri analisti ve yaratıcı yönetmen. Veriye dayalı karşılaştırma yap; korelasyonu nedensellik diye sunma.",
+          "KANAL SABİTLERİ: 8 saniye, dikey 9:16, diyalogsuz, doğal ASMR, İngilizce başlık. Mizah gerçekçi insan davranışından doğmalı; güçlü ilk 0,3 saniye ve tamamlanmış final olmalı.",
+          "",
+          "BOŞ DÜKKÂN KANAL VERİSİ (YouTube Analytics API ve video metaverisi):",
+          JSON.stringify({channel:c.snippet.title,subscriberCount:+c.statistics.subscriberCount||0,periodDays:+$('#odays').value,summary:{videos:vs.length,totalViews:tv,medianViews:viewMedian,medianViewedPercent:Number.isFinite(retentionMedian)?retentionMedian:null,weightedAverageViewedPercent:Number.isFinite(wpct)?wpct:null},videos:own},null,2),
+          "",
+          "BOŞ DÜKKÂN VİDEOLARINDAN YORUM ÖRNEKLERİ (API'den çekilen gerçek sonuçlar; hata varsa reason alanında):",
+          JSON.stringify(ownComments,null,2),
+          "",
+          "ARAŞTIRMA VİDEOLARI:",
+          research?JSON.stringify(research,null,2):"Bu oturumda Genel Analiz araştırma sonuçları henüz alınmamış. Kanal verisi var; rakip karşılaştırmasını eksik veri diye açıkça belirt.",
+          "",
+          "GÖREV:",
+          "1) Kendi kanalımda yüksek/düşük performanslı videoları yalnızca mevcut veriye göre ayır. Ortalama izleme süresi ve izlenen yüzde eksik olanları tahmin etme.",
+          "2) Araştırma videolarındaki görüntülenme/abone oranını yalnızca keşif sinyali say; bunun neden-sonuç kanıtı olmadığını açıkla. Kanalımın retention verisiyle birebir aynı metrikmiş gibi kıyaslama.",
+          "3) Ortak olası kancaları, başlık örüntülerini ve farklılıkları çıkar. Video başlığı/izlenme sayısı tek başına sahne mekanizmasını kanıtlamaz; emin olmadığın yerde belirsizliği belirt.",
+          "4) Video süresi, görüntülenme, izlenen yüzde, ortalama izleme süresi ve beğeni/yorum sayıları arasındaki örüntüleri; örneklem boyutunu ve seçilim yanlılığını hesaba katarak karşılaştır.",
+          "5) YORUM ANALİZİ: Araştırma ve kanal yorum örneklerindeki tekrar eden izleyici tepkilerini, izleyicinin açıkça belirttiği komik anları, şaşkınlık/duygu ifadelerini, alıntılanan replik veya meme referanslarını ve kafa karışıklığını ayrı kümelere ayır. Yorumların sahneyi gerçekten açıklayıp açıklamadığını değerlendir; yorumlarda bulunmayan sahne ayrıntılarını uydurma.",
+          "6) Yorum örnekleri en fazla 5 video başına 8 yorumdur ve YouTube'un relevance sıralamasına dayanır; temsili anket değildir. Beğeniler ve yorumlar sessiz izleyicileri temsil etmez. Alay, spam, bot, dil ve kültür farkı ile seçilim yanlılığını belirt. Tek bir yorumdan genelleme yapma; tekrar eden örüntüleri kanıt düzeyine göre etiketle.",
+          "7) Ortalama izlenme yüzdesi %100'ü aşıyorsa bunu tekrar izleme/loop için olası sinyal olarak not et; doğrudan tekrar sayısı diye adlandırma. API'de doğrudan tekrar oynatma sayısı yoksa bunu açıkça söyle. Eksik metrikleri tahmin etme.",
+          "8) Sonuçta Boş Dükkân için test edilmeye değer en fazla 3 farklı mizah mekanizması öner; her birini hangi kanal metriği ve hangi yorum örüntüsünün desteklediğiyle ilişkilendir. Sadece yorumlarda insanların 'komik' demesini mekanizma kanıtı sayma.",
+          "9) 8 saniyelik format için somut sonraki test planı ver: neyi değiştireceğiz, hangi metriği ölçeceğiz, hangi sonuç tekrar test etmeyi hak edecek.",
+          "10) Bu veri tek başına başarıyı garanti etmez. Tam manifesto dosyası panele bağlı değil; yalnızca yukarıdaki verileri kullan."
+        ].join("\n");
+        const ta=$('#compareTxt');ta.value=txt;ta.style.display='block';ta.select();
+        try{await navigator.clipboard.writeText(txt);btn.textContent='Kopyalandı ✓ Claude’a yapıştır';}
+        catch(e){try{const ok=document.execCommand('copy');btn.textContent=ok?'Kopyalandı ✓ Claude’a yapıştır':'Metni aşağıdan elle kopyala';}catch(_){btn.textContent='Metni aşağıdan elle kopyala';}}
+      } catch(e) {
+        commentDiag.innerHTML='<h2>Yorum çekme teşhisi</h2><p><strong>İşlem sırasında hata oluştu:</strong> '+esc(String(e&&e.message||e))+'</p><p>Bu hata yorum isteğinden önce veya analiz verisi hazırlanırken oluşmuş olabilir.</p>';
+        btn.textContent='Hata oluştu — tekrar dene';
+      } finally {
+        btn.disabled=false;
+      }
     };
   }catch(e){fail(el,e)}
 };
