@@ -285,10 +285,11 @@ $('#goOwn').onclick=async()=>{
     const tv=vs.reduce((a,v)=>a+v.views,0)||1;
     const analyticsTv=vs.reduce((a,v)=>a+v.analyticsViews,0)||1;
     const wpct=vs.reduce((a,v)=>a+v.pct*v.analyticsViews,0)/analyticsTv;
-    const good=vs.filter(v=>v.pct>=55).length, loop=vs.filter(v=>v.pct>100).length;
-    const best=[...vs].sort((a,b)=>b.pct-a.pct)[0];
-    el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(tv),'toplam izlenme')}${stat(wpct.toFixed(0)+'%','ağırlıklı ort. izlenen kısım')}${stat(good+'/'+vs.length,'%55 ve üstü video')}${stat(loop,'%100 üstü (loop sinyali)')}</div>
-    <p class="note">En yüksek izlenen kısım: ${link(best)} (${best.pct.toFixed(0)}%). %100'ün üstü, izleyicilerin videoyu ortalama bir kereden fazla izlediği anlamına gelir.</p>
+    const available=vs.filter(v=>v.analyticsAvailable);
+    const good=available.filter(v=>v.pct>=55).length, loop=available.filter(v=>v.pct>100).length;
+    const best=available.length?[...available].sort((a,b)=>b.pct-a.pct)[0]:null;
+    el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(tv),'toplam izlenme')}${stat(wpct.toFixed(0)+'%','ağırlıklı ort. izlenen kısım')}${stat(good+'/'+available.length,'%55 ve üstü (raporlu)')}${stat(loop,'%100 üstü (loop sinyali)')}</div>
+    <p class="note">${best?`En yüksek izlenen kısım: ${link(best)} (${best.pct.toFixed(0)}%).`:'Tutma/izleme yüzdesi için Analytics verisi henüz gelmedi.'} %100'ün üstü, izleyicilerin videoyu ortalama bir kereden fazla izlediği anlamına gelir.</p>
     <h2>Videolar (izlenmeye göre)</h2><div class="wrap"><table><tr><th>Başlık</th><th>Toplam izlenme</th><th>Ort. izleme</th><th>İzlenen kısım</th><th>Süre</th><th>Beğeni</th><th>Yeni abone</th></tr>
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${v.analyticsAvailable?v.avgSec.toFixed(1)+' sn':'Veri bekleniyor'}</td><td class="${pctCls(v.pct)}">${v.analyticsAvailable?v.pct.toFixed(0)+'%':'Veri bekleniyor'}</td><td>${v.sec} sn</td><td>${fmt(v.likes)}</td><td>${v.subs}</td></tr>`).join('')}</table></div>
     <p class="note">Toplam izlenme sayısı YouTube Data API'den güncel toplam olarak gelir. Ortalama izleme, izlenen kısım, beğeni ve abone verileri seçilen dönemin Analytics raporudur; Analytics satırı henüz gelmeyen videolarda tutma verisi “Veri bekleniyor” gösterilir. %55 eşiği senin hedefin olarak işaretlendi. YouTube'un bu eşiğe göre dağıtım yaptığı garanti değil, kendi videolarını birbiriyle kıyaslamak için kullan.</p>`;
