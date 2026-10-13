@@ -2,6 +2,8 @@ name: Free Shorts frame access diagnostic
 
 on:
   workflow_dispatch:
+  push:
+    branches: [test/free-shorts-frames]
   pull_request:
     branches: [main]
 
