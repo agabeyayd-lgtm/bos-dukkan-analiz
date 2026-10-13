@@ -116,12 +116,14 @@ def try_embedded_player_frames(video_id):
     except Exception as e:
         return {"success": False, "error": "Playwright unavailable: " + str(e)[:180]}
     result = {"success": False, "states": []}
-    embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1&mute=1&playsinline=1&controls=0&rel=0"
+    embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1&mute=1&playsinline=1&controls=0&rel=0&origin=https%3A%2F%2Fagabeyayd-lgtm.github.io"
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
             page = browser.new_page(viewport={"width": 720, "height": 1280}, device_scale_factor=1)
-            page.goto(embed_url, wait_until="domcontentloaded", timeout=30000)
+            # Load a real parent origin first: YouTube requires a Referer for embedded playback.
+            page.goto("https://agabeyayd-lgtm.github.io/bos-dukkan-analiz/", wait_until="domcontentloaded", timeout=30000)
+            page.set_content(f'<html><body style="margin:0"><iframe id="yt-player" width="720" height="1280" src="{embed_url}" allow="autoplay; encrypted-media; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe></body></html>')
             page.wait_for_timeout(7000)
             for frame in page.frames:
                 try:
