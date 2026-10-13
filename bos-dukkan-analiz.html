@@ -497,7 +497,7 @@ $('#goOwn').onclick=async()=>{
       <p class="note">Bir sonraki aşamada bu karşılaştırmaların başlık/konu ve görsel olay özellikleriyle eşleştirilmesi gerekir; mevcut API verileri tek başına videonun sahne içeriğini açıklamaz.</p>`;
     el.innerHTML=`${comparisonHtml}<div class="stats">${stat(vs.length,'video')}${stat(fmt(tv),'toplam izlenme')}${stat(Number.isFinite(wpct)?wpct.toFixed(0)+'%':'—','ağırlıklı ort. izlenen kısım')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct>=55).length+'/'+vs.filter(v=>v.hasAnalytics).length,'video ≥55% (raporlu)')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct>100).length,'%100 üstü (loop sinyali)')}</div>
     <p class="note">Analytics verisi henüz gelmeyen videolarda herkese açık izlenme sayısı gösterilir; ortalama izleme ve izlenen yüzde için — görünür. %100'ün üstü, izleyicilerin videoyu ortalama bir kereden fazla izlediği anlamına gelir.</p>
-    <h2>Videolar (en yeni önce)</h2><p><button class="ghost" id="copyOwn">Tabloyu kopyala</button></p><div class="wrap"><table id="to"><tr><th>Başlık</th><th>İzlenme</th><th>Ort. izleme</th><th>İzlenen kısım</th><th>Süre</th><th>Beğeni</th><th>Yeni abone</th></tr>
+    <h2>Videolar (en yeni önce)</h2><p><button class="ghost" id="copyOwn">Tabloyu kopyala</button> <button class="ghost" id="copyOwnShort">Kısa çıktıyı kopyala (son 10)</button></p><div class="wrap"><table id="to"><tr><th>Başlık</th><th>İzlenme</th><th>Ort. izleme</th><th>İzlenen kısım</th><th>Süre</th><th>Beğeni</th><th>Yeni abone</th></tr>
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${v.avgSec==null?'—':v.avgSec.toFixed(1)+' sn'}</td><td class="${v.pct==null?'':pctCls(v.pct)}">${v.pct==null?'—':v.pct.toFixed(0)+'%'}</td><td>${v.sec} sn</td><td>${v.likes==null?'—':fmt(v.likes)}</td><td>${v.subs==null?'—':v.subs}</td></tr>`).join('')}</table></div>
     <details class="note"><summary>Teknik teşhis (istatistikler neden 0?)</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(analyticsDebug,null,2)}</pre></details>
     <p class="note">%55 eşiği senin hedefin olarak işaretlendi. Bu eşik YouTube dağıtımını garanti etmez; yalnızca kendi videolarını kıyaslamak için kullan.</p>
@@ -507,6 +507,27 @@ $('#goOwn').onclick=async()=>{
     <div id="commentDiag" class="note" aria-live="polite">Yorum teşhisi henüz çalıştırılmadı. Yukarıdaki düğmeye bastığında yorumların alınıp alınmadığı ve varsa API hatası burada gösterilecek.</div>
     <textarea id="compareTxt" readonly rows="8" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
     $('#copyOwn').onclick=()=>copyTable('#to','#copyOwn');
+    $('#copyOwnShort').onclick=async()=>{
+      const btn=$('#copyOwnShort');
+      const recent=vs.slice(0,10);
+      const lines=['Boş Dükkân · kısa tutma çıktısı (son '+recent.length+' video)',
+        ...recent.map(v=>[
+          String(v.title||v.id).replace(/\\s+/g,' ').slice(0,90),
+          'Süre: '+(v.sec?v.sec+' sn':'Yok'),
+          'İzlenme: '+fmt(v.views),
+          'Ort. izleme: '+(v.avgSec==null?'Yok':v.avgSec.toFixed(1)+' sn'),
+          'Ort. izlenen: '+(v.pct==null?'Yok':v.pct.toFixed(1)+'%')
+        ].join(' | ')),
+        'Saniye bazlı düşüş noktaları: Bu API raporunda yok; tahmin edilmedi.'];
+      const textOut=lines.join('\\n');
+      try{await navigator.clipboard.writeText(textOut);btn.textContent='Kısa çıktı kopyalandı ✓';}
+      catch(e){
+        const area=document.createElement('textarea');area.value=textOut;area.rows=8;area.style.width='100%';area.style.marginTop='8px';
+        btn.parentElement.after(area);area.focus();area.select();
+        let ok=false;try{ok=document.execCommand('copy')}catch(_){}
+        btn.textContent=ok?'Kısa çıktı kopyalandı ✓':'Metni seçip kopyala';
+      }
+    };
     $('#copyCompare').onclick=async()=>{
       const btn=$('#copyCompare');
       const commentDiag=$('#commentDiag');
