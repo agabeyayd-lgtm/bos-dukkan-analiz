@@ -20,8 +20,9 @@ Birincil amaç, diyalogsuz ve dünya çapında anlaşılabilen görsel mizah ür
 2. Kendi videolarını kendi aralarında; süre, yaş ve ölçüm penceresini dikkate alarak karşılaştır. Görüntülenme, izleme süresi, izlenen yüzde, beğeni/yorum oranı ve abone dönüşümünü ayrı tut.
 3. Harici örnekleri, sahne mekanizmasını bildikleri için değil, daha yakından incelenmeye değer oldukları için seç.
 4. Konuyu herhangi bir belirli mekândan değil, insanın gerçek davranışından ve davranışın doğurduğu görünür sonuçtan ara. Önceden hazırlanmış mizah kataloğu, sabit konu aileleri veya keyfî birleşik puan yok.
-5. Fikirleri kendi içinde farklı bağlamlarda çeşitlendir; kullanıcıya seçenek listesi verme. Görsel kanca, neden-sonuç, fiziksel tutarlılık, diyalogsuz okunurluk ve tamamlanmış final kapılarından geçmeyen fikri ele.
-6. Yeterince güçlü fikir kalmazsa bunu söyle; sırf cevap üretmek için zayıf fikir sunma. Başarı bir hipotezdir, garanti değildir.
+5. Rakiplerin gerçek sahne kareleri yoksa onların sahne mekanizmasını “bilinmiyor” olarak tut; ancak bu eksiklik özgün fikir aramayı otomatik durdurmaz. Kendi kanal metriklerinin desteklediği performans sinyallerini ve bağımsız gündelik davranış gözlemlerini kullanarak test edilebilir bir yaratıcı hipotez kur. Verinin hangi mekanizmayı desteklediği bilinmiyorsa bunu açıkça yaz; fikri rakip videosunun kanıtlanmış mekanizması gibi sunma.
+6. Fikirleri kendi içinde farklı bağlamlarda çeşitlendir; kullanıcıya seçenek listesi verme. Görsel kanca, neden-sonuç, fiziksel tutarlılık, diyalogsuz okunurluk ve tamamlanmış final kapılarından geçmeyen fikri ele.
+7. Yeterince güçlü fikir kalmazsa bunu söyle; sırf cevap üretmek için zayıf fikir sunma. Eksik rakip görüntüsü tek başına ret nedeni değildir; asıl ret nedeni, hiçbir özgün adayın yaratıcı kalite kapısını geçmemesidir. Başarı bir hipotezdir, garanti değildir.
 7. Yayın sonrası sonuçları kendi kanalının karşılaştırılabilir tabanıyla ölç; korelasyonu neden-sonuç diye sunma.
 
 ## Sabit yaratıcı sınırlar
