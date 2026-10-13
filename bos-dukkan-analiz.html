@@ -63,6 +63,7 @@ a{color:var(--acc)}
   <button class="tab on" role="tab" data-p="gen">1. Genel analiz</button>
   <button class="tab" role="tab" data-p="kan">2. Kanal analizi</button>
   <button class="tab" role="tab" data-p="own">3. Tutma oranı</button>
+  <button class="tab" role="tab" data-p="frames">4. Gerçek kareler</button>
 </div>
 
 <section id="gen" class="pane on">
@@ -94,6 +95,21 @@ a{color:var(--acc)}
   </div>
   <p class="note">Yalnızca kendi kanalın için çalışır. Google Cloud'da OAuth istemcisini "Web uygulaması" olarak oluştur, yetkili JavaScript kaynağı olarak <code>https://agabeyayd-lgtm.github.io</code> ekle ve "YouTube Analytics API"yi de etkinleştir.</p>
   <div id="outOwn"></div>
+</section>
+
+<section id="frames" class="pane">
+  <h2>Rakip Shorts'tan gerçek kare çıkar</h2>
+  <p class="note">YouTube bağlantısından gizlice kare çekmez. YouTube uygulamasında aldığın ekran kaydını veya cihazındaki video dosyasını seç; kareler bu tarayıcıda yerel olarak çıkarılır, sunucuya yüklenmez.</p>
+  <div class="bar">
+    <input id="frameFile" type="file" accept="video/*" aria-label="Ekran kaydı veya video seç">
+    <label style="display:flex;align-items:center;gap:6px">Başlangıç sn <input id="frameStart" type="number" min="0" step="0.1" value="0" style="width:90px;flex:none"></label>
+    <label style="display:flex;align-items:center;gap:6px">Kare sayısı <select id="frameCount" style="width:90px;flex:none"><option>6</option><option selected>8</option><option>10</option><option>12</option></select></label>
+    <button id="extractFrames" disabled>Kareleri çıkar</button>
+  </div>
+  <div id="frameStatus" class="msg">Önce video veya ekran kaydı seç.</div>
+  <video id="frameVideo" controls playsinline preload="metadata" style="display:none;width:100%;max-height:420px;margin-top:12px;border-radius:10px;background:#000"></video>
+  <div id="frameResult" style="margin-top:12px"></div>
+  <p class="note">İpucu: Ekran kaydında önce YouTube oynatıcısını aç, Shorts'u tam ekrana al ve oynat. Kayıt videonun başından önce menü/arama ekranı içeriyorsa “Başlangıç sn” değerini artır. Bu araç kareleri görselleştirir; kendi başına mizah veya sahne yorumu üretmez.</p>
 </section>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -548,6 +564,127 @@ $('#goOwn').onclick=async()=>{
     };
   }catch(e){fail(el,e)}
 };
+
+/* ---------- 4. LOCAL SHORTS FRAME EXTRACTION ---------- */
+let frameObjectUrl = '';
+const frameFile = $('#frameFile');
+const frameVideo = $('#frameVideo');
+const frameStatus = $('#frameStatus');
+const extractFramesBtn = $('#extractFrames');
+frameFile.addEventListener('change', () => {
+  $('#frameResult').innerHTML = '';
+  extractFramesBtn.disabled = true;
+  if (frameObjectUrl) URL.revokeObjectURL(frameObjectUrl);
+  const f = frameFile.files && frameFile.files[0];
+  if (!f) {
+    frameVideo.removeAttribute('src');
+    frameVideo.style.display = 'none';
+    frameStatus.textContent = 'Önce video veya ekran kaydı seç.';
+    return;
+  }
+  if (!f.type.startsWith('video/')) {
+    frameStatus.textContent = 'Bu dosya video olarak tanınmadı. MP4 veya cihazın desteklediği bir video dosyası seç.';
+    return;
+  }
+  frameObjectUrl = URL.createObjectURL(f);
+  frameVideo.src = frameObjectUrl;
+  frameVideo.style.display = 'block';
+  frameStatus.textContent = 'Video açılıyor… Dosya bu cihazda işleniyor.';
+  frameVideo.onloadedmetadata = () => {
+    const d = frameVideo.duration;
+    if (!Number.isFinite(d) || d <= 0) {
+      frameStatus.textContent = 'Video süresi okunamadı. Başka bir video biçimi dene.';
+      return;
+    }
+    $('#frameStart').max = Math.max(0, d - 0.05).toFixed(2);
+    frameStatus.textContent = 'Video hazır · ' + d.toFixed(2) + ' sn · ' + (f.name || 'video') + '. Kare çıkarmaya hazır.';
+    extractFramesBtn.disabled = false;
+  };
+  frameVideo.onerror = () => {
+    frameStatus.textContent = 'Tarayıcı bu videoyu açamadı. Mümkünse MP4 (H.264) ekran kaydı kullan.';
+    extractFramesBtn.disabled = true;
+  };
+});
+function seekTo(video, time) {
+  return new Promise((resolve, reject) => {
+    const onSeeked = () => { cleanup(); resolve(); };
+    const onError = () => { cleanup(); reject(new Error('Video karesine gidilemedi.')); };
+    const cleanup = () => {
+      video.removeEventListener('seeked', onSeeked);
+      video.removeEventListener('error', onError);
+    };
+    video.addEventListener('seeked', onSeeked, {once:true});
+    video.addEventListener('error', onError, {once:true});
+    try { video.currentTime = time; } catch (e) { cleanup(); reject(e); }
+  });
+}
+extractFramesBtn.addEventListener('click', async () => {
+  const d = frameVideo.duration;
+  if (!Number.isFinite(d) || d <= 0) return;
+  const start = Math.max(0, Math.min(Number($('#frameStart').value) || 0, d - 0.05));
+  const count = Number($('#frameCount').value) || 8;
+  const end = Math.min(d - 0.04, start + 8);
+  if (end < start) {
+    frameStatus.textContent = 'Başlangıç değeri video süresinin içinde olmalı.';
+    return;
+  }
+  extractFramesBtn.disabled = true;
+  frameStatus.textContent = 'Kareler çıkarılıyor… Bu işlem yalnızca cihazında gerçekleşir.';
+  $('#frameResult').innerHTML = '';
+  try {
+    const times = count === 1 ? [start] : Array.from({length:count}, (_,i) => start + (end - start) * i / (count - 1));
+    const vw = frameVideo.videoWidth, vh = frameVideo.videoHeight;
+    if (!vw || !vh) throw new Error('Video görüntü boyutu okunamadı.');
+    const cellW = 240, cellH = Math.round(cellW * vh / vw), labelH = 30, cols = 2, rows = Math.ceil(count / cols);
+    const canvas = document.createElement('canvas');
+    canvas.width = cols * cellW;
+    canvas.height = rows * (cellH + labelH);
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#f5f5f5'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    for (let i=0; i<times.length; i++) {
+      frameStatus.textContent = 'Kare ' + (i+1) + '/' + count + ' hazırlanıyor…';
+      await seekTo(frameVideo, times[i]);
+      const x = (i % cols) * cellW, y = Math.floor(i / cols) * (cellH + labelH);
+      ctx.drawImage(frameVideo, x, y, cellW, cellH);
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(x, y + cellH, cellW, labelH);
+      ctx.fillStyle = '#14213d'; ctx.font = '16px sans-serif';
+      ctx.fillText('Kare ' + (i+1) + ' · ' + times[i].toFixed(2) + ' sn', x + 8, y + cellH + 20);
+    }
+    const preview = document.createElement('img');
+    preview.alt = 'Videodan çıkarılan gerçek karelerin iletişim sayfası';
+    preview.src = canvas.toDataURL('image/jpeg', 0.9);
+    preview.style.cssText = 'display:block;width:100%;max-width:520px;border:1px solid var(--line);border-radius:10px;background:white';
+    const save = document.createElement('button');
+    save.textContent = 'Kare sayfasını JPG olarak kaydet';
+    save.onclick = () => {
+      const a = document.createElement('a');
+      a.href = preview.src; a.download = 'rakip-shorts-gercek-kareler.jpg';
+      document.body.appendChild(a); a.click(); a.remove();
+    };
+    const copy = document.createElement('button');
+    copy.className = 'ghost'; copy.textContent = 'Görseli panoya kopyala';
+    copy.onclick = async () => {
+      try {
+        if (!navigator.clipboard || !window.ClipboardItem) throw new Error('Bu tarayıcı görsel kopyalamayı desteklemiyor.');
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+        frameStatus.textContent = 'Görsel panoya kopyalandı.';
+      } catch(e) {
+        frameStatus.textContent = 'Görsel kopyalanamadı; JPG olarak kaydet düğmesini kullan.';
+      }
+    };
+    const controls = document.createElement('div');
+    controls.className = 'bar'; controls.style.marginBottom = '10px';
+    controls.append(save, copy);
+    $('#frameResult').append(controls, preview);
+    frameStatus.textContent = 'Tamamlandı: ' + count + ' gerçek video karesi çıkarıldı. Kareler bu cihazda işlendi.';
+  } catch(e) {
+    frameStatus.textContent = 'Kare çıkarma başarısız: ' + (e && e.message ? e.message : String(e));
+  } finally {
+    extractFramesBtn.disabled = false;
+  }
+});
+
 </script>
 </body>
 </html>
