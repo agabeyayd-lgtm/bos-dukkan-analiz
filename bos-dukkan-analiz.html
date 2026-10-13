@@ -581,9 +581,10 @@ $('#goOwn').onclick=async()=>{
         // Yorumları başlık benzerliğiyle değil, tam YouTube video ID'siyle eşleştir.
         const ownCommentById=new Map(ownComments.map(x=>[x.videoId,x]));
         const researchCommentById=new Map(researchComments.map(x=>[x.videoId,x]));
-        const ownMatched=own.map(v=>({...v,views:v.viewsInWindow,likes:v.likesInWindow,comments:v.publicLifetimeComments,commentSample:ownCommentById.get(v.id)||{videoId:v.id,available:false,reason:'Yorum örneği için seçilmedi; farklı performans uçları örneklendi',sampled:0,comments:[]}}));
+        const ownPickedIds=new Set(ownCommentPicks.map(v=>v.id));
+        const ownMatched=own.filter(v=>ownPickedIds.has(v.id)).map(v=>({...v,views:v.viewsInWindow,likes:v.likesInWindow,comments:v.publicLifetimeComments,commentSample:ownCommentById.get(v.id)||{videoId:v.id,available:false,reason:'Yorum isteği bu video için başarısız oldu',sampled:0,comments:[]}}));
         const researchPickedIds=new Set(researchCommentPicks.map(v=>v.id));
-        const researchMatched=researchVideos.map(v=>({...v,commentSample:researchCommentById.get(v.id)||{videoId:v.id,available:false,reason:researchPickedIds.has(v.id)?'Yorum isteği başarısız oldu':'Yorum örneği için seçilmedi; farklı performans sinyallerinden birine girmedi',sampled:0,comments:[]}}));
+        const researchMatched=researchCommentPicks.map(v=>({...v,commentSample:researchCommentById.get(v.id)||{videoId:v.id,available:false,reason:researchPickedIds.has(v.id)?'Yorum isteği başarısız oldu':'Yorum örneği yok',sampled:0,comments:[]}}));
         if(research){research.commentSamples=researchComments;research.videoCommentMatches=researchMatched;}
         window.bosOwnAnalyticsSnapshot={source:'YouTube Analytics API v2 + YouTube Data API v3 video metadata',reportingWindowDays:periodDays,requestedAt:new Date().toISOString(),channelSubscriberCount:Number(cj.items?.[0]?.statistics?.subscriberCount||0),totalVideoRows:own.length,analyticsVideoRows:analyticsOwn.length,note:'Analytics-window metrics and public lifetime counters must not be mixed.',videos:own,commentSamples:ownComments};
         const renderMatchedGroup=(label,records,kind)=>'<h3>'+esc(label)+'</h3>'+((records&&records.length)?records.map(v=>{
