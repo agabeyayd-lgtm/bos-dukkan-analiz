@@ -37,7 +37,7 @@ jobs:
               fi
               yt-dlp --no-warnings --no-playlist "${args[@]}" --list-formats "https://www.youtube.com/watch?v=$id" 2>&1 | tee "storyboard-probe/formats-$client-$id.txt"
               if grep -qE 'sb[0-9]+[[:space:]]+mhtml' "storyboard-probe/formats-$client-$id.txt"; then
-                yt-dlp --no-warnings --no-playlist "${args[@]}" --skip-download --write-pages --write-thumbnail --format "sb0/sb1/sb2" -o "storyboard-probe/$client-$id.%(ext)s" "https://www.youtube.com/watch?v=$id"
+                yt-dlp --no-warnings --no-playlist "${args[@]}" --format "sb0/sb1/sb2" -o "storyboard-probe/$client-$id.%(ext)s" "https://www.youtube.com/watch?v=$id"
                 rc=$?
                 find storyboard-probe -maxdepth 1 -type f -name "$client-$id.*" -printf 'FOUND_FILE %p %s bytes\n'
                 if [ "$rc" -eq 0 ]; then
