@@ -272,7 +272,20 @@ $('#goGen').onclick=async()=>{
           role:'Boş Dükkân için yaratıcı yönetmen ve acımasız kalite hakemi; gerçek ölçümle hipotezi ayır, zayıf fikirleri reddet.',
           constraints:{durationSeconds:8,aspectRatio:'9:16',dialogue:false,audio:'natural ASMR',titleLanguage:'English',postingSchedule:'Wednesday and Sunday 19:00',humor:'realistic everyday human behavior, expectation, decision and consequence',mustHave:['strong visual hook in first 0.3 seconds','causal progression','concrete completed ending'],avoid:['forced contrast','random absurdity','impossible physics','only enlarging/changing an object','explanatory text','unfinished loop ending']},
           sourceAndSample:{source:research.source||'YouTube Data API v3',query:research.query,requestedPublishedWindowDays:research.searchDays,windowStart:research.searchStartedAt,windowEnd:research.searchEndedAt,returnedVideoCount:research.videos.length,selection:'YouTube search results; no random or population-representative sample',selectionBias:'The search API returns a relevance/ranking-limited sample (max 50 here); videos are not a representative sample of all comedy Shorts.',ownChannelIncluded:false,ownChannelVideosIncluded:false,ownChannelCommentsIncluded:false},
-          researchData:research,
+          researchData:{
+            videos:research.videos.slice().sort((a,b)=>(Number(b.views)||0)-(Number(a.views)||0)).slice(0,12).map(v=>({
+              id:v.id,title:v.title,channel:v.channel,channelId:v.channelId,publishedAt:v.publishedAt||v.date||null,ageDays:v.ageDays??null,
+              subscribers:v.subscribers??v.subs??null,views:v.views??null,likes:v.likes??null,comments:v.comments??null,
+              durationSeconds:v.durationSeconds??v.sec??null,viewsPerSubscriber:v.viewsPerSubscriber??v.viewsPerSub??v.brk??null,
+              viewsPerDay:v.viewsPerDay??v.vpd??null,likeRate:v.likeRate??null,commentRate:v.commentRate??null,
+              averageViewSeconds:null,averageViewedPercent:null
+            })),
+            commentSamples:(research.videoCommentMatches||[]).filter(v=>v.commentSample&&v.commentSample.available).slice(0,6).map(v=>({
+              videoId:v.id,title:v.title,channel:v.channel,selectionReason:v.commentSelectionReason||null,
+              sampled:v.commentSample.sampled,comments:(v.commentSample.comments||[]).slice(0,4).map(c=>({text:c.text||c.textDisplay||c.comment||'',likes:c.likes??c.likeCount??null}))
+            })),
+            note:'Kısaltılmış paket: en fazla 12 video ve en fazla 6 videoda 4 yorum. Ortalama izleme süresi/yüzdesi bu kaynakta yoktur.'
+          },
           analysisInstructions:[
             'Önce gerçek ölçümleri raporla: kaynak, örneklem sayısı, arama sorgusu, tarih aralığı ve veri eksikleri.',
             'İzlenme/abone oranı, izlenme/gün, beğeni oranı, ortalama izleme süresi ve ortalama izlenen yüzdeyi ayrı metrikler olarak tut. averageViewSeconds ve averageViewedPercent null/eksik ise bunları tahmin etme; YouTube Data API bu aramada bunları sağlamaz.',
@@ -287,7 +300,7 @@ $('#goGen').onclick=async()=>{
         };
         ta.value=JSON.stringify(payload,null,2);ta.style.display='block';ta.focus();ta.select();
         let copied=false;try{await navigator.clipboard.writeText(ta.value);copied=true}catch(e){try{copied=document.execCommand('copy')}catch(_){}}
-        diag.textContent='Paket hazır: '+research.videos.length+' harici video, '+samples.length+' video için yorum isteği, '+research.commentSampleDesign.sampledComments+' yorum örneği. '+(copied?'Kopyalandı; buraya yapıştır.':'Metin aşağıda seçili; Kopyala ile al.');
+        diag.textContent='Kısa paket hazır: en fazla 12 video ve 24 yorum. '+(copied?'Kopyalandı; buraya yapıştır.':'Metin aşağıda seçili; Kopyala ile al.');
         btn.textContent=copied?'Kopyalandı ✓':'Paket hazır';
       }catch(e){diag.textContent='Hata: '+(e.message||String(e));btn.textContent='Tekrar dene';}
       finally{btn.disabled=false;}
