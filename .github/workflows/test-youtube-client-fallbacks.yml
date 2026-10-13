@@ -1,0 +1,85 @@
+name: Test YouTube public extractor fallbacks
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/test-youtube-client-fallbacks.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install yt-dlp and ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install --upgrade yt-dlp
+      - name: Test public clients and extract one real frame per successful download
+        shell: bash
+        run: |
+          set +e
+          mkdir -p probe
+          ids=("v__e4whKJSs" "c7IqboV6qVw")
+          clients=("ios" "android_vr" "web_embedded" "tv_embedded" "default")
+          successes=0
+          for client in "${clients[@]}"; do
+            for id in "${ids[@]}"; do
+              echo "=== CLIENT=$client VIDEO=$id ==="
+              args=()
+              if [ "$client" != "default" ]; then
+                args=(--extractor-args "youtube:player_client=$client")
+              fi
+              yt-dlp --no-warnings --no-playlist "${args[@]}" --format "best[height<=720]/best" --merge-output-format mp4 -o "probe/$client-$id.%(ext)s" "https://www.youtube.com/watch?v=$id"
+              rc=$?
+              file=$(find probe -maxdepth 1 -type f -name "$client-$id.*" ! -name '*.jpg' | head -n 1)
+              if [ "$rc" -eq 0 ] && [ -n "$file" ]; then
+                ffmpeg -hide_banner -loglevel error -i "$file" -frames:v 1 -vf "scale=360:-1" "probe/$client-$id.jpg" -y
+                if [ -s "probe/$client-$id.jpg" ]; then
+                  echo "FRAME_OK client=$client video=$id"
+                  successes=$((successes+1))
+                else
+                  echo "FRAME_FAILED client=$client video=$id"
+                fi
+                rm -f "$file"
+              else
+                echo "DOWNLOAD_FAILED client=$client video=$id"
+              fi
+            done
+          done
+          printf 'Successful real frames: %s\n' "$successes" | tee probe/summary.txt
+          if [ "$successes" -gt 0 ]; then
+            python - <<'PY'
+          from PIL import Image, ImageDraw
+          from pathlib import Path
+          files=sorted(Path("probe").glob("*.jpg"))
+          cards=[]
+          for p in files:
+              im=Image.open(p).convert("RGB")
+              im.thumbnail((240,430))
+              card=Image.new("RGB",(270,470),"white")
+              card.paste(im,((270-im.width)//2,28))
+              ImageDraw.Draw(card).text((6,6),p.stem,fill="black")
+              cards.append(card)
+          cols=3
+          sheet=Image.new("RGB",(cols*270,((len(cards)+cols-1)//cols)*470),"#ddd")
+          for i,im in enumerate(cards):
+              sheet.paste(im,((i%cols)*270,(i//cols)*470))
+          sheet.save("probe/contact-sheet.jpg",quality=88)
+          PY
+          else
+            echo "No public extractor client returned video frames; do not treat metadata or thumbnails as scene frames."
+          fi
+      - name: Upload diagnostic results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: youtube-client-fallback-probe
+          path: probe/
+          if-no-files-found: warn
+          retention-days: 3
