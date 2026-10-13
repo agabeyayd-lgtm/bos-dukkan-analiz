@@ -1,0 +1,67 @@
+name: Inspect Shorts Public Thumbnails
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/inspect-short-thumbnails.yml"
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch public YouTube thumbnails
+        shell: bash
+        run: |
+          set +e
+          mkdir -p thumbs
+          ids=(
+            "v__e4whKJSs"
+            "c7IqboV6qVw"
+            "EbgDmaDz3w8"
+            "C2N1_RjnG2k"
+            "lJnLtaTyQcw"
+          )
+          for id in "${ids[@]}"; do
+            echo "Fetching thumbnail $id"
+            curl -L --fail --silent --show-error "https://i.ytimg.com/vi/$id/hqdefault.jpg" -o "thumbs/$id.jpg"
+            if [ $? -eq 0 ] && [ -s "thumbs/$id.jpg" ]; then
+              echo "OK $id" | tee -a thumbs/status.txt
+            else
+              rm -f "thumbs/$id.jpg"
+              echo "THUMBNAIL_FAILED $id" | tee -a thumbs/status.txt
+            fi
+          done
+      - name: Create contact sheet
+        run: |
+          python -m pip install --quiet pillow
+          python - <<'PY'
+          from PIL import Image, ImageDraw
+          from pathlib import Path
+          files=sorted(Path("thumbs").glob("*.jpg"))
+          if not files:
+              print("No thumbnails fetched")
+              raise SystemExit(0)
+          cards=[]
+          for p in files:
+              im=Image.open(p).convert("RGB")
+              im.thumbnail((320,240))
+              card=Image.new("RGB",(340,280),"white")
+              card.paste(im,((340-im.width)//2,25))
+              ImageDraw.Draw(card).text((8,5),p.stem,fill="black")
+              cards.append(card)
+          cols=2
+          rows=(len(cards)+cols-1)//cols
+          sheet=Image.new("RGB",(cols*340,rows*280),"#ddd")
+          for i,im in enumerate(cards):
+              sheet.paste(im,((i%cols)*340,(i//cols)*280))
+          sheet.save("thumbs/contact-sheet.jpg",quality=90)
+          print(f"Created sheet from {len(files)} thumbnails")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shorts-public-thumbnails
+          path: thumbs/
+          if-no-files-found: warn
+          retention-days: 3
