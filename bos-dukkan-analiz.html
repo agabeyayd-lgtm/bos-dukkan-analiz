@@ -104,6 +104,7 @@ a{color:var(--acc)}
     <input id="videoUrl" type="url" inputmode="url" autocomplete="off" placeholder="YouTube Shorts bağlantısını buraya yapıştır" aria-label="YouTube video bağlantısı">
     <button id="pasteVideoUrl" class="ghost" type="button">Panodan yapıştır</button>
     <button id="openVideoUrl" type="button">Videoyu panelde aç</button>
+    <button id="downloadSourceVideo" type="button" class="ghost">Videoyu indir</button>
   </div>
   <div id="youtubePreview" style="display:none;margin-top:12px;aspect-ratio:9/16;max-height:520px;background:#000;border-radius:10px;overflow:hidden">
     <iframe id="youtubeFrame" title="YouTube Shorts önizlemesi" style="width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -699,6 +700,15 @@ $('#pasteVideoUrl').addEventListener('click', async () => {
     videoUrlInput.focus();
     frameStatus.textContent = 'Bağlantı alanına dokunup basılı tut ve “Yapıştır”ı seç.';
   }
+});
+$('#downloadSourceVideo').addEventListener('click', () => {
+  const id = parseYouTubeId(videoUrlInput.value);
+  if (!id || !/^[A-Za-z0-9_-]{6,}$/.test(id)) {
+    frameStatus.textContent = 'Önce geçerli YouTube veya Shorts bağlantısını yapıştır.';
+    return;
+  }
+  window.open('https://www.youtube.com/watch?v=' + encodeURIComponent(id), '_blank', 'noopener');
+  frameStatus.textContent = 'Video YouTube’da açıldı. İndirme seçeneği videoya, hesaba ve bölgeye göre YouTube tarafından sunulursa oradan kullanabilirsin. İndirme yoksa YouTube uygulamasından ekran kaydı alıp aşağıdaki dosya alanına seç.';
 });
 $('#openVideoUrl').addEventListener('click', () => {
   const id = parseYouTubeId(videoUrlInput.value);
