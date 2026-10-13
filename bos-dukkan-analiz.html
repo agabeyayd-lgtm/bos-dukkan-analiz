@@ -325,7 +325,7 @@ $('#goGen').onclick=async()=>{
         research.videoCommentMatches=research.videos.map(v=>({...v,commentSample:byId.get(v.id)||{videoId:v.id,available:false,reason:'Bu video yorum örneklemi için seçilmedi.',sampled:0,comments:[]}}));
         research.commentSampleDesign={selection:'En fazla 8 video; farklı performans sinyallerine göre; her video için relevance sıralı en fazla 8 üst düzey yorum',selectedVideoIds:picks.map(v=>v.id),sampledComments:samples.reduce((n,v)=>n+v.sampled,0),commentRequestsSucceeded:samples.filter(v=>v.available).length,commentRequestsFailed:samples.filter(v=>!v.available).length};
         const payload={
-          role:'Boş Dükkân için yaratıcı yönetmen ve acımasız kalite hakemi; gerçek ölçümle hipotezi ayır, zayıf fikirleri reddet.',
+          role:'Rakip keşif denetçisi; yalnızca ölçülen harici veriyi ve eksik kanıtı raporla, nihai konu seçme.',
           constraints:{durationSeconds:8,aspectRatio:'9:16',dialogue:false,audio:'natural ASMR',titleLanguage:'English',postingSchedule:'Wednesday and Sunday 19:00',humor:'realistic everyday human behavior, expectation, decision and consequence',mustHave:['strong visual hook in first 0.3 seconds','causal progression','concrete completed ending'],avoid:['forced contrast','random absurdity','impossible physics','only enlarging/changing an object','explanatory text','unfinished loop ending']},
           sourceAndSample:{source:research.source||'YouTube Data API v3',query:research.query,requestedPublishedWindowDays:research.searchDays,windowStart:research.searchStartedAt,windowEnd:research.searchEndedAt,returnedVideoCount:research.videos.length,selection:'YouTube search results; no random or population-representative sample',selectionBias:'The search API returns a relevance/ranking-limited sample (max 50 here); videos are not a representative sample of all comedy Shorts.',ownChannelIncluded:false,ownChannelVideosIncluded:false,ownChannelCommentsIncluded:false},
           researchData:{
@@ -348,10 +348,9 @@ $('#goGen').onclick=async()=>{
             'Videoları süre, video yaşı ve kanal büyüklüğü bakımından uygun gruplarda kıyasla. Video yaşı ve dağıtım farklılıklarını not et. Başarı ve zayıflık yalnızca gözlenen örneklem içinde söylenebilir; izlenme/abone oranı tek başına neden-sonuç değildir.',
             'Yorumları yalnızca aynı tam YouTube video ID’sinin commentSample alanıyla eşleştir. Yorumlar relevance sıralı küçük örneklemdir; tüm izleyicileri temsil etmez. Başlık veya yorumdan sahne uydurma. Görsel içerik gerçekten incelenmediyse bunu açıkça belirt.',
             'Önceden tanımlı mizah mekanizması kataloğu, konu ailesi, başarı formülü veya keyfî eşik kullanma. Veri desteklemiyorsa “bilinmiyor” de.',
-            'Ölçülmüş kanıtı, yorumlarla desteklenen yorumu ve test edilmemiş hipotezi ayrı sun. Birden fazla fikir listesi verme; tek bir sonraki test seç. Kanıt zayıfsa seçimin geçici olduğunu açıkla.',
-            'Seçilen testi çekime hazır yaz: İngilizce başlık; ilk kare; 0.0–1.0, 1.0–2.5, 2.5–5.5, 5.5–8.0 saniyelerde eylem/kamera/doğal ASMR; nedensel ilerleyiş ve tamamlanmış final.',
-            'Yayın sonrası ölçüm planında izlenme, ortalama izleme süresi, ortalama izlenen yüzde, beğeni/yorum oranı ve abone dönüşümünü ayrı tut. Kanal taban verisi bu pakette yoktur; kanal tabanı uydurma ve rakip verisini kendi kanalınla kıyaslama.',
-            'Başarı garantisi verme. Veriler yetersizse bunu açıkça belirt ama mevcut kanıta göre tek bir geçici test öner.'
+            'Bu paket yalnızca harici rakip keşfidir. Nihai konu, yeni video fikri veya çekim senaryosu seçme; kendi kanal verisi bu pakette yoktur.',
+            'Başlık, thumbnail, görüntülenme veya yorumdan sahne uydurma. Gerçek kareler/gözle doğrulanmış sahne notları yoksa görsel mekanizmayı bilinmiyor olarak işaretle.',
+            'Çıktı: gözlenen ölçümler; örneklem ve seçilim yanlılığı; video yaşı/süre/kanal büyüklüğü sınırlamaları; tam video ID ile eşleşen yorumların sınırlı anlamı; sahne analizi için eksik kanıt.'
           ]
         };
         ta.value=JSON.stringify(payload,null,2);ta.style.display='block';ta.focus();ta.select();
@@ -465,7 +464,7 @@ $('#goOwn').onclick=async()=>{
       const vr=await fetch(API+'videos?part=snippet,contentDetails,statistics&id='+batch,au);
       const vj=await vr.json();
       if(!vr.ok)throw new Error((vj.error&&vj.error.message)||('Video bilgileri alınamadı: '+vr.status));
-      (vj.items||[]).forEach(v=>meta[v.id]={title:v.snippet.title,sec:dur(v.contentDetails.duration),date:new Date(v.snippet.publishedAt),publicViews:+(v.statistics&&v.statistics.viewCount||0)});
+      (vj.items||[]).forEach(v=>meta[v.id]={title:v.snippet.title,sec:dur(v.contentDetails.duration),date:new Date(v.snippet.publishedAt),publicViews:+(v.statistics&&v.statistics.viewCount||0),publicLikes:+(v.statistics&&v.statistics.likeCount||0),publicComments:+(v.statistics&&v.statistics.commentCount||0)});
     }
     const metrics=new Map(rows.map(x=>[x[0],x]));
     // OAuth video metadata's statistics can be absent for an item; retry missing/zero public counts with the saved Data API key.
@@ -481,7 +480,9 @@ $('#goOwn').onclick=async()=>{
               title:prev.title||v.snippet.title,
               sec:prev.sec>0?prev.sec:fallbackSec,
               date:prev.date||date,
-              publicViews:prev.publicViews>0?prev.publicViews:+(v.statistics&&v.statistics.viewCount||0)
+              publicViews:prev.publicViews>0?prev.publicViews:+(v.statistics&&v.statistics.viewCount||0),
+              publicLikes:prev.publicLikes>0?prev.publicLikes:+(v.statistics&&v.statistics.likeCount||0),
+              publicComments:prev.publicComments>0?prev.publicComments:+(v.statistics&&v.statistics.commentCount||0)
             };
           });
         }catch(e){/* Keep OAuth response; diagnostics below expose missing metadata. */}
@@ -521,9 +522,9 @@ $('#goOwn').onclick=async()=>{
       ${bestRetention&&weakRetention&&reported.length>1?`<h3>Uç örnekler</h3><ul><li>En yüksek izlenen kısım: ${link(bestRetention)} — ${bestRetention.pct.toFixed(1)}%.</li><li>En düşük izlenen kısım: ${link(weakRetention)} — ${weakRetention.pct.toFixed(1)}%.</li></ul>`:''}
       <p class="note">Bir sonraki aşamada bu karşılaştırmaların başlık/konu ve görsel olay özellikleriyle eşleştirilmesi gerekir; mevcut API verileri tek başına videonun sahne içeriğini açıklamaz.</p>`;
     el.innerHTML=`${comparisonHtml}<div class="stats">${stat(vs.length,'video')}${stat(fmt(tv),'toplam izlenme')}${stat(Number.isFinite(wpct)?wpct.toFixed(0)+'%':'—','ağırlıklı ort. izlenen kısım')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct>=55).length+'/'+vs.filter(v=>v.hasAnalytics).length,'video ≥55% (raporlu)')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct>100).length,'%100 üstü (loop sinyali)')}</div>
-    <p class="note">Analytics verisi henüz gelmeyen videolarda herkese açık izlenme sayısı gösterilir; ortalama izleme ve izlenen yüzde için — görünür. %100'ün üstü, izleyicilerin videoyu ortalama bir kereden fazla izlediği anlamına gelir.</p>
-    <h2>Videolar (en yeni önce)</h2><p><button class="ghost" id="copyOwn">Tabloyu kopyala</button> <button class="ghost" id="copyOwnShort">Kısa çıktıyı kopyala (son 10)</button></p><div class="wrap"><table id="to"><tr><th>Başlık</th><th>İzlenme</th><th>Ort. izleme</th><th>İzlenen kısım</th><th>Süre</th><th>Beğeni</th><th>Yeni abone</th></tr>
-    ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${v.avgSec==null?'—':v.avgSec.toFixed(1)+' sn'}</td><td class="${v.pct==null?'':pctCls(v.pct)}">${v.pct==null?'—':v.pct.toFixed(0)+'%'}</td><td>${v.sec} sn</td><td>${v.likes==null?'—':fmt(v.likes)}</td><td>${v.subs==null?'—':v.subs}</td></tr>`).join('')}</table></div>
+    <p class="note">Seçili dönem izlenmesi yalnızca Analytics satırı bulunan videolarda gösterilir; herkese açık toplam izlenme ayrı kolondadır. Farklı zaman aralıklarına ait sayılar aynı toplamda veya medyanda karıştırılmaz. %100'ün üstü tekrar izleme/loop için olası sinyaldir; doğrudan tekrar sayısı değildir.</p>
+    <h2>Videolar (en yeni önce)</h2><p><button class="ghost" id="copyOwn">Tabloyu kopyala</button> <button class="ghost" id="copyOwnShort">Kısa çıktıyı kopyala (son 10)</button></p><div class="wrap"><table id="to"><tr><th>Başlık</th><th>İzlenme (dönem)</th><th>Kamusal toplam izlenme</th><th>Ort. izleme</th><th>İzlenen kısım</th><th>Süre</th><th>Beğeni</th><th>Yeni abone</th></tr>
+    ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${v.hasAnalytics?fmt(v.views):'—'}</td><td>${v.publicViews==null?'—':fmt(v.publicViews)}</td><td>${v.avgSec==null?'—':v.avgSec.toFixed(1)+' sn'}</td><td class="${v.pct==null?'':pctCls(v.pct)}">${v.pct==null?'—':v.pct.toFixed(0)+'%'}</td><td>${v.sec} sn</td><td>${v.likes==null?'—':fmt(v.likes)}</td><td>${v.subs==null?'—':v.subs}</td></tr>`).join('')}</table></div>
     <details class="note"><summary>Teknik teşhis (istatistikler neden 0?)</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(analyticsDebug,null,2)}</pre></details>
     <p class="note">%55 eşiği senin hedefin olarak işaretlendi. Bu eşik YouTube dağıtımını garanti etmez; yalnızca kendi videolarını kıyaslamak için kullan.</p>
     <h2>Konu Motoru · kanal verisi + rakip keşfi</h2>
