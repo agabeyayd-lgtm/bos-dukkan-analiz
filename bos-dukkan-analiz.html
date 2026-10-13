@@ -99,14 +99,23 @@ a{color:var(--acc)}
 
 <section id="frames" class="pane">
   <h2>Rakip Shorts'tan gerçek kare çıkar</h2>
-  <p class="note">YouTube bağlantısından gizlice kare çekmez. YouTube uygulamasında aldığın ekran kaydını veya cihazındaki video dosyasını seç; kareler bu tarayıcıda yerel olarak çıkarılır, sunucuya yüklenmez.</p>
+  <p class="note">YouTube Shorts bağlantısını aşağıya yapıştırıp panelde açabilirsin. YouTube oynatıcısından doğrudan kare alma tarayıcı güvenliği nedeniyle mümkün değil; gerçek kare çıkarmak için ekran kaydını veya video dosyasını seç. Dosya sunucuya yüklenmez.</p>
+  <div class="bar" aria-label="YouTube video bağlantısı">
+    <input id="videoUrl" type="url" inputmode="url" autocomplete="off" placeholder="YouTube Shorts bağlantısını buraya yapıştır" aria-label="YouTube video bağlantısı">
+    <button id="pasteVideoUrl" class="ghost" type="button">Panodan yapıştır</button>
+    <button id="openVideoUrl" type="button">Videoyu panelde aç</button>
+  </div>
+  <div id="youtubePreview" style="display:none;margin-top:12px;aspect-ratio:9/16;max-height:520px;background:#000;border-radius:10px;overflow:hidden">
+    <iframe id="youtubeFrame" title="YouTube Shorts önizlemesi" style="width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  </div>
+  <p class="note">Kare çıkarma için aşağıdan aynı videonun ekran kaydını seçebilirsin.</p>
   <div class="bar">
-    <input id="frameFile" type="file" accept="video/*" aria-label="Ekran kaydı veya video seç">
+    <input id="frameFile" type="file" accept="video/*" aria-label="Telefondan video veya ekran kaydı seç">
     <label style="display:flex;align-items:center;gap:6px">Başlangıç sn <input id="frameStart" type="number" min="0" step="0.1" value="0" style="width:90px;flex:none"></label>
     <label style="display:flex;align-items:center;gap:6px">Kare sayısı <select id="frameCount" style="width:90px;flex:none"><option>6</option><option selected>8</option><option>10</option><option>12</option></select></label>
     <button id="extractFrames" disabled>Kareleri çıkar</button>
   </div>
-  <div id="frameStatus" class="msg">Önce video veya ekran kaydı seç.</div>
+  <div id="frameStatus" class="msg">YouTube bağlantısını yapıştırıp açabilir veya telefondan video/ekran kaydı seçebilirsin.</div>
   <video id="frameVideo" controls playsinline preload="metadata" style="display:none;width:100%;max-height:420px;margin-top:12px;border-radius:10px;background:#000"></video>
   <div id="frameResult" style="margin-top:12px"></div>
   <p class="note">İpucu: Ekran kaydında önce YouTube oynatıcısını aç, Shorts'u tam ekrana al ve oynat. Kayıt videonun başından önce menü/arama ekranı içeriyorsa “Başlangıç sn” değerini artır. Bu araç kareleri görselleştirir; kendi başına mizah veya sahne yorumu üretmez.</p>
@@ -565,7 +574,46 @@ $('#goOwn').onclick=async()=>{
   }catch(e){fail(el,e)}
 };
 
-/* ---------- 4. LOCAL SHORTS FRAME EXTRACTION ---------- */
+/* ---------- 4. YOUTUBE LINK PREVIEW + LOCAL SHORTS FRAME EXTRACTION ---------- */
+const videoUrlInput = $('#videoUrl');
+const youtubePreview = $('#youtubePreview');
+const youtubeFrame = $('#youtubeFrame');
+function parseYouTubeId(raw) {
+  try {
+    const u = new URL(String(raw || '').trim());
+    const host = u.hostname.toLowerCase().replace(/^www\./, '');
+    if (host === 'youtu.be') return u.pathname.split('/').filter(Boolean)[0] || '';
+    if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com') {
+      if (u.pathname === '/watch') return u.searchParams.get('v') || '';
+      const parts = u.pathname.split('/').filter(Boolean);
+      if (['shorts','embed','live'].includes(parts[0])) return parts[1] || '';
+    }
+  } catch (_) {}
+  return '';
+}
+$('#pasteVideoUrl').addEventListener('click', async () => {
+  try {
+    if (!navigator.clipboard || !navigator.clipboard.readText) throw new Error('Panoya otomatik erişim yok.');
+    const pasted = (await navigator.clipboard.readText()).trim();
+    if (!pasted) throw new Error('Pano boş görünüyor.');
+    videoUrlInput.value = pasted;
+    videoUrlInput.focus();
+    frameStatus.textContent = 'Bağlantı panodan alındı. Şimdi “Videoyu panelde aç” düğmesine bas.';
+  } catch (_) {
+    videoUrlInput.focus();
+    frameStatus.textContent = 'Bağlantı alanına dokunup basılı tut ve “Yapıştır”ı seç.';
+  }
+});
+$('#openVideoUrl').addEventListener('click', () => {
+  const id = parseYouTubeId(videoUrlInput.value);
+  if (!id || !/^[A-Za-z0-9_-]{6,}$/.test(id)) {
+    frameStatus.textContent = 'Geçerli bir YouTube veya Shorts bağlantısı yapıştır.';
+    return;
+  }
+  youtubeFrame.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id);
+  youtubePreview.style.display = 'block';
+  frameStatus.textContent = 'YouTube videosu panelde açıldı. Gerçek kareleri çıkarmak için videonun ekran kaydını aşağıdan seç.';
+});
 let frameObjectUrl = '';
 const frameFile = $('#frameFile');
 const frameVideo = $('#frameVideo');
