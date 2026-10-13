@@ -1,66 +1,123 @@
 #!/usr/bin/env python3
-"""Diagnostic only: test unauthenticated public routes for Shorts metadata/storyboard access."""
+"""Unauthenticated diagnostic for public Shorts storyboard access; never uses cookies."""
 import json
 import subprocess
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
+from io import BytesIO
 from pathlib import Path
+from PIL import Image
 
 URLS = [
     "https://www.youtube.com/shorts/cP1lmemI0fk",
     "https://www.youtube.com/shorts/sSt88cW5Bw8",
 ]
-# Deno is installed by the workflow. Combined clients are included because
-# YouTube sometimes permits player data from one client but not another.
 CLIENTS = [
     "default", "tv,web_safari", "web_safari,tv", "web", "web_embedded",
     "web_safari", "tv_embedded", "mweb", "ios", "android", "android_vr", "tv",
-    # Newer client variants not included in the first diagnostic run.
     "tv_downgraded", "web_creator", "tv_simply", "web_music",
     "web,android_vr,tv_downgraded", "tv_downgraded,web_creator,mweb", "default,all",
 ]
 OUT = Path("shorts-frame-test")
 OUT.mkdir(exist_ok=True)
 report = {
-    "note": "Unauthenticated diagnostics only. oEmbed/HTML reachability is not visual access; thumbnails are never counted as scene frames.",
+    "note": "Unauthenticated only. No cookies or account credentials. Metadata and thumbnails do not count as scene frames.",
     "videos": [],
 }
 
-def walk_storyboard(value, path=""):
-    found = []
-    if isinstance(value, dict):
-        for k, v in value.items():
-            p = f"{path}.{k}" if path else k
-            found.extend(walk_storyboard(v, p))
-    elif isinstance(value, list):
-        for i, v in enumerate(value):
-            found.extend(walk_storyboard(v, f"{path}[{i}]"))
-    elif isinstance(value, str) and value.startswith("http") and ("storyboard" in path.lower() or "/sb/" in value):
-        found.append({"path": path, "url": value})
-    return found
-
-def probe(url):
+def probe(url, max_bytes=200000):
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36"})
     try:
-        with urllib.request.urlopen(req, timeout=15) as response:
-            body = response.read(200000).decode("utf-8", "replace")
-            return {"status": "ok", "http_status": response.status, "bytes_sampled": len(body), "contains_storyboard": "storyboard" in body.lower(), "contains_bot_check": "not a bot" in body.lower() or "unusual traffic" in body.lower()}
+        with urllib.request.urlopen(req, timeout=20) as response:
+            body = response.read(max_bytes).decode("utf-8", "replace")
+            return {"status": "ok", "http_status": response.status, "bytes_sampled": len(body),
+                    "contains_storyboard": "storyboard" in body.lower(),
+                    "contains_bot_check": "not a bot" in body.lower() or "unusual traffic" in body.lower()}, body
     except urllib.error.HTTPError as e:
-        return {"status": "http_error", "http_status": e.code}
+        return {"status": "http_error", "http_status": e.code}, ""
     except Exception as e:
-        return {"status": "error", "error": str(e)[:300]}
+        return {"status": "error", "error": str(e)[:300]}, ""
+
+def player_response(html):
+    marker = "ytInitialPlayerResponse"
+    pos = html.find(marker)
+    decoder = json.JSONDecoder()
+    while pos >= 0:
+        start = html.find("{", pos + len(marker))
+        if start < 0 or start - pos > 1000:
+            return None
+        try:
+            obj, _ = decoder.raw_decode(html[start:])
+            if isinstance(obj, dict):
+                return obj
+        except json.JSONDecodeError:
+            pass
+        pos = html.find(marker, pos + len(marker))
+    return None
+
+def extract_storyboard_spec(html):
+    response = player_response(html)
+    if not response:
+        return None
+    sb = response.get("storyboards") or {}
+    renderer = sb.get("playerStoryboardSpecRenderer") or {}
+    return renderer.get("spec")
+
+def download_storyboard(spec, video_id):
+    """Parse YouTube's own signed spec; never guess signatures or bypass auth."""
+    parts = spec.split("|")
+    if len(parts) < 2:
+        return []
+    template = parts[0]
+    saved = []
+    # Part 1 describes L0/default; later parts describe higher-resolution M0 sheets.
+    for part_index, entry in enumerate(parts[1:], start=1):
+        fields = entry.split("#")
+        if len(fields) < 8:
+            continue
+        try:
+            tile_w, tile_h, count, cols, rows, interval = map(int, fields[:6])
+        except ValueError:
+            continue
+        pattern = fields[6]
+        signature_field = fields[7]
+        if "rs$" not in signature_field:
+            continue
+        signature = signature_field.split("rs$", 1)[1]
+        level = part_index - 1
+        sheet_name = pattern.replace("$M", "0")
+        path = template.replace("L$L/$N", f"L{level}/{sheet_name}")
+        url = path + ("&" if "?" in path else "?") + "sigh=rs%24" + urllib.parse.quote(signature, safe="")
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                raw = resp.read(8 * 1024 * 1024)
+                content_type = resp.headers.get("Content-Type", "")
+            if not content_type.startswith("image/"):
+                continue
+            image = Image.open(BytesIO(raw)).convert("RGB")
+            sheet_path = OUT / f"{video_id}-storyboard-L{level}.jpg"
+            image.save(sheet_path, quality=92)
+            saved.append({"level": level, "url_status": "image_downloaded", "width": image.width,
+                          "height": image.height, "tile_width": tile_w, "tile_height": tile_h,
+                          "frame_count_reported": count, "columns": cols, "rows": rows,
+                          "interval_ms": interval, "file": str(sheet_path)})
+            # Higher-resolution sheet is usually enough; keep testing levels but do not crop/claim
+            # semantic analysis here. The saved sprite itself is the visual-access proof.
+        except Exception as e:
+            saved.append({"level": level, "url_status": "failed", "error": str(e)[:240]})
+    return saved
 
 for url in URLS:
     video_id = url.rstrip("/").split("/")[-1]
     item = {"video_id": video_id, "url": url, "attempts": [], "public_endpoint_probes": {}}
     info = None
     for client in CLIENTS:
-        cmd = [
-            "yt-dlp", "--ignore-config", "--js-runtimes", "deno", "--force-ipv4",
-            "--dump-single-json", "--skip-download", "--no-warnings",
-            "--no-check-formats", "--socket-timeout", "15",
-        ]
+        cmd = ["yt-dlp", "--ignore-config", "--js-runtimes", "deno", "--force-ipv4",
+               "--dump-single-json", "--skip-download", "--no-warnings",
+               "--no-check-formats", "--socket-timeout", "15"]
         if client != "default":
             cmd += ["--extractor-args", f"youtube:player_client={client}"]
         cmd.append(url)
@@ -71,31 +128,46 @@ for url in URLS:
             item["working_client"] = client
             break
         except subprocess.CalledProcessError as e:
-            detail = (e.output or str(e)).strip()
-            item["attempts"].append({"client": client, "status": "failed", "error": detail[-500:]})
+            item["attempts"].append({"client": client, "status": "failed", "error": (e.output or str(e)).strip()[-500:]})
         except subprocess.TimeoutExpired:
             item["attempts"].append({"client": client, "status": "timeout"})
         except Exception as e:
             item["attempts"].append({"client": client, "status": "error", "error": str(e)[:300]})
+
+    # Important new path: request the public watch page itself and parse its embedded player response.
+    watch_url = "https://www.youtube.com/watch?v=" + video_id
+    watch_probe, html = probe(watch_url, max_bytes=8 * 1024 * 1024)
+    item["public_endpoint_probes"]["watch_page"] = watch_probe
+    spec = extract_storyboard_spec(html) if html else None
+    if spec:
+        item["watch_page_storyboard_spec_found"] = True
+        item["watch_page_storyboards"] = download_storyboard(spec, video_id)
+    else:
+        item["watch_page_storyboard_spec_found"] = False
+        item["watch_page_storyboards"] = []
+
     if info:
         storyboards = info.get("storyboards")
-        storyboard_urls = walk_storyboard(storyboards if storyboards is not None else {})
         item.update({
             "title": info.get("title"),
             "duration_seconds": info.get("duration"),
             "storyboards_field_present": storyboards is not None,
-            "storyboard_url_count": len(storyboard_urls),
-            "storyboard_candidates": storyboard_urls[:20],
+            "storyboard_url_count": len(storyboards or []),
             "thumbnail_count_not_frames": len(info.get("thumbnails") or []),
-            "status": "metadata_ok"
         })
     else:
         item["status"] = "yt_dlp_clients_failed"
-    item["public_endpoint_probes"]["oembed"] = probe("https://www.youtube.com/oembed?url=" + urllib.request.quote(url, safe="") + "&format=json")
-    item["public_endpoint_probes"]["embed_html"] = probe("https://www.youtube.com/embed/" + video_id)
-    item["public_endpoint_probes"]["youtube_nocookie_embed"] = probe("https://www.youtube-nocookie.com/embed/" + video_id)
-    item["visual_access_confirmed"] = bool(info and item.get("storyboard_url_count", 0) > 0)
-    item["status"] = "storyboard_candidates_found" if item["visual_access_confirmed"] else item["status"]
+
+    for label, endpoint in [
+        ("oembed", "https://www.youtube.com/oembed?url=" + urllib.parse.quote(url, safe="") + "&format=json"),
+        ("embed_html", "https://www.youtube.com/embed/" + video_id),
+        ("youtube_nocookie_embed", "https://www.youtube-nocookie.com/embed/" + video_id),
+    ]:
+        probe_result, _ = probe(endpoint)
+        item["public_endpoint_probes"][label] = probe_result
+
+    item["visual_access_confirmed"] = any(x.get("url_status") == "image_downloaded" for x in item["watch_page_storyboards"])
+    item["status"] = "storyboard_image_downloaded" if item["visual_access_confirmed"] else item.get("status", "no_storyboard_image")
     (OUT / f"{video_id}.json").write_text(json.dumps(item, indent=2, ensure_ascii=False), encoding="utf-8")
     report["videos"].append(item)
 
