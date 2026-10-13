@@ -108,6 +108,45 @@ def download_storyboard(spec, video_id):
     return saved
 
 
+
+def try_embedded_player_frames(video_id):
+    """Render YouTube's official public embed in Chromium; save a frame only if video time advances."""
+    try:
+        from playwright.sync_api import sync_playwright
+    except Exception as e:
+        return {"success": False, "error": "Playwright unavailable: " + str(e)[:180]}
+    result = {"success": False, "states": []}
+    embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1&mute=1&playsinline=1&controls=0&rel=0"
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
+            page = browser.new_page(viewport={"width": 720, "height": 1280}, device_scale_factor=1)
+            page.goto(embed_url, wait_until="domcontentloaded", timeout=30000)
+            page.wait_for_timeout(7000)
+            for frame in page.frames:
+                try:
+                    video = frame.locator("video").first
+                    if video.count() == 0:
+                        continue
+                    state = video.evaluate("(v) => ({readyState:v.readyState, currentTime:v.currentTime, paused:v.paused, width:v.videoWidth, height:v.videoHeight, error:v.error ? v.error.code : null})")
+                    result["states"].append(state)
+                    if state.get("readyState", 0) >= 2 and state.get("currentTime", 0) > 0.25 and state.get("width", 0) > 0:
+                        out = OUT / f"{video_id}-embedded-player.jpg"
+                        video.screenshot(path=str(out), timeout=10000)
+                        if out.exists() and out.stat().st_size > 1000:
+                            with Image.open(out) as im:
+                                width, height = im.size
+                            result.update({"success": True, "file": str(out), "width": width, "height": height,
+                                           "video_state": state, "source": "official_embed_render"})
+                            break
+                except Exception as e:
+                    result["states"].append({"error": str(e)[:180]})
+            browser.close()
+    except Exception as e:
+        result["error"] = str(e)[:260]
+    return result
+
+
 def try_invidious_frames(video_id):
     """Use only public Invidious APIs/stream URLs; no cookies, login, or guessed YouTube signatures."""
     instances = [
@@ -153,9 +192,13 @@ for url in URLS:
     video_id = url.rstrip("/").split("/")[-1]
     item = {"video_id": video_id, "url": url, "attempts": [], "public_endpoint_probes": {}}
     info = None
-    invidious = try_invidious_frames(video_id)
+    embedded = try_embedded_player_frames(video_id)
+    item["embed_playback_fallback"] = embedded
+    invidious = {"success": False, "attempts": []}
+    if not embedded.get("success"):
+        invidious = try_invidious_frames(video_id)
     item["invidious_fallback"] = invidious
-    for client in (CLIENTS if not invidious.get("success") else []):
+    for client in (CLIENTS if not (embedded.get("success") or invidious.get("success")) else []):
         cmd = ["yt-dlp", "--ignore-config", "--js-runtimes", "deno", "--force-ipv4",
                "--dump-single-json", "--skip-download", "--no-warnings",
                "--no-check-formats", "--socket-timeout", "15"]
@@ -209,9 +252,11 @@ for url in URLS:
         item["public_endpoint_probes"][label] = probe_result
 
     storyboard_ok = any(x.get("url_status") == "image_downloaded" for x in item["watch_page_storyboards"])
-    item["visual_access_confirmed"] = storyboard_ok or bool(invidious.get("success"))
+    item["visual_access_confirmed"] = storyboard_ok or bool(invidious.get("success")) or bool(embedded.get("success"))
     if storyboard_ok:
         item["status"] = "storyboard_image_downloaded"
+    elif embedded.get("success"):
+        item["status"] = "embedded_player_frame_captured"
     elif invidious.get("success"):
         item["status"] = "invidious_frame_extracted"
     else:
