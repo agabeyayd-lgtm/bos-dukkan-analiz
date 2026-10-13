@@ -243,10 +243,10 @@ $('#goGen').onclick=async()=>{
     <h2>Videolar</h2><p><button class="ghost" id="copyGen">Tabloyu kopyala</button></p><div class="wrap"><table id="tg"><tr><th>Başlık</th><th>Kanal</th><th>Abone</th><th>İzlenme</th><th>Fırlama</th><th>İzl./gün</th><th>Beğeni %</th><th>Yorum</th><th>Süre</th><th>Gün-saat</th></tr>
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${esc(v.channel)}</td><td>${v.subs==null?'–':fmt(v.subs)}</td><td>${fmt(v.views)}</td><td class="${v.brk>=5?'y':''}">${v.brk==null?'–':v.brk.toFixed(1)+'x'}</td><td>${fmt(v.vpd)}</td><td>${v.views?(v.likes/v.views*100).toFixed(1):'–'}</td><td>${fmt(v.comments)}</td><td>${v.sec} sn</td><td>${GUN[v.date.getDay()]} ${String(v.date.getHours()).padStart(2,'0')}:00</td></tr>`).join('')}</table></div>
     <p class="note">İzlenme/abone = keşif sinyalidir; tek başına başarı veya neden-sonuç kanıtı değildir. Video yaşı, süre ve dağıtım farkları karşılaştırmayı etkiler. YouTube Data API bu aramada ortalama izleme süresi ve izlenen yüzde sağlamaz. Arama sonuçları, seçilen tarih aralığındaki ve YouTube'un döndürdüğü en fazla 50 videoyla sınırlıdır.</p>
-    <h2>Bağımsız rakip araştırma paketi</h2>
-    <p class="note">Bu paket yalnızca yukarıdaki harici araştırma videolarını ve seçilen videoların kendi video ID'lerine bağlı yorum örneklerini kullanır. Kendi kanalın, kendi videoların ve kendi yorumların bu akışa dahil edilmez. Önce Genel Analiz'i çalıştır, sonra aşağıdaki düğmeye bas. Google/OAuth ile kendi kanalına bağlanman gerekmez.</p>
-    <p><button id="makeCompetitorPacket">Rakip paketini oluştur ve kopyala</button></p>
-    <div id="competitorDiag" class="note" aria-live="polite">Araştırma sonuçları hazır olduğunda paket oluşturulabilir.</div>
+    <h2>Veriden Konu Bul</h2>
+    <p class="note">Tek düğme, rakip videoları ve video ID’siyle eşleşen yorum örneklerini toplar; kanıt/hipotez ayrımını ve Boş Dükkân’ın sabit kurallarını içeren analiz talimatıyla birlikte tek bir paket hazırlar. Kendi kanalın ve kendi yorumların dahil edilmez. Önce Genel Analiz’i çalıştır, sonra düğmeye bas ve kopyalanan paketi ChatGPT’ye buraya yapıştır. Bu sürüm paketi hazırlar; yapay zekâ analizini kendi kendine çalıştırmaz. Google/OAuth ile kendi kanalına bağlanman gerekmez.</p>
+    <p><button id="makeCompetitorPacket">Veriden Konu Bul — paketi hazırla ve kopyala</button></p>
+    <div id="competitorDiag" class="note" aria-live="polite">Önce Genel Analiz’i çalıştır; ardından rakip verisi + analiz talimatı tek pakette hazırlanır.</div>
     <textarea id="competitorPacket" readonly rows="10" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
     <h2>Önceki fikirler / tekrar filtresi</h2>
     <p class="note">Daha önce üretilen fikirleri veya kaçınılacak mizah mekanizmalarını buraya yapıştır. Yeni istem bunların tekrar edilmemesini şart koşar.</p>
