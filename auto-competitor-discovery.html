@@ -114,7 +114,7 @@ async function discover(){
  document.querySelectorAll('[data-visual-id]').forEach(btn=>{btn.onclick=()=>analyzeVisual(btn.dataset.visualId,btn)});
  $('#copyJson').onclick=async()=>{const t=JSON.stringify(window.autoCompetitorResearch,null,2);try{await navigator.clipboard.writeText(t);$('#copyJson').textContent='Kopyalandı ✓'}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();document.execCommand('copy');a.remove();$('#copyJson').textContent='Kopyalandı ✓'}};
  $('#downloadJson').onclick=()=>{const b=new Blob([JSON.stringify(window.autoCompetitorResearch,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bos-dukkan-competitor-discovery.json';a.click();URL.revokeObjectURL(a.href)};
- $('#status').textContent='Keşif tamamlandı. Gerçek görüntü erişimi henüz çözülmedi; küçük resimler sahne analizi yerine geçmez.';
+ $('#status').textContent='Keşif tamamlandı. Gerçek sahne analizi için bir aday kartındaki düğmeye bas; analiz yapılmadan küçük resimden sahne sonucu çıkarılmaz.';
 }
 async function analyzeVisual(videoId,btn){
  const out=$('#scene-'+videoId);
