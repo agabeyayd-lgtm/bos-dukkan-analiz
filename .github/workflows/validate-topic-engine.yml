@@ -1,0 +1,69 @@
+name: Validate topic engine
+on:
+  push:
+    branches:
+      - feat/data-driven-topic-engine
+    paths:
+      - bos-dukkan-analiz.html
+      - .github/workflows/validate-topic-engine.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - bos-dukkan-analiz.html
+      - .github/workflows/validate-topic-engine.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Extract inline JavaScript and check syntax
+        run: |
+          python - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+
+          class InlineScripts(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.inline = False
+                  self.current = []
+                  self.scripts = []
+
+              def handle_starttag(self, tag, attrs):
+                  if tag.lower() == "script":
+                      attrs = dict(attrs)
+                      self.inline = "src" not in attrs
+                      self.current = []
+
+              def handle_endtag(self, tag):
+                  if tag.lower() == "script":
+                      if self.inline:
+                          self.scripts.append("".join(self.current))
+                      self.inline = False
+                      self.current = []
+
+              def handle_data(self, data):
+                  if self.inline:
+                      self.current.append(data)
+
+          source = Path("bos-dukkan-analiz.html").read_text(encoding="utf-8")
+          parser = InlineScripts()
+          parser.feed(source)
+          if not parser.scripts:
+              raise SystemExit("No inline JavaScript was found.")
+          Path("/tmp/topic-engine.js").write_text("\n;\n".join(parser.scripts), encoding="utf-8")
+          assert "Konu Motoru paketini oluştur ve kopyala" in source, "Topic engine button is missing"
+          assert "window.bosOwnAnalyticsSnapshot" in source, "Own-channel snapshot is missing"
+          assert "MARKA KURALI" in source, "Brand/subject independence rule is missing"
+          PY
+          node --check /tmp/topic-engine.js
