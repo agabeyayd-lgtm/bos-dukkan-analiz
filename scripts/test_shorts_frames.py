@@ -11,9 +11,11 @@ URLS = [
     "https://www.youtube.com/shorts/cP1lmemI0fk",
     "https://www.youtube.com/shorts/sSt88cW5Bw8",
 ]
+# Deno is installed by the workflow. Combined clients are included because
+# YouTube sometimes permits player data from one client but not another.
 CLIENTS = [
-    "default", "web", "web_embedded", "web_safari", "tv_embedded",
-    "mweb", "ios", "android", "android_vr", "tv",
+    "default", "tv,web_safari", "web_safari,tv", "web", "web_embedded",
+    "web_safari", "tv_embedded", "mweb", "ios", "android", "android_vr", "tv",
 ]
 OUT = Path("shorts-frame-test")
 OUT.mkdir(exist_ok=True)
@@ -51,12 +53,16 @@ for url in URLS:
     item = {"video_id": video_id, "url": url, "attempts": [], "public_endpoint_probes": {}}
     info = None
     for client in CLIENTS:
-        cmd = ["yt-dlp", "--dump-single-json", "--skip-download", "--no-warnings", "--no-check-formats"]
+        cmd = [
+            "yt-dlp", "--ignore-config", "--js-runtimes", "deno",
+            "--dump-single-json", "--skip-download", "--no-warnings",
+            "--no-check-formats", "--socket-timeout", "15",
+        ]
         if client != "default":
             cmd += ["--extractor-args", f"youtube:player_client={client}"]
         cmd.append(url)
         try:
-            raw = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=35, text=True)
+            raw = subprocess.check_output(cmd, stderr=subprocess.STDOUT, timeout=40, text=True)
             info = json.loads(raw)
             item["attempts"].append({"client": client, "status": "ok"})
             item["working_client"] = client
