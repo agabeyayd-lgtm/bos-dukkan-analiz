@@ -120,7 +120,7 @@ def try_invidious_frames(video_id):
     for base in instances:
         try:
             api_url = base + "/api/v1/videos/" + urllib.parse.quote(video_id)
-            req = urllib.request.Request(api_url, headers={"User-Agent": "BoşDükkan-Shorts-Diagnostic/1.0", "Accept": "application/json"})
+            req = urllib.request.Request(api_url, headers={"User-Agent": "BosDukkan-Shorts-Diagnostic/1.0", "Accept": "application/json"})
             with urllib.request.urlopen(req, timeout=12) as resp:
                 data = json.loads(resp.read(5 * 1024 * 1024).decode("utf-8", "replace"))
             streams = data.get("formatStreams") or []
