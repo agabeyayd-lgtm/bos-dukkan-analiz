@@ -855,6 +855,52 @@ $('#fetchStoryboardFrames').addEventListener('click', async () => {
       card.append(label, img);
       storyboardResult.appendChild(card);
     });
+    const framePacket = {
+      source: 'YouTube Browser API — public storyboard preview, experimental',
+      videoId: id,
+      videoUrl: 'https://www.youtube.com/watch?v=' + id,
+      title: title || null,
+      channel: data && data.channel ? data.channel : null,
+      limitation: 'Preview storyboard sheets only; not the full video. Scene sequence must be visually checked; do not infer unseen actions.',
+      sheets: urls.slice(0, 4).map((url, index) => {
+        const item = preferred.find(x => x && x.url === url) || null;
+        const slot = item && item.slot ? item.slot : {};
+        return {
+          index: index + 1,
+          imageUrl: url,
+          intervalMs: Number.isFinite(Number(slot.interval)) ? Number(slot.interval) : null,
+          thumbnailWidth: Number.isFinite(Number(slot.thumbnailWidth)) ? Number(slot.thumbnailWidth) : null,
+          thumbnailHeight: Number.isFinite(Number(slot.thumbnailHeight)) ? Number(slot.thumbnailHeight) : null,
+          thumbnailCount: Number.isFinite(Number(item && item.thumbnailCount)) ? Number(item.thumbnailCount) : null
+        };
+      })
+    };
+    const packetCard = document.createElement('div');
+    packetCard.className = 'msg';
+    const packetLabel = document.createElement('p');
+    packetLabel.textContent = 'Görsel bağlantı paketi: bu metni sohbete gönderirsen kare bağlantılarını buradan incelemeyi deneyebilirim; bağlantılar süreli olabilir.';
+    const packetArea = document.createElement('textarea');
+    packetArea.rows = 6;
+    packetArea.readOnly = true;
+    packetArea.value = JSON.stringify(framePacket, null, 2);
+    packetArea.style.cssText = 'display:block;width:100%;max-width:100%;box-sizing:border-box;margin:8px 0;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)';
+    const packetCopy = document.createElement('button');
+    packetCopy.type = 'button';
+    packetCopy.textContent = 'Kare bağlantı paketini kopyala';
+    packetCopy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(packetArea.value);
+        packetCopy.textContent = 'Kopyalandı ✓ — sohbete yapıştır';
+      } catch (_) {
+        packetArea.focus();
+        packetArea.select();
+        let copied = false;
+        try { copied = document.execCommand('copy'); } catch (_) {}
+        packetCopy.textContent = copied ? 'Kopyalandı ✓ — sohbete yapıştır' : 'Metin seçildi — Kopyala seçeneğini kullan';
+      }
+    });
+    packetCard.append(packetLabel, packetArea, packetCopy);
+    storyboardResult.appendChild(packetCard);
     storyboardStatus.textContent = 'Önizleme bulundu: ' + urls.length + ' çizelge. Görseller yükleniyorsa gerçek video akışının yerine geçmezler; video indirme veya kayıt gerekmez.';
   } catch (e) {
     storyboardStatus.textContent = 'Otomatik önizleme bu videoda çalışmadı: ' + (e && e.message ? e.message : String(e)) + ' Bu, konu motorunun hata mesajıdır; aynı indirme/kayıt yöntemlerini otomatik başlatmayacağım.';
