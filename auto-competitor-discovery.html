@@ -7,7 +7,7 @@
 <style>
 :root{color-scheme:light dark;--bg:#e8ebe8;--panel:#f7f8f6;--ink:#14213d;--muted:#5b6577;--line:#cfd5d1;--accent:#0f7f82;--warn:#8a5a00}
 @media(prefers-color-scheme:dark){:root{--bg:#10151f;--panel:#182030;--ink:#e8ecf3;--muted:#93a0b5;--line:#2a3550;--accent:#3cc4c7;--warn:#e3b341}}
-*{box-sizing:border-box}body{margin:0 auto;padding:16px;max-width:1000px;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,sans-serif}h1{font-size:25px;line-height:1.15;margin:4px 0 8px}h2{font-size:18px;margin:20px 0 8px}.muted{color:var(--muted);font-size:13px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin:12px 0}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}input,select,button{font:inherit;border-radius:8px;border:1px solid var(--line);padding:10px;background:var(--bg);color:var(--ink)}input{flex:1;min-width:190px}button{background:var(--accent);color:white;border:0;font-weight:700;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.status{white-space:pre-wrap;overflow-wrap:anywhere}.warn{border-left:4px solid var(--warn)}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}.card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#777}.body{padding:10px}.title{font-weight:700}.metrics{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.pill{border:1px solid var(--line);border-radius:99px;padding:2px 8px;font-size:12px}.small{font-size:12px;color:var(--muted)}a{color:var(--accent)}table{border-collapse:collapse;width:100%;font-size:13px}td,th{border-bottom:1px solid var(--line);padding:7px;text-align:left}th{color:var(--muted)}.tablewrap{overflow:auto}
+*{box-sizing:border-box}body{margin:0 auto;padding:16px;max-width:1000px;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,sans-serif}h1{font-size:25px;line-height:1.15;margin:4px 0 8px}h2{font-size:18px;margin:20px 0 8px}.muted{color:var(--muted);font-size:13px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin:12px 0}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}input,select,button{font:inherit;border-radius:8px;border:1px solid var(--line);padding:10px;background:var(--bg);color:var(--ink)}input{flex:1;min-width:190px}button{background:var(--accent);color:white;border:0;font-weight:700;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.status{white-space:pre-wrap;overflow-wrap:anywhere}.warn{border-left:4px solid var(--warn)}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}.card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#777}.body{padding:10px}.title{font-weight:700}.metrics{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.pill{border:1px solid var(--line);border-radius:99px;padding:2px 8px;font-size:12px}.small{font-size:12px;color:var(--muted)}a{color:var(--accent)}.analysis{width:100%;margin-top:8px}.scene-result{white-space:pre-wrap;background:var(--bg);padding:8px;border-radius:8px;margin-top:8px;font-size:13px}table{border-collapse:collapse;width:100%;font-size:13px}td,th{border-bottom:1px solid var(--line);padding:7px;text-align:left}th{color:var(--muted)}.tablewrap{overflow:auto}
 </style>
 </head>
 <body>
@@ -24,6 +24,14 @@
   </div>
   <p class="muted">Arama sorguları sistem tarafından çalıştırılır; kullanıcı video veya konu girmez. Sonuçlar yalnızca YouTube'un döndürdüğü arama örneklemidir, bütün Shorts evreni değildir.</p>
 </div>
+<div class="panel warn">
+  <h2>Gerçek sahne analizi — ücretsiz başlangıç kredisi</h2>
+  <p class="muted">YouTube doğrudan kare vermediği için ayrı bir video-analiz servisi kullanılır. FrameFetch yeni anahtara $0,05 başlangıç kredisi verdiğini bildiriyor. Görsel analiz yaklaşık $0,03/video; bu krediyle genellikle yalnızca 1 video analiz edilebilir. Kart ekleme veya otomatik yükleme yapma; bu panel yalnızca sen tek tek tıkladığında analiz çağırır.</p>
+  <div class="row"><input id="ffEmail" type="email" placeholder="E-posta — ücretsiz anahtar için" autocomplete="email"><button id="createFfKey">Ücretsiz anahtar oluştur</button></div>
+  <div class="row"><input id="ffKey" type="password" placeholder="FrameFetch anahtarı (ff_…)" autocomplete="off"><button id="saveFfKey">Anahtarı kaydet</button><button id="checkFfBalance">Kalan krediyi kontrol et</button></div>
+  <p class="muted">Anahtar yalnızca bu tarayıcıda saklanır. Anahtarı sohbete veya herkese açık GitHub dosyasına yapıştırma. Görsel analiz için her aday kartındaki düğmeye ayrıca basılır; otomatik toplu harcama yoktur.</p>
+  <div id="ffStatus" class="status">Görsel analiz henüz başlatılmadı.</div>
+</div>
 <div id="status" class="panel status">Hazır. Keşif başlatılmadı.</div>
 <div id="out"></div>
 <script>
@@ -31,7 +39,450 @@ const $=s=>document.querySelector(s);
 const API='https://www.googleapis.com/youtube/v3/';
 let key='';try{key=localStorage.getItem('yt_key')||''}catch(e){}
 $('#key').value=key;
-$('#save').onclick=()=>{key=$('#key').value.trim();try{localStorage.setItem('yt_key',key)}catch(e){}$('#status').textContent='Anahtar bu tarayıcıda kaydedildi.'};
+$('#save').onclick=()=>{key=$('#key').value.trim();try{localStorage.setItem('yt_key',key)}catch(e){}$('#status').textContent='YouTube anahtarı bu tarayıcıda kaydedildi.'};
+let ffKey='';try{ffKey=localStorage.getItem('framefetch_key')||''}catch(e){}
+$('#ffKey').value=ffKey;
+$('#saveFfKey').onclick=()=>{ffKey=$('#ffKey').value.trim();try{localStorage.setItem('framefetch_key',ffKey)}catch(e){}$('#ffStatus').textContent='FrameFetch anahtarı bu tarayıcıda kaydedildi.'};
+async function ffRequest(path,method='GET',body=null){
+ const opts={method,headers:{Authorization:'Bearer '+ffKey}};
+ if(body){opts.headers['Content-Type']='application/json';opts.body=JSON.stringify(body)}
+ const r=await fetch('https://framefetch.net'+path,opts);
+ const j=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(j.error?.message||j.message||('FrameFetch HTTP '+r.status));
+ return j;
+}
+$('#createFfKey').onclick=async()=>{
+ const email=$('#ffEmail').value.trim(),btn=$('#createFfKey');
+ if(!email||!email.includes('@')){ $('#ffStatus').textContent='Önce geçerli e-posta gir.';return }
+ if(!confirm('E-posta FrameFetch servisine gönderilecek. Servis yeni anahtara $0,05 başlangıç kredisi verdiğini söylüyor. Devam edilsin mi?'))return;
+ btn.disabled=true;
+ try{
+  const r=await fetch('https://framefetch.net/v1/keys',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.error?.message||j.message||('HTTP '+r.status));
+  if(!j.key)throw new Error('Servis anahtar döndürmedi. Anahtarı FrameFetch belgelerinden oluşturmayı dene.');
+  ffKey=j.key;$('#ffKey').value=ffKey;try{localStorage.setItem('framefetch_key',ffKey)}catch(e){}
+  $('#ffStatus').textContent='Anahtar oluşturuldu ve bu tarayıcıya kaydedildi. Anahtar bir kez gösterilir; burada saklı tut. Şimdi kalan krediyi kontrol et.';
+ }catch(e){$('#ffStatus').textContent='Anahtar oluşturulamadı: '+(e.message||String(e))+'\nAlternatif: https://framefetch.net/docs adresindeki “Get a key” bölümünü kullan. Anahtarı sohbete gönderme.'}
+ finally{btn.disabled=false}
+};
+$('#checkFfBalance').onclick=async()=>{
+ if(!ffKey){$('#ffStatus').textContent='Önce FrameFetch anahtarını kaydet.';return}
+ const btn=$('#checkFfBalance');btn.disabled=true;
+ try{const a=await ffRequest('/v1/account');$('#ffStatus').textContent='Kalan kredi: 
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>new Intl.NumberFormat('tr-TR',{maximumFractionDigits:1}).format(Number(n)||0);
+const dur=s=>{const m=String(s||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);return m?(+(m[1]||0)*3600+ +(m[2]||0)*60+ +(m[3]||0)):0};
+async function yt(path,params){const u=new URL(API+path);Object.entries({...params,key}).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u);const j=await r.json();if(!r.ok)throw new Error(j.error?.message||('YouTube API error '+r.status));return j}
+const seeds=[
+  {q:'funny everyday shorts',label:'Gündelik komedi'},
+  {q:'silent visual comedy short',label:'Diyalogsuz görsel komedi'},
+  {q:'funny repair short',label:'Tamir / el işi'},
+  {q:'satisfying funny short',label:'Tatmin edici davranış / sonuç'},
+  {q:'unexpected everyday moment short',label:'Gündelik beklenmedik sonuç'}
+];
+function ageDays(d){return Math.max((Date.now()-d.getTime())/864e5,.5)}
+async function discover(){
+ if(!key)throw new Error('YouTube Data API anahtarı girilmemiş. Ana panelde kaydedilen anahtar burada otomatik görünmüyorsa aynı anahtarı gir.');
+ const after=new Date(Date.now()-Number($('#days').value)*864e5).toISOString();
+ const found=new Map();let done=0;
+ for(const seed of seeds){
+   $('#status').textContent='Aday aranıyor ('+(++done+'/'+seeds.length)+'): '+seed.label;
+   const j=await yt('search',{part:'snippet',q:seed.q,type:'video',maxResults:50,order:'viewCount',publishedAfter:after,videoDuration:'short',safeSearch:'none'});
+   for(const x of (j.items||[])){const id=x.id?.videoId;if(!id)continue;const prev=found.get(id)||{id,title:x.snippet?.title||'',channel:x.snippet?.channelTitle||'',channelId:x.snippet?.channelId||'',publishedAt:x.snippet?.publishedAt||null,seeds:[]};if(!prev.seeds.includes(seed.label))prev.seeds.push(seed.label);found.set(id,prev)}
+ }
+ const ids=[...found.keys()];if(!ids.length)throw new Error('YouTube API bu sorgularda aday döndürmedi.');
+ const meta=[];
+ for(let i=0;i<ids.length;i+=50){
+   const j=await yt('videos',{part:'snippet,statistics,contentDetails',id:ids.slice(i,i+50).join(',')});
+   meta.push(...(j.items||[]));
+ }
+ const chIds=[...new Set(meta.map(v=>v.snippet?.channelId).filter(Boolean))],subs={};
+ for(let i=0;i<chIds.length;i+=50){const j=await yt('channels',{part:'statistics',id:chIds.slice(i,i+50).join(',')});for(const c of (j.items||[]))subs[c.id]=c.statistics?.hiddenSubscriberCount?null:Number(c.statistics?.subscriberCount||0)}
+ const min=Number($('#min').value),max=Number($('#max').value);
+ const all=meta.map(v=>{const d=new Date(v.snippet.publishedAt),views=Number(v.statistics?.viewCount||0),seconds=dur(v.contentDetails?.duration),sub=subs[v.snippet.channelId]??null;return{id:v.id,title:v.snippet.title,channel:v.snippet.channelTitle,channelId:v.snippet.channelId,seconds,views,likes:Number(v.statistics?.likeCount||0),comments:Number(v.statistics?.commentCount||0),subscribers:sub,publishedAt:d.toISOString(),ageDays:ageDays(d),viewsPerDay:views/ageDays(d),viewsPerSubscriber:sub>0?views/sub:null,seeds:found.get(v.id)?.seeds||[],thumbnail:v.snippet.thumbnails?.high?.url||v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||''}}).filter(v=>v.seconds>=min&&v.seconds<=max);
+ if(!all.length)throw new Error('Arama sonuçlarında '+min+'–'+max+' saniyelik aday bulunmadı. Süre aralığını genişlet.');
+ const bySpeed=[...all].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ const byBreakout=[...all].filter(v=>v.viewsPerSubscriber!=null).sort((a,b)=>b.viewsPerSubscriber-a.viewsPerSubscriber);
+ const top=new Map();for(const v of [...bySpeed.slice(0,25),...byBreakout.slice(0,25)])top.set(v.id,v);
+ const candidates=[...top.values()].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ window.autoCompetitorResearch={createdAt:new Date().toISOString(),source:'YouTube Data API v3 search.list + videos.list + channels.list',windowDays:Number($('#days').value),seedQueries:seeds,returnedUniqueVideos:all.length,candidateCount:candidates.length,metricNote:'YouTube Data API does not provide average view duration/percentage for competitor videos. Do not infer visual scene content from title or thumbnail.',visualAccess:'NOT_VERIFIED',candidates:candidates.map(v=>({...v,thumbnail:undefined}))};
+ $('#out').innerHTML='<h2>Aday videolar ('+candidates.length+')</h2><p class="muted">Adaylar günlük izlenme hızı ve izlenme/abone oranı olarak ayrı sıralanır; tek bir keyfî birleşik puan kullanılmaz. Bu oranlar başarı nedeni olduğunu kanıtlamaz. Süre filtresi '+min+'–'+max+' sn.</p><div class="cards">'+candidates.map(v=>'<article class="card"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(v.thumbnail)+'" alt="YouTube küçük resmi"></a><div class="body"><div class="title"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener">'+esc(v.title)+'</a></div><div class="muted">'+esc(v.channel)+' · '+v.seconds+' sn · '+Math.round(v.ageDays)+' gün önce</div><div class="metrics"><span class="pill">'+fmt(v.views)+' izlenme</span><span class="pill">'+fmt(v.viewsPerDay)+'/gün</span><span class="pill">'+(v.viewsPerSubscriber==null?'Abone oranı yok':fmt(v.viewsPerSubscriber)+'x izlenme/abone')+'</span><span class="pill">'+fmt(v.likes)+' beğeni</span></div><div class="small">Bulunduğu aramalar: '+esc(v.seeds.join(' · '))+'</div><p class="small">Görüntü durumu: yalnızca küçük resim/metadata. Gerçek sahne analizi henüz yapılmadı.</p><button class="analysis" data-visual-id="'+esc(v.id)+'">Gerçek sahne analizi (yaklaşık $0,03)</button><div class="scene-result" id="scene-'+esc(v.id)+'" hidden></div></div></article>').join('')+'</div><h2>Veri özeti</h2><div class="panel"><p>Arama penceresi: son '+$('#days').value+' gün. Benzersiz video sonucu: '+all.length+'. Gösterilen aday: '+candidates.length+'.</p><p>Kaynak: YouTube Data API v3. Ortalama izleme süresi ve ortalama izlenen yüzde rakip kanallar için bu API ile alınmadı; tahmin edilmedi.</p><button id="copyJson">Aday verisini kopyala</button> <button id="downloadJson">JSON indir</button></div>';
+ document.querySelectorAll('[data-visual-id]').forEach(btn=>{btn.onclick=()=>analyzeVisual(btn.dataset.visualId,btn)}); 
+ $('#copyJson').onclick=async()=>{const t=JSON.stringify(window.autoCompetitorResearch,null,2);try{await navigator.clipboard.writeText(t);$('#copyJson').textContent='Kopyalandı ✓'}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();document.execCommand('copy');a.remove();$('#copyJson').textContent='Kopyalandı ✓'}};
+ $('#downloadJson').onclick=()=>{const b=new Blob([JSON.stringify(window.autoCompetitorResearch,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bos-dukkan-competitor-discovery.json';a.click();URL.revokeObjectURL(a.href)};
+ $('#status').textContent='Keşif tamamlandı. Gerçek görüntü erişimi henüz çözülmedi; küçük resimler sahne analizi yerine geçmez.';
+}
+async function analyzeVisual(videoId,btn){
+ const out=$('#scene-'+videoId);
+ if(!ffKey){$('#ffStatus').textContent='Önce ücretsiz FrameFetch anahtarı oluştur veya gir.';return}
+ if(!confirm('Bu videonun gerçek karelerini yapay zekâ ile analiz et. Tahmini ücret yaklaşık $0,03/video; yalnızca mevcut başlangıç kredisi kullanılabilir. Bakiye yetersizse işlem durdurulur. Devam?'))return;
+ btn.disabled=true;out.hidden=false;out.textContent='Önce kalan kredi kontrol ediliyor…';
+ try{
+  const account=await ffRequest('/v1/account');
+  const balance=Number(account.balance_micros||0);
+  if(balance<35000)throw new Error('Kalan kredi 
+</body>
+</html>+(Number(a.balance_micros||0)/1000000).toFixed(5)+' · Bugünkü harcama: 
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>new Intl.NumberFormat('tr-TR',{maximumFractionDigits:1}).format(Number(n)||0);
+const dur=s=>{const m=String(s||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);return m?(+(m[1]||0)*3600+ +(m[2]||0)*60+ +(m[3]||0)):0};
+async function yt(path,params){const u=new URL(API+path);Object.entries({...params,key}).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u);const j=await r.json();if(!r.ok)throw new Error(j.error?.message||('YouTube API error '+r.status));return j}
+const seeds=[
+  {q:'funny everyday shorts',label:'Gündelik komedi'},
+  {q:'silent visual comedy short',label:'Diyalogsuz görsel komedi'},
+  {q:'funny repair short',label:'Tamir / el işi'},
+  {q:'satisfying funny short',label:'Tatmin edici davranış / sonuç'},
+  {q:'unexpected everyday moment short',label:'Gündelik beklenmedik sonuç'}
+];
+function ageDays(d){return Math.max((Date.now()-d.getTime())/864e5,.5)}
+async function discover(){
+ if(!key)throw new Error('YouTube Data API anahtarı girilmemiş. Ana panelde kaydedilen anahtar burada otomatik görünmüyorsa aynı anahtarı gir.');
+ const after=new Date(Date.now()-Number($('#days').value)*864e5).toISOString();
+ const found=new Map();let done=0;
+ for(const seed of seeds){
+   $('#status').textContent='Aday aranıyor ('+(++done+'/'+seeds.length)+'): '+seed.label;
+   const j=await yt('search',{part:'snippet',q:seed.q,type:'video',maxResults:50,order:'viewCount',publishedAfter:after,videoDuration:'short',safeSearch:'none'});
+   for(const x of (j.items||[])){const id=x.id?.videoId;if(!id)continue;const prev=found.get(id)||{id,title:x.snippet?.title||'',channel:x.snippet?.channelTitle||'',channelId:x.snippet?.channelId||'',publishedAt:x.snippet?.publishedAt||null,seeds:[]};if(!prev.seeds.includes(seed.label))prev.seeds.push(seed.label);found.set(id,prev)}
+ }
+ const ids=[...found.keys()];if(!ids.length)throw new Error('YouTube API bu sorgularda aday döndürmedi.');
+ const meta=[];
+ for(let i=0;i<ids.length;i+=50){
+   const j=await yt('videos',{part:'snippet,statistics,contentDetails',id:ids.slice(i,i+50).join(',')});
+   meta.push(...(j.items||[]));
+ }
+ const chIds=[...new Set(meta.map(v=>v.snippet?.channelId).filter(Boolean))],subs={};
+ for(let i=0;i<chIds.length;i+=50){const j=await yt('channels',{part:'statistics',id:chIds.slice(i,i+50).join(',')});for(const c of (j.items||[]))subs[c.id]=c.statistics?.hiddenSubscriberCount?null:Number(c.statistics?.subscriberCount||0)}
+ const min=Number($('#min').value),max=Number($('#max').value);
+ const all=meta.map(v=>{const d=new Date(v.snippet.publishedAt),views=Number(v.statistics?.viewCount||0),seconds=dur(v.contentDetails?.duration),sub=subs[v.snippet.channelId]??null;return{id:v.id,title:v.snippet.title,channel:v.snippet.channelTitle,channelId:v.snippet.channelId,seconds,views,likes:Number(v.statistics?.likeCount||0),comments:Number(v.statistics?.commentCount||0),subscribers:sub,publishedAt:d.toISOString(),ageDays:ageDays(d),viewsPerDay:views/ageDays(d),viewsPerSubscriber:sub>0?views/sub:null,seeds:found.get(v.id)?.seeds||[],thumbnail:v.snippet.thumbnails?.high?.url||v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||''}}).filter(v=>v.seconds>=min&&v.seconds<=max);
+ if(!all.length)throw new Error('Arama sonuçlarında '+min+'–'+max+' saniyelik aday bulunmadı. Süre aralığını genişlet.');
+ const bySpeed=[...all].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ const byBreakout=[...all].filter(v=>v.viewsPerSubscriber!=null).sort((a,b)=>b.viewsPerSubscriber-a.viewsPerSubscriber);
+ const top=new Map();for(const v of [...bySpeed.slice(0,25),...byBreakout.slice(0,25)])top.set(v.id,v);
+ const candidates=[...top.values()].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ window.autoCompetitorResearch={createdAt:new Date().toISOString(),source:'YouTube Data API v3 search.list + videos.list + channels.list',windowDays:Number($('#days').value),seedQueries:seeds,returnedUniqueVideos:all.length,candidateCount:candidates.length,metricNote:'YouTube Data API does not provide average view duration/percentage for competitor videos. Do not infer visual scene content from title or thumbnail.',visualAccess:'NOT_VERIFIED',candidates:candidates.map(v=>({...v,thumbnail:undefined}))};
+ $('#out').innerHTML='<h2>Aday videolar ('+candidates.length+')</h2><p class="muted">Adaylar günlük izlenme hızı ve izlenme/abone oranı olarak ayrı sıralanır; tek bir keyfî birleşik puan kullanılmaz. Bu oranlar başarı nedeni olduğunu kanıtlamaz. Süre filtresi '+min+'–'+max+' sn.</p><div class="cards">'+candidates.map(v=>'<article class="card"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(v.thumbnail)+'" alt="YouTube küçük resmi"></a><div class="body"><div class="title"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener">'+esc(v.title)+'</a></div><div class="muted">'+esc(v.channel)+' · '+v.seconds+' sn · '+Math.round(v.ageDays)+' gün önce</div><div class="metrics"><span class="pill">'+fmt(v.views)+' izlenme</span><span class="pill">'+fmt(v.viewsPerDay)+'/gün</span><span class="pill">'+(v.viewsPerSubscriber==null?'Abone oranı yok':fmt(v.viewsPerSubscriber)+'x izlenme/abone')+'</span><span class="pill">'+fmt(v.likes)+' beğeni</span></div><div class="small">Bulunduğu aramalar: '+esc(v.seeds.join(' · '))+'</div><p class="small">Görüntü durumu: yalnızca küçük resim/metadata. Gerçek video kareleri henüz alınmadı; sahne analizi yapılmış sayılmaz.</p></div></article>').join('')+'</div><h2>Veri özeti</h2><div class="panel"><p>Arama penceresi: son '+$('#days').value+' gün. Benzersiz video sonucu: '+all.length+'. Gösterilen aday: '+candidates.length+'.</p><p>Kaynak: YouTube Data API v3. Ortalama izleme süresi ve ortalama izlenen yüzde rakip kanallar için bu API ile alınmadı; tahmin edilmedi.</p><button id="copyJson">Aday verisini kopyala</button> <button id="downloadJson">JSON indir</button></div>';
+ $('#copyJson').onclick=async()=>{const t=JSON.stringify(window.autoCompetitorResearch,null,2);try{await navigator.clipboard.writeText(t);$('#copyJson').textContent='Kopyalandı ✓'}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();document.execCommand('copy');a.remove();$('#copyJson').textContent='Kopyalandı ✓'}};
+ $('#downloadJson').onclick=()=>{const b=new Blob([JSON.stringify(window.autoCompetitorResearch,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bos-dukkan-competitor-discovery.json';a.click();URL.revokeObjectURL(a.href)};
+ $('#status').textContent='Keşif tamamlandı. Gerçek görüntü erişimi henüz çözülmedi; küçük resimler sahne analizi yerine geçmez.';
+}
+$('#run').onclick=async()=>{const b=$('#run');b.disabled=true;$('#out').innerHTML='';try{await discover()}catch(e){$('#status').textContent='Keşif hatası: '+(e.message||String(e))}finally{b.disabled=false}};
+</script>
+</body>
+</html>+(Number(a.spend_today_micros||0)/1000000).toFixed(5)+' · Otomatik yükleme: '+(a.auto_topup?.enabled?'AÇIK':'kapalı');}
+ catch(e){$('#ffStatus').textContent='Bakiye kontrolü başarısız: '+(e.message||String(e))}
+ finally{btn.disabled=false}
+};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>new Intl.NumberFormat('tr-TR',{maximumFractionDigits:1}).format(Number(n)||0);
+const dur=s=>{const m=String(s||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);return m?(+(m[1]||0)*3600+ +(m[2]||0)*60+ +(m[3]||0)):0};
+async function yt(path,params){const u=new URL(API+path);Object.entries({...params,key}).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u);const j=await r.json();if(!r.ok)throw new Error(j.error?.message||('YouTube API error '+r.status));return j}
+const seeds=[
+  {q:'funny everyday shorts',label:'Gündelik komedi'},
+  {q:'silent visual comedy short',label:'Diyalogsuz görsel komedi'},
+  {q:'funny repair short',label:'Tamir / el işi'},
+  {q:'satisfying funny short',label:'Tatmin edici davranış / sonuç'},
+  {q:'unexpected everyday moment short',label:'Gündelik beklenmedik sonuç'}
+];
+function ageDays(d){return Math.max((Date.now()-d.getTime())/864e5,.5)}
+async function discover(){
+ if(!key)throw new Error('YouTube Data API anahtarı girilmemiş. Ana panelde kaydedilen anahtar burada otomatik görünmüyorsa aynı anahtarı gir.');
+ const after=new Date(Date.now()-Number($('#days').value)*864e5).toISOString();
+ const found=new Map();let done=0;
+ for(const seed of seeds){
+   $('#status').textContent='Aday aranıyor ('+(++done+'/'+seeds.length)+'): '+seed.label;
+   const j=await yt('search',{part:'snippet',q:seed.q,type:'video',maxResults:50,order:'viewCount',publishedAfter:after,videoDuration:'short',safeSearch:'none'});
+   for(const x of (j.items||[])){const id=x.id?.videoId;if(!id)continue;const prev=found.get(id)||{id,title:x.snippet?.title||'',channel:x.snippet?.channelTitle||'',channelId:x.snippet?.channelId||'',publishedAt:x.snippet?.publishedAt||null,seeds:[]};if(!prev.seeds.includes(seed.label))prev.seeds.push(seed.label);found.set(id,prev)}
+ }
+ const ids=[...found.keys()];if(!ids.length)throw new Error('YouTube API bu sorgularda aday döndürmedi.');
+ const meta=[];
+ for(let i=0;i<ids.length;i+=50){
+   const j=await yt('videos',{part:'snippet,statistics,contentDetails',id:ids.slice(i,i+50).join(',')});
+   meta.push(...(j.items||[]));
+ }
+ const chIds=[...new Set(meta.map(v=>v.snippet?.channelId).filter(Boolean))],subs={};
+ for(let i=0;i<chIds.length;i+=50){const j=await yt('channels',{part:'statistics',id:chIds.slice(i,i+50).join(',')});for(const c of (j.items||[]))subs[c.id]=c.statistics?.hiddenSubscriberCount?null:Number(c.statistics?.subscriberCount||0)}
+ const min=Number($('#min').value),max=Number($('#max').value);
+ const all=meta.map(v=>{const d=new Date(v.snippet.publishedAt),views=Number(v.statistics?.viewCount||0),seconds=dur(v.contentDetails?.duration),sub=subs[v.snippet.channelId]??null;return{id:v.id,title:v.snippet.title,channel:v.snippet.channelTitle,channelId:v.snippet.channelId,seconds,views,likes:Number(v.statistics?.likeCount||0),comments:Number(v.statistics?.commentCount||0),subscribers:sub,publishedAt:d.toISOString(),ageDays:ageDays(d),viewsPerDay:views/ageDays(d),viewsPerSubscriber:sub>0?views/sub:null,seeds:found.get(v.id)?.seeds||[],thumbnail:v.snippet.thumbnails?.high?.url||v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||''}}).filter(v=>v.seconds>=min&&v.seconds<=max);
+ if(!all.length)throw new Error('Arama sonuçlarında '+min+'–'+max+' saniyelik aday bulunmadı. Süre aralığını genişlet.');
+ const bySpeed=[...all].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ const byBreakout=[...all].filter(v=>v.viewsPerSubscriber!=null).sort((a,b)=>b.viewsPerSubscriber-a.viewsPerSubscriber);
+ const top=new Map();for(const v of [...bySpeed.slice(0,25),...byBreakout.slice(0,25)])top.set(v.id,v);
+ const candidates=[...top.values()].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ window.autoCompetitorResearch={createdAt:new Date().toISOString(),source:'YouTube Data API v3 search.list + videos.list + channels.list',windowDays:Number($('#days').value),seedQueries:seeds,returnedUniqueVideos:all.length,candidateCount:candidates.length,metricNote:'YouTube Data API does not provide average view duration/percentage for competitor videos. Do not infer visual scene content from title or thumbnail.',visualAccess:'NOT_VERIFIED',candidates:candidates.map(v=>({...v,thumbnail:undefined}))};
+ $('#out').innerHTML='<h2>Aday videolar ('+candidates.length+')</h2><p class="muted">Adaylar günlük izlenme hızı ve izlenme/abone oranı olarak ayrı sıralanır; tek bir keyfî birleşik puan kullanılmaz. Bu oranlar başarı nedeni olduğunu kanıtlamaz. Süre filtresi '+min+'–'+max+' sn.</p><div class="cards">'+candidates.map(v=>'<article class="card"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(v.thumbnail)+'" alt="YouTube küçük resmi"></a><div class="body"><div class="title"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener">'+esc(v.title)+'</a></div><div class="muted">'+esc(v.channel)+' · '+v.seconds+' sn · '+Math.round(v.ageDays)+' gün önce</div><div class="metrics"><span class="pill">'+fmt(v.views)+' izlenme</span><span class="pill">'+fmt(v.viewsPerDay)+'/gün</span><span class="pill">'+(v.viewsPerSubscriber==null?'Abone oranı yok':fmt(v.viewsPerSubscriber)+'x izlenme/abone')+'</span><span class="pill">'+fmt(v.likes)+' beğeni</span></div><div class="small">Bulunduğu aramalar: '+esc(v.seeds.join(' · '))+'</div><p class="small">Görüntü durumu: yalnızca küçük resim/metadata. Gerçek video kareleri henüz alınmadı; sahne analizi yapılmış sayılmaz.</p></div></article>').join('')+'</div><h2>Veri özeti</h2><div class="panel"><p>Arama penceresi: son '+$('#days').value+' gün. Benzersiz video sonucu: '+all.length+'. Gösterilen aday: '+candidates.length+'.</p><p>Kaynak: YouTube Data API v3. Ortalama izleme süresi ve ortalama izlenen yüzde rakip kanallar için bu API ile alınmadı; tahmin edilmedi.</p><button id="copyJson">Aday verisini kopyala</button> <button id="downloadJson">JSON indir</button></div>';
+ $('#copyJson').onclick=async()=>{const t=JSON.stringify(window.autoCompetitorResearch,null,2);try{await navigator.clipboard.writeText(t);$('#copyJson').textContent='Kopyalandı ✓'}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();document.execCommand('copy');a.remove();$('#copyJson').textContent='Kopyalandı ✓'}};
+ $('#downloadJson').onclick=()=>{const b=new Blob([JSON.stringify(window.autoCompetitorResearch,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bos-dukkan-competitor-discovery.json';a.click();URL.revokeObjectURL(a.href)};
+ $('#status').textContent='Keşif tamamlandı. Gerçek görüntü erişimi henüz çözülmedi; küçük resimler sahne analizi yerine geçmez.';
+}
+$('#run').onclick=async()=>{const b=$('#run');b.disabled=true;$('#out').innerHTML='';try{await discover()}catch(e){$('#status').textContent='Keşif hatası: '+(e.message||String(e))}finally{b.disabled=false}};
+</script>
+</body>
+</html>+(balance/1000000).toFixed(5)+'; güvenli analiz eşiği $0,035. Ek ödeme yapılmadı, işlem durduruldu.');
+  out.textContent='Video kareleri çıkarılıyor ve sahne analizi yapılıyor…';
+  const result=await ffRequest('/v1/extract','POST',{url:'https://www.youtube.com/shorts/'+videoId,fields:['structured']});
+  const s=result.structured;
+  if(!s){out.textContent='Servis sahne analizi döndürmedi.\n'+(result.warnings||[]).join('\n');}
+  else{
+   const parts=[];
+   if(s.key_moments?.length)parts.push('ÖNEMLİ ANLAR\n'+s.key_moments.map(x=>'• '+(x.timestamp_sec??'?')+' sn — '+x.description).join('\n'));
+   if(s.chapters?.length)parts.push('SAHNE / BÖLÜM ÖZETİ\n'+s.chapters.map(x=>'• '+(x.start_sec??'?')+'–'+(x.end_sec??'?')+' sn: '+x.title+' — '+x.summary).join('\n'));
+   if(s.entities?.length)parts.push('GÖRÜLEN / DUYULAN\n'+s.entities.map(x=>'• '+x.name+' ('+x.type+')').join('\n'));
+   parts.push('Yöntem: FrameFetch yapılandırılmış video analizi. Bu çıktı aday sahne bulmaya yardım eder; komedi mekanizmasının güçlü olup olmadığını ayrıca eleştirel değerlendirmek gerekir.');
+   out.textContent=parts.join('\n\n')+'\n\nBu işlem maliyeti: 
+</body>
+</html>+(Number(a.balance_micros||0)/1000000).toFixed(5)+' · Bugünkü harcama: 
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>new Intl.NumberFormat('tr-TR',{maximumFractionDigits:1}).format(Number(n)||0);
+const dur=s=>{const m=String(s||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);return m?(+(m[1]||0)*3600+ +(m[2]||0)*60+ +(m[3]||0)):0};
+async function yt(path,params){const u=new URL(API+path);Object.entries({...params,key}).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u);const j=await r.json();if(!r.ok)throw new Error(j.error?.message||('YouTube API error '+r.status));return j}
+const seeds=[
+  {q:'funny everyday shorts',label:'Gündelik komedi'},
+  {q:'silent visual comedy short',label:'Diyalogsuz görsel komedi'},
+  {q:'funny repair short',label:'Tamir / el işi'},
+  {q:'satisfying funny short',label:'Tatmin edici davranış / sonuç'},
+  {q:'unexpected everyday moment short',label:'Gündelik beklenmedik sonuç'}
+];
+function ageDays(d){return Math.max((Date.now()-d.getTime())/864e5,.5)}
+async function discover(){
+ if(!key)throw new Error('YouTube Data API anahtarı girilmemiş. Ana panelde kaydedilen anahtar burada otomatik görünmüyorsa aynı anahtarı gir.');
+ const after=new Date(Date.now()-Number($('#days').value)*864e5).toISOString();
+ const found=new Map();let done=0;
+ for(const seed of seeds){
+   $('#status').textContent='Aday aranıyor ('+(++done+'/'+seeds.length)+'): '+seed.label;
+   const j=await yt('search',{part:'snippet',q:seed.q,type:'video',maxResults:50,order:'viewCount',publishedAfter:after,videoDuration:'short',safeSearch:'none'});
+   for(const x of (j.items||[])){const id=x.id?.videoId;if(!id)continue;const prev=found.get(id)||{id,title:x.snippet?.title||'',channel:x.snippet?.channelTitle||'',channelId:x.snippet?.channelId||'',publishedAt:x.snippet?.publishedAt||null,seeds:[]};if(!prev.seeds.includes(seed.label))prev.seeds.push(seed.label);found.set(id,prev)}
+ }
+ const ids=[...found.keys()];if(!ids.length)throw new Error('YouTube API bu sorgularda aday döndürmedi.');
+ const meta=[];
+ for(let i=0;i<ids.length;i+=50){
+   const j=await yt('videos',{part:'snippet,statistics,contentDetails',id:ids.slice(i,i+50).join(',')});
+   meta.push(...(j.items||[]));
+ }
+ const chIds=[...new Set(meta.map(v=>v.snippet?.channelId).filter(Boolean))],subs={};
+ for(let i=0;i<chIds.length;i+=50){const j=await yt('channels',{part:'statistics',id:chIds.slice(i,i+50).join(',')});for(const c of (j.items||[]))subs[c.id]=c.statistics?.hiddenSubscriberCount?null:Number(c.statistics?.subscriberCount||0)}
+ const min=Number($('#min').value),max=Number($('#max').value);
+ const all=meta.map(v=>{const d=new Date(v.snippet.publishedAt),views=Number(v.statistics?.viewCount||0),seconds=dur(v.contentDetails?.duration),sub=subs[v.snippet.channelId]??null;return{id:v.id,title:v.snippet.title,channel:v.snippet.channelTitle,channelId:v.snippet.channelId,seconds,views,likes:Number(v.statistics?.likeCount||0),comments:Number(v.statistics?.commentCount||0),subscribers:sub,publishedAt:d.toISOString(),ageDays:ageDays(d),viewsPerDay:views/ageDays(d),viewsPerSubscriber:sub>0?views/sub:null,seeds:found.get(v.id)?.seeds||[],thumbnail:v.snippet.thumbnails?.high?.url||v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||''}}).filter(v=>v.seconds>=min&&v.seconds<=max);
+ if(!all.length)throw new Error('Arama sonuçlarında '+min+'–'+max+' saniyelik aday bulunmadı. Süre aralığını genişlet.');
+ const bySpeed=[...all].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ const byBreakout=[...all].filter(v=>v.viewsPerSubscriber!=null).sort((a,b)=>b.viewsPerSubscriber-a.viewsPerSubscriber);
+ const top=new Map();for(const v of [...bySpeed.slice(0,25),...byBreakout.slice(0,25)])top.set(v.id,v);
+ const candidates=[...top.values()].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ window.autoCompetitorResearch={createdAt:new Date().toISOString(),source:'YouTube Data API v3 search.list + videos.list + channels.list',windowDays:Number($('#days').value),seedQueries:seeds,returnedUniqueVideos:all.length,candidateCount:candidates.length,metricNote:'YouTube Data API does not provide average view duration/percentage for competitor videos. Do not infer visual scene content from title or thumbnail.',visualAccess:'NOT_VERIFIED',candidates:candidates.map(v=>({...v,thumbnail:undefined}))};
+ $('#out').innerHTML='<h2>Aday videolar ('+candidates.length+')</h2><p class="muted">Adaylar günlük izlenme hızı ve izlenme/abone oranı olarak ayrı sıralanır; tek bir keyfî birleşik puan kullanılmaz. Bu oranlar başarı nedeni olduğunu kanıtlamaz. Süre filtresi '+min+'–'+max+' sn.</p><div class="cards">'+candidates.map(v=>'<article class="card"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(v.thumbnail)+'" alt="YouTube küçük resmi"></a><div class="body"><div class="title"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener">'+esc(v.title)+'</a></div><div class="muted">'+esc(v.channel)+' · '+v.seconds+' sn · '+Math.round(v.ageDays)+' gün önce</div><div class="metrics"><span class="pill">'+fmt(v.views)+' izlenme</span><span class="pill">'+fmt(v.viewsPerDay)+'/gün</span><span class="pill">'+(v.viewsPerSubscriber==null?'Abone oranı yok':fmt(v.viewsPerSubscriber)+'x izlenme/abone')+'</span><span class="pill">'+fmt(v.likes)+' beğeni</span></div><div class="small">Bulunduğu aramalar: '+esc(v.seeds.join(' · '))+'</div><p class="small">Görüntü durumu: yalnızca küçük resim/metadata. Gerçek video kareleri henüz alınmadı; sahne analizi yapılmış sayılmaz.</p></div></article>').join('')+'</div><h2>Veri özeti</h2><div class="panel"><p>Arama penceresi: son '+$('#days').value+' gün. Benzersiz video sonucu: '+all.length+'. Gösterilen aday: '+candidates.length+'.</p><p>Kaynak: YouTube Data API v3. Ortalama izleme süresi ve ortalama izlenen yüzde rakip kanallar için bu API ile alınmadı; tahmin edilmedi.</p><button id="copyJson">Aday verisini kopyala</button> <button id="downloadJson">JSON indir</button></div>';
+ $('#copyJson').onclick=async()=>{const t=JSON.stringify(window.autoCompetitorResearch,null,2);try{await navigator.clipboard.writeText(t);$('#copyJson').textContent='Kopyalandı ✓'}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();document.execCommand('copy');a.remove();$('#copyJson').textContent='Kopyalandı ✓'}};
+ $('#downloadJson').onclick=()=>{const b=new Blob([JSON.stringify(window.autoCompetitorResearch,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bos-dukkan-competitor-discovery.json';a.click();URL.revokeObjectURL(a.href)};
+ $('#status').textContent='Keşif tamamlandı. Gerçek görüntü erişimi henüz çözülmedi; küçük resimler sahne analizi yerine geçmez.';
+}
+$('#run').onclick=async()=>{const b=$('#run');b.disabled=true;$('#out').innerHTML='';try{await discover()}catch(e){$('#status').textContent='Keşif hatası: '+(e.message||String(e))}finally{b.disabled=false}};
+</script>
+</body>
+</html>+(Number(a.spend_today_micros||0)/1000000).toFixed(5)+' · Otomatik yükleme: '+(a.auto_topup?.enabled?'AÇIK':'kapalı');}
+ catch(e){$('#ffStatus').textContent='Bakiye kontrolü başarısız: '+(e.message||String(e))}
+ finally{btn.disabled=false}
+};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>new Intl.NumberFormat('tr-TR',{maximumFractionDigits:1}).format(Number(n)||0);
+const dur=s=>{const m=String(s||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);return m?(+(m[1]||0)*3600+ +(m[2]||0)*60+ +(m[3]||0)):0};
+async function yt(path,params){const u=new URL(API+path);Object.entries({...params,key}).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u);const j=await r.json();if(!r.ok)throw new Error(j.error?.message||('YouTube API error '+r.status));return j}
+const seeds=[
+  {q:'funny everyday shorts',label:'Gündelik komedi'},
+  {q:'silent visual comedy short',label:'Diyalogsuz görsel komedi'},
+  {q:'funny repair short',label:'Tamir / el işi'},
+  {q:'satisfying funny short',label:'Tatmin edici davranış / sonuç'},
+  {q:'unexpected everyday moment short',label:'Gündelik beklenmedik sonuç'}
+];
+function ageDays(d){return Math.max((Date.now()-d.getTime())/864e5,.5)}
+async function discover(){
+ if(!key)throw new Error('YouTube Data API anahtarı girilmemiş. Ana panelde kaydedilen anahtar burada otomatik görünmüyorsa aynı anahtarı gir.');
+ const after=new Date(Date.now()-Number($('#days').value)*864e5).toISOString();
+ const found=new Map();let done=0;
+ for(const seed of seeds){
+   $('#status').textContent='Aday aranıyor ('+(++done+'/'+seeds.length)+'): '+seed.label;
+   const j=await yt('search',{part:'snippet',q:seed.q,type:'video',maxResults:50,order:'viewCount',publishedAfter:after,videoDuration:'short',safeSearch:'none'});
+   for(const x of (j.items||[])){const id=x.id?.videoId;if(!id)continue;const prev=found.get(id)||{id,title:x.snippet?.title||'',channel:x.snippet?.channelTitle||'',channelId:x.snippet?.channelId||'',publishedAt:x.snippet?.publishedAt||null,seeds:[]};if(!prev.seeds.includes(seed.label))prev.seeds.push(seed.label);found.set(id,prev)}
+ }
+ const ids=[...found.keys()];if(!ids.length)throw new Error('YouTube API bu sorgularda aday döndürmedi.');
+ const meta=[];
+ for(let i=0;i<ids.length;i+=50){
+   const j=await yt('videos',{part:'snippet,statistics,contentDetails',id:ids.slice(i,i+50).join(',')});
+   meta.push(...(j.items||[]));
+ }
+ const chIds=[...new Set(meta.map(v=>v.snippet?.channelId).filter(Boolean))],subs={};
+ for(let i=0;i<chIds.length;i+=50){const j=await yt('channels',{part:'statistics',id:chIds.slice(i,i+50).join(',')});for(const c of (j.items||[]))subs[c.id]=c.statistics?.hiddenSubscriberCount?null:Number(c.statistics?.subscriberCount||0)}
+ const min=Number($('#min').value),max=Number($('#max').value);
+ const all=meta.map(v=>{const d=new Date(v.snippet.publishedAt),views=Number(v.statistics?.viewCount||0),seconds=dur(v.contentDetails?.duration),sub=subs[v.snippet.channelId]??null;return{id:v.id,title:v.snippet.title,channel:v.snippet.channelTitle,channelId:v.snippet.channelId,seconds,views,likes:Number(v.statistics?.likeCount||0),comments:Number(v.statistics?.commentCount||0),subscribers:sub,publishedAt:d.toISOString(),ageDays:ageDays(d),viewsPerDay:views/ageDays(d),viewsPerSubscriber:sub>0?views/sub:null,seeds:found.get(v.id)?.seeds||[],thumbnail:v.snippet.thumbnails?.high?.url||v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||''}}).filter(v=>v.seconds>=min&&v.seconds<=max);
+ if(!all.length)throw new Error('Arama sonuçlarında '+min+'–'+max+' saniyelik aday bulunmadı. Süre aralığını genişlet.');
+ const bySpeed=[...all].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ const byBreakout=[...all].filter(v=>v.viewsPerSubscriber!=null).sort((a,b)=>b.viewsPerSubscriber-a.viewsPerSubscriber);
+ const top=new Map();for(const v of [...bySpeed.slice(0,25),...byBreakout.slice(0,25)])top.set(v.id,v);
+ const candidates=[...top.values()].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ window.autoCompetitorResearch={createdAt:new Date().toISOString(),source:'YouTube Data API v3 search.list + videos.list + channels.list',windowDays:Number($('#days').value),seedQueries:seeds,returnedUniqueVideos:all.length,candidateCount:candidates.length,metricNote:'YouTube Data API does not provide average view duration/percentage for competitor videos. Do not infer visual scene content from title or thumbnail.',visualAccess:'NOT_VERIFIED',candidates:candidates.map(v=>({...v,thumbnail:undefined}))};
+ $('#out').innerHTML='<h2>Aday videolar ('+candidates.length+')</h2><p class="muted">Adaylar günlük izlenme hızı ve izlenme/abone oranı olarak ayrı sıralanır; tek bir keyfî birleşik puan kullanılmaz. Bu oranlar başarı nedeni olduğunu kanıtlamaz. Süre filtresi '+min+'–'+max+' sn.</p><div class="cards">'+candidates.map(v=>'<article class="card"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(v.thumbnail)+'" alt="YouTube küçük resmi"></a><div class="body"><div class="title"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener">'+esc(v.title)+'</a></div><div class="muted">'+esc(v.channel)+' · '+v.seconds+' sn · '+Math.round(v.ageDays)+' gün önce</div><div class="metrics"><span class="pill">'+fmt(v.views)+' izlenme</span><span class="pill">'+fmt(v.viewsPerDay)+'/gün</span><span class="pill">'+(v.viewsPerSubscriber==null?'Abone oranı yok':fmt(v.viewsPerSubscriber)+'x izlenme/abone')+'</span><span class="pill">'+fmt(v.likes)+' beğeni</span></div><div class="small">Bulunduğu aramalar: '+esc(v.seeds.join(' · '))+'</div><p class="small">Görüntü durumu: yalnızca küçük resim/metadata. Gerçek video kareleri henüz alınmadı; sahne analizi yapılmış sayılmaz.</p></div></article>').join('')+'</div><h2>Veri özeti</h2><div class="panel"><p>Arama penceresi: son '+$('#days').value+' gün. Benzersiz video sonucu: '+all.length+'. Gösterilen aday: '+candidates.length+'.</p><p>Kaynak: YouTube Data API v3. Ortalama izleme süresi ve ortalama izlenen yüzde rakip kanallar için bu API ile alınmadı; tahmin edilmedi.</p><button id="copyJson">Aday verisini kopyala</button> <button id="downloadJson">JSON indir</button></div>';
+ $('#copyJson').onclick=async()=>{const t=JSON.stringify(window.autoCompetitorResearch,null,2);try{await navigator.clipboard.writeText(t);$('#copyJson').textContent='Kopyalandı ✓'}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();document.execCommand('copy');a.remove();$('#copyJson').textContent='Kopyalandı ✓'}};
+ $('#downloadJson').onclick=()=>{const b=new Blob([JSON.stringify(window.autoCompetitorResearch,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bos-dukkan-competitor-discovery.json';a.click();URL.revokeObjectURL(a.href)};
+ $('#status').textContent='Keşif tamamlandı. Gerçek görüntü erişimi henüz çözülmedi; küçük resimler sahne analizi yerine geçmez.';
+}
+$('#run').onclick=async()=>{const b=$('#run');b.disabled=true;$('#out').innerHTML='';try{await discover()}catch(e){$('#status').textContent='Keşif hatası: '+(e.message||String(e))}finally{b.disabled=false}};
+</script>
+</body>
+</html>+(Number(result.cost?.totalMicros||0)/1000000).toFixed(5);
+  }
+  const left=await ffRequest('/v1/account');
+  $('#ffStatus').textContent='Analiz tamamlandı. Kalan kredi: 
+</body>
+</html>+(Number(a.balance_micros||0)/1000000).toFixed(5)+' · Bugünkü harcama: 
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>new Intl.NumberFormat('tr-TR',{maximumFractionDigits:1}).format(Number(n)||0);
+const dur=s=>{const m=String(s||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);return m?(+(m[1]||0)*3600+ +(m[2]||0)*60+ +(m[3]||0)):0};
+async function yt(path,params){const u=new URL(API+path);Object.entries({...params,key}).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u);const j=await r.json();if(!r.ok)throw new Error(j.error?.message||('YouTube API error '+r.status));return j}
+const seeds=[
+  {q:'funny everyday shorts',label:'Gündelik komedi'},
+  {q:'silent visual comedy short',label:'Diyalogsuz görsel komedi'},
+  {q:'funny repair short',label:'Tamir / el işi'},
+  {q:'satisfying funny short',label:'Tatmin edici davranış / sonuç'},
+  {q:'unexpected everyday moment short',label:'Gündelik beklenmedik sonuç'}
+];
+function ageDays(d){return Math.max((Date.now()-d.getTime())/864e5,.5)}
+async function discover(){
+ if(!key)throw new Error('YouTube Data API anahtarı girilmemiş. Ana panelde kaydedilen anahtar burada otomatik görünmüyorsa aynı anahtarı gir.');
+ const after=new Date(Date.now()-Number($('#days').value)*864e5).toISOString();
+ const found=new Map();let done=0;
+ for(const seed of seeds){
+   $('#status').textContent='Aday aranıyor ('+(++done+'/'+seeds.length)+'): '+seed.label;
+   const j=await yt('search',{part:'snippet',q:seed.q,type:'video',maxResults:50,order:'viewCount',publishedAfter:after,videoDuration:'short',safeSearch:'none'});
+   for(const x of (j.items||[])){const id=x.id?.videoId;if(!id)continue;const prev=found.get(id)||{id,title:x.snippet?.title||'',channel:x.snippet?.channelTitle||'',channelId:x.snippet?.channelId||'',publishedAt:x.snippet?.publishedAt||null,seeds:[]};if(!prev.seeds.includes(seed.label))prev.seeds.push(seed.label);found.set(id,prev)}
+ }
+ const ids=[...found.keys()];if(!ids.length)throw new Error('YouTube API bu sorgularda aday döndürmedi.');
+ const meta=[];
+ for(let i=0;i<ids.length;i+=50){
+   const j=await yt('videos',{part:'snippet,statistics,contentDetails',id:ids.slice(i,i+50).join(',')});
+   meta.push(...(j.items||[]));
+ }
+ const chIds=[...new Set(meta.map(v=>v.snippet?.channelId).filter(Boolean))],subs={};
+ for(let i=0;i<chIds.length;i+=50){const j=await yt('channels',{part:'statistics',id:chIds.slice(i,i+50).join(',')});for(const c of (j.items||[]))subs[c.id]=c.statistics?.hiddenSubscriberCount?null:Number(c.statistics?.subscriberCount||0)}
+ const min=Number($('#min').value),max=Number($('#max').value);
+ const all=meta.map(v=>{const d=new Date(v.snippet.publishedAt),views=Number(v.statistics?.viewCount||0),seconds=dur(v.contentDetails?.duration),sub=subs[v.snippet.channelId]??null;return{id:v.id,title:v.snippet.title,channel:v.snippet.channelTitle,channelId:v.snippet.channelId,seconds,views,likes:Number(v.statistics?.likeCount||0),comments:Number(v.statistics?.commentCount||0),subscribers:sub,publishedAt:d.toISOString(),ageDays:ageDays(d),viewsPerDay:views/ageDays(d),viewsPerSubscriber:sub>0?views/sub:null,seeds:found.get(v.id)?.seeds||[],thumbnail:v.snippet.thumbnails?.high?.url||v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||''}}).filter(v=>v.seconds>=min&&v.seconds<=max);
+ if(!all.length)throw new Error('Arama sonuçlarında '+min+'–'+max+' saniyelik aday bulunmadı. Süre aralığını genişlet.');
+ const bySpeed=[...all].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ const byBreakout=[...all].filter(v=>v.viewsPerSubscriber!=null).sort((a,b)=>b.viewsPerSubscriber-a.viewsPerSubscriber);
+ const top=new Map();for(const v of [...bySpeed.slice(0,25),...byBreakout.slice(0,25)])top.set(v.id,v);
+ const candidates=[...top.values()].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ window.autoCompetitorResearch={createdAt:new Date().toISOString(),source:'YouTube Data API v3 search.list + videos.list + channels.list',windowDays:Number($('#days').value),seedQueries:seeds,returnedUniqueVideos:all.length,candidateCount:candidates.length,metricNote:'YouTube Data API does not provide average view duration/percentage for competitor videos. Do not infer visual scene content from title or thumbnail.',visualAccess:'NOT_VERIFIED',candidates:candidates.map(v=>({...v,thumbnail:undefined}))};
+ $('#out').innerHTML='<h2>Aday videolar ('+candidates.length+')</h2><p class="muted">Adaylar günlük izlenme hızı ve izlenme/abone oranı olarak ayrı sıralanır; tek bir keyfî birleşik puan kullanılmaz. Bu oranlar başarı nedeni olduğunu kanıtlamaz. Süre filtresi '+min+'–'+max+' sn.</p><div class="cards">'+candidates.map(v=>'<article class="card"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(v.thumbnail)+'" alt="YouTube küçük resmi"></a><div class="body"><div class="title"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener">'+esc(v.title)+'</a></div><div class="muted">'+esc(v.channel)+' · '+v.seconds+' sn · '+Math.round(v.ageDays)+' gün önce</div><div class="metrics"><span class="pill">'+fmt(v.views)+' izlenme</span><span class="pill">'+fmt(v.viewsPerDay)+'/gün</span><span class="pill">'+(v.viewsPerSubscriber==null?'Abone oranı yok':fmt(v.viewsPerSubscriber)+'x izlenme/abone')+'</span><span class="pill">'+fmt(v.likes)+' beğeni</span></div><div class="small">Bulunduğu aramalar: '+esc(v.seeds.join(' · '))+'</div><p class="small">Görüntü durumu: yalnızca küçük resim/metadata. Gerçek video kareleri henüz alınmadı; sahne analizi yapılmış sayılmaz.</p></div></article>').join('')+'</div><h2>Veri özeti</h2><div class="panel"><p>Arama penceresi: son '+$('#days').value+' gün. Benzersiz video sonucu: '+all.length+'. Gösterilen aday: '+candidates.length+'.</p><p>Kaynak: YouTube Data API v3. Ortalama izleme süresi ve ortalama izlenen yüzde rakip kanallar için bu API ile alınmadı; tahmin edilmedi.</p><button id="copyJson">Aday verisini kopyala</button> <button id="downloadJson">JSON indir</button></div>';
+ $('#copyJson').onclick=async()=>{const t=JSON.stringify(window.autoCompetitorResearch,null,2);try{await navigator.clipboard.writeText(t);$('#copyJson').textContent='Kopyalandı ✓'}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();document.execCommand('copy');a.remove();$('#copyJson').textContent='Kopyalandı ✓'}};
+ $('#downloadJson').onclick=()=>{const b=new Blob([JSON.stringify(window.autoCompetitorResearch,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bos-dukkan-competitor-discovery.json';a.click();URL.revokeObjectURL(a.href)};
+ $('#status').textContent='Keşif tamamlandı. Gerçek görüntü erişimi henüz çözülmedi; küçük resimler sahne analizi yerine geçmez.';
+}
+$('#run').onclick=async()=>{const b=$('#run');b.disabled=true;$('#out').innerHTML='';try{await discover()}catch(e){$('#status').textContent='Keşif hatası: '+(e.message||String(e))}finally{b.disabled=false}};
+</script>
+</body>
+</html>+(Number(a.spend_today_micros||0)/1000000).toFixed(5)+' · Otomatik yükleme: '+(a.auto_topup?.enabled?'AÇIK':'kapalı');}
+ catch(e){$('#ffStatus').textContent='Bakiye kontrolü başarısız: '+(e.message||String(e))}
+ finally{btn.disabled=false}
+};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>new Intl.NumberFormat('tr-TR',{maximumFractionDigits:1}).format(Number(n)||0);
+const dur=s=>{const m=String(s||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);return m?(+(m[1]||0)*3600+ +(m[2]||0)*60+ +(m[3]||0)):0};
+async function yt(path,params){const u=new URL(API+path);Object.entries({...params,key}).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u);const j=await r.json();if(!r.ok)throw new Error(j.error?.message||('YouTube API error '+r.status));return j}
+const seeds=[
+  {q:'funny everyday shorts',label:'Gündelik komedi'},
+  {q:'silent visual comedy short',label:'Diyalogsuz görsel komedi'},
+  {q:'funny repair short',label:'Tamir / el işi'},
+  {q:'satisfying funny short',label:'Tatmin edici davranış / sonuç'},
+  {q:'unexpected everyday moment short',label:'Gündelik beklenmedik sonuç'}
+];
+function ageDays(d){return Math.max((Date.now()-d.getTime())/864e5,.5)}
+async function discover(){
+ if(!key)throw new Error('YouTube Data API anahtarı girilmemiş. Ana panelde kaydedilen anahtar burada otomatik görünmüyorsa aynı anahtarı gir.');
+ const after=new Date(Date.now()-Number($('#days').value)*864e5).toISOString();
+ const found=new Map();let done=0;
+ for(const seed of seeds){
+   $('#status').textContent='Aday aranıyor ('+(++done+'/'+seeds.length)+'): '+seed.label;
+   const j=await yt('search',{part:'snippet',q:seed.q,type:'video',maxResults:50,order:'viewCount',publishedAfter:after,videoDuration:'short',safeSearch:'none'});
+   for(const x of (j.items||[])){const id=x.id?.videoId;if(!id)continue;const prev=found.get(id)||{id,title:x.snippet?.title||'',channel:x.snippet?.channelTitle||'',channelId:x.snippet?.channelId||'',publishedAt:x.snippet?.publishedAt||null,seeds:[]};if(!prev.seeds.includes(seed.label))prev.seeds.push(seed.label);found.set(id,prev)}
+ }
+ const ids=[...found.keys()];if(!ids.length)throw new Error('YouTube API bu sorgularda aday döndürmedi.');
+ const meta=[];
+ for(let i=0;i<ids.length;i+=50){
+   const j=await yt('videos',{part:'snippet,statistics,contentDetails',id:ids.slice(i,i+50).join(',')});
+   meta.push(...(j.items||[]));
+ }
+ const chIds=[...new Set(meta.map(v=>v.snippet?.channelId).filter(Boolean))],subs={};
+ for(let i=0;i<chIds.length;i+=50){const j=await yt('channels',{part:'statistics',id:chIds.slice(i,i+50).join(',')});for(const c of (j.items||[]))subs[c.id]=c.statistics?.hiddenSubscriberCount?null:Number(c.statistics?.subscriberCount||0)}
+ const min=Number($('#min').value),max=Number($('#max').value);
+ const all=meta.map(v=>{const d=new Date(v.snippet.publishedAt),views=Number(v.statistics?.viewCount||0),seconds=dur(v.contentDetails?.duration),sub=subs[v.snippet.channelId]??null;return{id:v.id,title:v.snippet.title,channel:v.snippet.channelTitle,channelId:v.snippet.channelId,seconds,views,likes:Number(v.statistics?.likeCount||0),comments:Number(v.statistics?.commentCount||0),subscribers:sub,publishedAt:d.toISOString(),ageDays:ageDays(d),viewsPerDay:views/ageDays(d),viewsPerSubscriber:sub>0?views/sub:null,seeds:found.get(v.id)?.seeds||[],thumbnail:v.snippet.thumbnails?.high?.url||v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||''}}).filter(v=>v.seconds>=min&&v.seconds<=max);
+ if(!all.length)throw new Error('Arama sonuçlarında '+min+'–'+max+' saniyelik aday bulunmadı. Süre aralığını genişlet.');
+ const bySpeed=[...all].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ const byBreakout=[...all].filter(v=>v.viewsPerSubscriber!=null).sort((a,b)=>b.viewsPerSubscriber-a.viewsPerSubscriber);
+ const top=new Map();for(const v of [...bySpeed.slice(0,25),...byBreakout.slice(0,25)])top.set(v.id,v);
+ const candidates=[...top.values()].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ window.autoCompetitorResearch={createdAt:new Date().toISOString(),source:'YouTube Data API v3 search.list + videos.list + channels.list',windowDays:Number($('#days').value),seedQueries:seeds,returnedUniqueVideos:all.length,candidateCount:candidates.length,metricNote:'YouTube Data API does not provide average view duration/percentage for competitor videos. Do not infer visual scene content from title or thumbnail.',visualAccess:'NOT_VERIFIED',candidates:candidates.map(v=>({...v,thumbnail:undefined}))};
+ $('#out').innerHTML='<h2>Aday videolar ('+candidates.length+')</h2><p class="muted">Adaylar günlük izlenme hızı ve izlenme/abone oranı olarak ayrı sıralanır; tek bir keyfî birleşik puan kullanılmaz. Bu oranlar başarı nedeni olduğunu kanıtlamaz. Süre filtresi '+min+'–'+max+' sn.</p><div class="cards">'+candidates.map(v=>'<article class="card"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(v.thumbnail)+'" alt="YouTube küçük resmi"></a><div class="body"><div class="title"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener">'+esc(v.title)+'</a></div><div class="muted">'+esc(v.channel)+' · '+v.seconds+' sn · '+Math.round(v.ageDays)+' gün önce</div><div class="metrics"><span class="pill">'+fmt(v.views)+' izlenme</span><span class="pill">'+fmt(v.viewsPerDay)+'/gün</span><span class="pill">'+(v.viewsPerSubscriber==null?'Abone oranı yok':fmt(v.viewsPerSubscriber)+'x izlenme/abone')+'</span><span class="pill">'+fmt(v.likes)+' beğeni</span></div><div class="small">Bulunduğu aramalar: '+esc(v.seeds.join(' · '))+'</div><p class="small">Görüntü durumu: yalnızca küçük resim/metadata. Gerçek video kareleri henüz alınmadı; sahne analizi yapılmış sayılmaz.</p></div></article>').join('')+'</div><h2>Veri özeti</h2><div class="panel"><p>Arama penceresi: son '+$('#days').value+' gün. Benzersiz video sonucu: '+all.length+'. Gösterilen aday: '+candidates.length+'.</p><p>Kaynak: YouTube Data API v3. Ortalama izleme süresi ve ortalama izlenen yüzde rakip kanallar için bu API ile alınmadı; tahmin edilmedi.</p><button id="copyJson">Aday verisini kopyala</button> <button id="downloadJson">JSON indir</button></div>';
+ $('#copyJson').onclick=async()=>{const t=JSON.stringify(window.autoCompetitorResearch,null,2);try{await navigator.clipboard.writeText(t);$('#copyJson').textContent='Kopyalandı ✓'}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();document.execCommand('copy');a.remove();$('#copyJson').textContent='Kopyalandı ✓'}};
+ $('#downloadJson').onclick=()=>{const b=new Blob([JSON.stringify(window.autoCompetitorResearch,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bos-dukkan-competitor-discovery.json';a.click();URL.revokeObjectURL(a.href)};
+ $('#status').textContent='Keşif tamamlandı. Gerçek görüntü erişimi henüz çözülmedi; küçük resimler sahne analizi yerine geçmez.';
+}
+$('#run').onclick=async()=>{const b=$('#run');b.disabled=true;$('#out').innerHTML='';try{await discover()}catch(e){$('#status').textContent='Keşif hatası: '+(e.message||String(e))}finally{b.disabled=false}};
+</script>
+</body>
+</html>+(Number(left.balance_micros||0)/1000000).toFixed(5)+'. Otomatik yükleme açılmadı.';
+ }catch(e){out.textContent='Görsel analiz yapılamadı: '+(e.message||String(e))+'\nKapak görselinden sahne sonucu uydurulmadı.';$('#ffStatus').textContent=out.textContent}
+ finally{btn.disabled=false}
+}
+$('#run').onclick=async()=>{const b=$('#run');b.disabled=true;$('#out').innerHTML='';try{await discover()}catch(e){$('#status').textContent='Keşif hatası: '+(e.message||String(e))}finally{b.disabled=false}};
+</script>
+</body>
+</html>+(Number(a.balance_micros||0)/1000000).toFixed(5)+' · Bugünkü harcama: 
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>new Intl.NumberFormat('tr-TR',{maximumFractionDigits:1}).format(Number(n)||0);
+const dur=s=>{const m=String(s||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);return m?(+(m[1]||0)*3600+ +(m[2]||0)*60+ +(m[3]||0)):0};
+async function yt(path,params){const u=new URL(API+path);Object.entries({...params,key}).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u);const j=await r.json();if(!r.ok)throw new Error(j.error?.message||('YouTube API error '+r.status));return j}
+const seeds=[
+  {q:'funny everyday shorts',label:'Gündelik komedi'},
+  {q:'silent visual comedy short',label:'Diyalogsuz görsel komedi'},
+  {q:'funny repair short',label:'Tamir / el işi'},
+  {q:'satisfying funny short',label:'Tatmin edici davranış / sonuç'},
+  {q:'unexpected everyday moment short',label:'Gündelik beklenmedik sonuç'}
+];
+function ageDays(d){return Math.max((Date.now()-d.getTime())/864e5,.5)}
+async function discover(){
+ if(!key)throw new Error('YouTube Data API anahtarı girilmemiş. Ana panelde kaydedilen anahtar burada otomatik görünmüyorsa aynı anahtarı gir.');
+ const after=new Date(Date.now()-Number($('#days').value)*864e5).toISOString();
+ const found=new Map();let done=0;
+ for(const seed of seeds){
+   $('#status').textContent='Aday aranıyor ('+(++done+'/'+seeds.length)+'): '+seed.label;
+   const j=await yt('search',{part:'snippet',q:seed.q,type:'video',maxResults:50,order:'viewCount',publishedAfter:after,videoDuration:'short',safeSearch:'none'});
+   for(const x of (j.items||[])){const id=x.id?.videoId;if(!id)continue;const prev=found.get(id)||{id,title:x.snippet?.title||'',channel:x.snippet?.channelTitle||'',channelId:x.snippet?.channelId||'',publishedAt:x.snippet?.publishedAt||null,seeds:[]};if(!prev.seeds.includes(seed.label))prev.seeds.push(seed.label);found.set(id,prev)}
+ }
+ const ids=[...found.keys()];if(!ids.length)throw new Error('YouTube API bu sorgularda aday döndürmedi.');
+ const meta=[];
+ for(let i=0;i<ids.length;i+=50){
+   const j=await yt('videos',{part:'snippet,statistics,contentDetails',id:ids.slice(i,i+50).join(',')});
+   meta.push(...(j.items||[]));
+ }
+ const chIds=[...new Set(meta.map(v=>v.snippet?.channelId).filter(Boolean))],subs={};
+ for(let i=0;i<chIds.length;i+=50){const j=await yt('channels',{part:'statistics',id:chIds.slice(i,i+50).join(',')});for(const c of (j.items||[]))subs[c.id]=c.statistics?.hiddenSubscriberCount?null:Number(c.statistics?.subscriberCount||0)}
+ const min=Number($('#min').value),max=Number($('#max').value);
+ const all=meta.map(v=>{const d=new Date(v.snippet.publishedAt),views=Number(v.statistics?.viewCount||0),seconds=dur(v.contentDetails?.duration),sub=subs[v.snippet.channelId]??null;return{id:v.id,title:v.snippet.title,channel:v.snippet.channelTitle,channelId:v.snippet.channelId,seconds,views,likes:Number(v.statistics?.likeCount||0),comments:Number(v.statistics?.commentCount||0),subscribers:sub,publishedAt:d.toISOString(),ageDays:ageDays(d),viewsPerDay:views/ageDays(d),viewsPerSubscriber:sub>0?views/sub:null,seeds:found.get(v.id)?.seeds||[],thumbnail:v.snippet.thumbnails?.high?.url||v.snippet.thumbnails?.medium?.url||v.snippet.thumbnails?.default?.url||''}}).filter(v=>v.seconds>=min&&v.seconds<=max);
+ if(!all.length)throw new Error('Arama sonuçlarında '+min+'–'+max+' saniyelik aday bulunmadı. Süre aralığını genişlet.');
+ const bySpeed=[...all].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ const byBreakout=[...all].filter(v=>v.viewsPerSubscriber!=null).sort((a,b)=>b.viewsPerSubscriber-a.viewsPerSubscriber);
+ const top=new Map();for(const v of [...bySpeed.slice(0,25),...byBreakout.slice(0,25)])top.set(v.id,v);
+ const candidates=[...top.values()].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
+ window.autoCompetitorResearch={createdAt:new Date().toISOString(),source:'YouTube Data API v3 search.list + videos.list + channels.list',windowDays:Number($('#days').value),seedQueries:seeds,returnedUniqueVideos:all.length,candidateCount:candidates.length,metricNote:'YouTube Data API does not provide average view duration/percentage for competitor videos. Do not infer visual scene content from title or thumbnail.',visualAccess:'NOT_VERIFIED',candidates:candidates.map(v=>({...v,thumbnail:undefined}))};
+ $('#out').innerHTML='<h2>Aday videolar ('+candidates.length+')</h2><p class="muted">Adaylar günlük izlenme hızı ve izlenme/abone oranı olarak ayrı sıralanır; tek bir keyfî birleşik puan kullanılmaz. Bu oranlar başarı nedeni olduğunu kanıtlamaz. Süre filtresi '+min+'–'+max+' sn.</p><div class="cards">'+candidates.map(v=>'<article class="card"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(v.thumbnail)+'" alt="YouTube küçük resmi"></a><div class="body"><div class="title"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener">'+esc(v.title)+'</a></div><div class="muted">'+esc(v.channel)+' · '+v.seconds+' sn · '+Math.round(v.ageDays)+' gün önce</div><div class="metrics"><span class="pill">'+fmt(v.views)+' izlenme</span><span class="pill">'+fmt(v.viewsPerDay)+'/gün</span><span class="pill">'+(v.viewsPerSubscriber==null?'Abone oranı yok':fmt(v.viewsPerSubscriber)+'x izlenme/abone')+'</span><span class="pill">'+fmt(v.likes)+' beğeni</span></div><div class="small">Bulunduğu aramalar: '+esc(v.seeds.join(' · '))+'</div><p class="small">Görüntü durumu: yalnızca küçük resim/metadata. Gerçek video kareleri henüz alınmadı; sahne analizi yapılmış sayılmaz.</p></div></article>').join('')+'</div><h2>Veri özeti</h2><div class="panel"><p>Arama penceresi: son '+$('#days').value+' gün. Benzersiz video sonucu: '+all.length+'. Gösterilen aday: '+candidates.length+'.</p><p>Kaynak: YouTube Data API v3. Ortalama izleme süresi ve ortalama izlenen yüzde rakip kanallar için bu API ile alınmadı; tahmin edilmedi.</p><button id="copyJson">Aday verisini kopyala</button> <button id="downloadJson">JSON indir</button></div>';
+ $('#copyJson').onclick=async()=>{const t=JSON.stringify(window.autoCompetitorResearch,null,2);try{await navigator.clipboard.writeText(t);$('#copyJson').textContent='Kopyalandı ✓'}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();document.execCommand('copy');a.remove();$('#copyJson').textContent='Kopyalandı ✓'}};
+ $('#downloadJson').onclick=()=>{const b=new Blob([JSON.stringify(window.autoCompetitorResearch,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bos-dukkan-competitor-discovery.json';a.click();URL.revokeObjectURL(a.href)};
+ $('#status').textContent='Keşif tamamlandı. Gerçek görüntü erişimi henüz çözülmedi; küçük resimler sahne analizi yerine geçmez.';
+}
+$('#run').onclick=async()=>{const b=$('#run');b.disabled=true;$('#out').innerHTML='';try{await discover()}catch(e){$('#status').textContent='Keşif hatası: '+(e.message||String(e))}finally{b.disabled=false}};
+</script>
+</body>
+</html>+(Number(a.spend_today_micros||0)/1000000).toFixed(5)+' · Otomatik yükleme: '+(a.auto_topup?.enabled?'AÇIK':'kapalı');}
+ catch(e){$('#ffStatus').textContent='Bakiye kontrolü başarısız: '+(e.message||String(e))}
+ finally{btn.disabled=false}
+};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>new Intl.NumberFormat('tr-TR',{maximumFractionDigits:1}).format(Number(n)||0);
 const dur=s=>{const m=String(s||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);return m?(+(m[1]||0)*3600+ +(m[2]||0)*60+ +(m[3]||0)):0};
