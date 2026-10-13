@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 """Free diagnostic: try to extract storyboard frames from public YouTube Shorts."""
 import json
-import os
-import re
 import subprocess
 import sys
-import urllib.request
 from pathlib import Path
 
 URLS = [
@@ -54,9 +51,14 @@ for url in URLS:
         })
         # Save a sanitized metadata subset, never cookies or request headers.
         (OUT / f"{video_id}.json").write_text(json.dumps(item, indent=2), encoding="utf-8")
+    except subprocess.CalledProcessError as e:
+        detail = (e.output or str(e)).strip()
+        item.update({"status": "failed", "error": detail[-1800:]})
     except Exception as e:
-        item.update({"status": "failed", "error": str(e)[:700]})
+        item.update({"status": "failed", "error": str(e)[:1200]})
     report["videos"].append(item)
 
 (OUT / "report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
 print(json.dumps(report, indent=2, ensure_ascii=False))
+if any(v.get("status") == "failed" for v in report["videos"]):
+    sys.exit(1)
