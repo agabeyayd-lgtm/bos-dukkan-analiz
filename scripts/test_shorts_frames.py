@@ -14,12 +14,9 @@ URLS = [
     "https://www.youtube.com/shorts/cP1lmemI0fk",
     "https://www.youtube.com/shorts/sSt88cW5Bw8",
 ]
-CLIENTS = [
-    "default", "tv,web_safari", "web_safari,tv", "web", "web_embedded",
-    "web_safari", "tv_embedded", "mweb", "ios", "android", "android_vr", "tv",
-    "tv_downgraded", "web_creator", "tv_simply", "web_music",
-    "web,android_vr,tv_downgraded", "tv_downgraded,web_creator,mweb", "default,all",
-]
+# Do not brute-force a long list of YouTube clients. Try the public API fallback first,
+# then one standard yt-dlp request only if it fails.
+CLIENTS = ["default"]
 OUT = Path("shorts-frame-test")
 OUT.mkdir(exist_ok=True)
 report = {
@@ -156,7 +153,9 @@ for url in URLS:
     video_id = url.rstrip("/").split("/")[-1]
     item = {"video_id": video_id, "url": url, "attempts": [], "public_endpoint_probes": {}}
     info = None
-    for client in CLIENTS:
+    invidious = try_invidious_frames(video_id)
+    item["invidious_fallback"] = invidious
+    for client in (CLIENTS if not invidious.get("success") else []):
         cmd = ["yt-dlp", "--ignore-config", "--js-runtimes", "deno", "--force-ipv4",
                "--dump-single-json", "--skip-download", "--no-warnings",
                "--no-check-formats", "--socket-timeout", "15"]
@@ -188,13 +187,7 @@ for url in URLS:
         item["watch_page_storyboard_spec_found"] = False
         item["watch_page_storyboards"] = []
 
-    # Alternate public route: Invidious API exposes stream URLs on some healthy instances.
-    # This is a bounded fallback, not an authentication bypass; no cookies or account data are used.
-    invidious = {"success": False, "attempts": []}
-    if not spec:
-        invidious = try_invidious_frames(video_id)
-    item["invidious_fallback"] = invidious
-
+    # If the Invidious route already worked, keep it; otherwise use the public watch-page storyboard probe.
     if info:
         storyboards = info.get("storyboards")
         item.update({
