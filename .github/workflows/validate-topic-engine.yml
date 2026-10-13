@@ -2,6 +2,7 @@ name: Validate topic engine
 on:
   push:
     branches:
+      - main
       - feat/data-driven-topic-engine
     paths:
       - bos-dukkan-analiz.html
