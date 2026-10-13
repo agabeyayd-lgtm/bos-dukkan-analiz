@@ -512,14 +512,14 @@ $('#goOwn').onclick=async()=>{
       const recent=vs.slice(0,10);
       const lines=['Boş Dükkân · kısa tutma çıktısı (son '+recent.length+' video)',
         ...recent.map(v=>[
-          String(v.title||v.id).replace(/\\s+/g,' ').slice(0,90),
+          String(v.title||v.id).replace(/\s+/g,' ').slice(0,90),
           'Süre: '+(v.sec?v.sec+' sn':'Yok'),
           'İzlenme: '+fmt(v.views),
           'Ort. izleme: '+(v.avgSec==null?'Yok':v.avgSec.toFixed(1)+' sn'),
           'Ort. izlenen: '+(v.pct==null?'Yok':v.pct.toFixed(1)+'%')
         ].join(' | ')),
         'Saniye bazlı düşüş noktaları: Bu API raporunda yok; tahmin edilmedi.'];
-      const textOut=lines.join('\\n');
+      const textOut=lines.join('\n');
       try{await navigator.clipboard.writeText(textOut);btn.textContent='Kısa çıktı kopyalandı ✓';}
       catch(e){
         const area=document.createElement('textarea');area.value=textOut;area.rows=8;area.style.width='100%';area.style.marginTop='8px';
