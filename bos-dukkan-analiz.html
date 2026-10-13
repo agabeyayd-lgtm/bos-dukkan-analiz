@@ -140,6 +140,16 @@ a{color:var(--acc)}
   <div id="frameStatus" class="msg">YouTube bağlantısını yapıştırıp açabilir veya telefondan video/ekran kaydı seçebilirsin.</div>
   <video id="frameVideo" controls playsinline preload="metadata" style="display:none;width:100%;max-height:420px;margin-top:12px;border-radius:10px;background:#000"></video>
   <div id="frameResult" style="margin-top:12px"></div>
+  <div class="msg" style="margin-top:12px">
+    <h3 style="margin:0 0 6px">Kare gözlemleri → Konu Motoru</h3>
+    <p class="note" style="margin:0 0 8px">Kareleri bu sohbetle paylaşıp görsel analizi aldıktan sonra zaman damgalı gözlemleri buraya yaz. Bu alan mevcut Konu Motoru paketine otomatik bağlanır; panel tek başına görüntüleri yorumladığını iddia etmez.</p>
+    <textarea id="frameSceneNotes" rows="5" placeholder="Video ID / başlık (varsa) — 0.0–0.3 sn: ilk gerçek görüntü; 0.3–1.5 sn: davranış; 1.5–4.5 sn: gelişme; 4.5–8.0 sn: sonuç. Belirsiz olanı 'bilinmiyor' yaz." style="display:block;width:100%;max-width:100%;box-sizing:border-box;margin:8px 0;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
+    <div class="bar" style="padding:0;border:0;background:transparent">
+      <button id="syncFrameNotes" type="button">Notları Konu Motoru'na bağla</button>
+      <button id="clearFrameNotes" class="ghost" type="button">Notları temizle</button>
+    </div>
+    <p id="frameNotesStatus" class="note" aria-live="polite">Notlar, Genel Analiz bölümündeki sahne notlarıyla eş zamanlı tutulur.</p>
+  </div>
   <p class="note">İpucu: Ekran kaydında önce YouTube oynatıcısını aç, Shorts'u tam ekrana al ve oynat. Kayıt videonun başından önce menü/arama ekranı içeriyorsa “Başlangıç sn” değerini artır. Bu araç kareleri görselleştirir; kendi başına mizah veya sahne yorumu üretmez.</p>
 </section>
 
@@ -951,6 +961,29 @@ const frameFile = $('#frameFile');
 const frameVideo = $('#frameVideo');
 const frameStatus = $('#frameStatus');
 const extractFramesBtn = $('#extractFrames');
+const frameSceneNotes = $('#frameSceneNotes');
+const frameNotesStatus = $('#frameNotesStatus');
+const generalSceneNotes = $('#sceneNotes');
+frameSceneNotes.value = generalSceneNotes.value || '';
+frameSceneNotes.addEventListener('input', () => {
+  generalSceneNotes.value = frameSceneNotes.value;
+  try { localStorage.setItem('bd_scene_notes', frameSceneNotes.value); } catch (_) {}
+  frameNotesStatus.textContent = 'Notlar kaydedildi ve Konu Motoru paketine bağlandı.';
+});
+generalSceneNotes.addEventListener('input', () => {
+  frameSceneNotes.value = generalSceneNotes.value;
+});
+$('#syncFrameNotes').addEventListener('click', () => {
+  generalSceneNotes.value = frameSceneNotes.value.trim();
+  try { localStorage.setItem('bd_scene_notes', generalSceneNotes.value); } catch (_) {}
+  frameNotesStatus.textContent = 'Tamam: bu gözlemler Konu Motoru paketine eklenecek. 3. sekmede güncel verileri getirip “Konu Motoru paketini oluştur ve kopyala” düğmesine bas.';
+});
+$('#clearFrameNotes').addEventListener('click', () => {
+  frameSceneNotes.value = '';
+  generalSceneNotes.value = '';
+  try { localStorage.removeItem('bd_scene_notes'); } catch (_) {}
+  frameNotesStatus.textContent = 'Sahne notları temizlendi.';
+});
 frameFile.addEventListener('change', () => {
   $('#frameResult').innerHTML = '';
   extractFramesBtn.disabled = true;
