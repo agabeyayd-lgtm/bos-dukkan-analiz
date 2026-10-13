@@ -148,7 +148,7 @@ async function subsMap(ids){
 }
 
 /* Yorum örnekleri, yaratıcı karar için çeşitli performans sinyallerini temsil edecek şekilde seçilir. */
-function chooseResearchCommentVideos(videos,maxVideos=5){
+function chooseResearchCommentVideos(videos,maxVideos=8){
   const pool=[...videos].filter(v=>v&&v.id),chosen=[],used=new Set();
   const pick=(rank,reason)=>{
     const v=rank.find(x=>!used.has(x.id));
@@ -157,9 +157,12 @@ function chooseResearchCommentVideos(videos,maxVideos=5){
   const desc=key=>[...pool].sort((a,b)=>(Number(b[key])||0)-(Number(a[key])||0));
   pick(desc('viewsPerSub'),'Kanal abonesine göre yüksek izlenme');
   pick(desc('viewsPerDay'),'Günlük izlenme hızı yüksek');
-  pick([...pool].sort((a,b)=>Math.abs((Number(a.seconds)||60)-8)-Math.abs((Number(b.seconds)||60)-8)||(b.views||0)-(a.views||0)),'8 saniyelik formata süre bakımından yakın');
+  pick([...pool].sort((a,b)=>Math.abs((Number(a.seconds)||60)-8)-Math.abs((Number(b.seconds)||60)-8)||(b.views||0)-(a.views||0)),'8 saniyelik formata süre bakımından en yakın');
   pick([...pool].sort((a,b)=>(b.comments||0)/Math.max(1,b.views||0)-(a.comments||0)/Math.max(1,a.views||0)),'İzlenmeye göre yorum oranı yüksek');
   pick([...pool].sort((a,b)=>(b.likes||0)/Math.max(1,b.views||0)-(a.likes||0)/Math.max(1,a.views||0)),'İzlenmeye göre beğeni oranı yüksek');
+  pick(desc('views'),'Mutlak görüntülenmesi en yüksek');
+  pick([...pool].filter(v=>Number(v.seconds)>=7&&Number(v.seconds)<=15).sort((a,b)=>(b.viewsPerSub??-1)-(a.viewsPerSub??-1)),'7–15 saniye aralığında aboneye göre güçlü performans');
+  pick([...pool].filter(v=>Number(v.seconds)>=7&&Number(v.seconds)<=15).sort((a,b)=>(b.comments||0)/Math.max(1,b.views||0)-(a.comments||0)/Math.max(1,a.views||0)),'7–15 saniye aralığında yüksek yorum oranı');
   return chosen;
 }
 async function sampleComments(videos,maxVideos=5,perVideo=8){
@@ -427,8 +430,8 @@ $('#goOwn').onclick=async()=>{
         const research=window.bosResearchSnapshot||null;
         const researchVideos=research&&Array.isArray(research.videos)?research.videos:[];
         // Yorum örneği için yalnızca en yüksek izlenmeyi değil, farklı performans sinyallerini temsil eden videolar seç.
-        const researchCommentPicks=chooseResearchCommentVideos(researchVideos,5);
-        const researchComments=researchCommentPicks.length?await sampleComments(researchCommentPicks,5,8):[];
+        const researchCommentPicks=chooseResearchCommentVideos(researchVideos,8);
+        const researchComments=researchCommentPicks.length?await sampleComments(researchCommentPicks,8,8):[];
         const ownComments=await sampleComments([...vs].sort((a,b)=>b.views-a.views),5,8);
         // Yorumları başlık benzerliğiyle değil, tam YouTube video ID'siyle eşleştir.
         const ownCommentById=new Map(ownComments.map(x=>[x.videoId,x]));
@@ -444,7 +447,7 @@ $('#goOwn').onclick=async()=>{
           return '<div style="margin:8px 0;padding:8px;border:1px solid var(--line);border-radius:8px"><strong>'+esc(v.title||v.id)+'</strong><p>'+esc(metrics)+'</p><p>Video ID: <code>'+esc(v.id||'')+'</code> · '+(s.available?'Yorum API başarılı · '+s.sampled+' örnek':'Yorum örneği yok'+(s.reason?' · '+esc(s.reason):''))+(kind==='research'&&s.selectionReason?' · Seçim nedeni: '+esc(s.selectionReason):'')+'</p>'+((s.comments||[]).length?'<ul>'+s.comments.map(x=>'<li>'+esc(x.text)+' <small>('+fmt(x.likes)+' beğeni)</small></li>').join('')+'</ul>':(s.available?'<p>API sonuçlarında gösterilebilir yorum yok.</p>':''))+'</div>';
         }).join(''):'<p>Bu grupta video yok.</p>');
         const failures=[...ownComments,...researchComments].filter(v=>!v.available);
-        commentDiag.innerHTML='<h2>Yorum çekme ve video eşleştirme</h2><p>Kanal: '+ownComments.filter(v=>v.available).length+'/'+ownComments.length+' seçili videoda istek başarılı. Araştırma: '+researchComments.filter(v=>v.available).length+'/'+researchComments.length+' seçili videoda istek başarılı.</p><p>Her yorum örneği tam video ID üzerinden ilgili video ve metriklerine bağlandı. Araştırmada yorum için en fazla 5 video seçilir: aboneye göre izlenme, günlük izlenme, 8 saniyeye yakın süre, yorum/izlenme ve beğeni/izlenme sinyalleri. Bu çeşitlendirme fikir seçimine yardımcı olur; başarı nedenini tek başına kanıtlamaz.</p>'+(failures.length?'<p><strong>Hata ayrıntıları ilgili video kaydında gösterilir.</strong></p>':'<p>Seçilen videolarda API isteği hata vermedi. Sıfır yorum, o videolarda sonuç dönmediği anlamına gelir.</p>')+renderMatchedGroup('Boş Dükkân — video, performans ve yorum eşleşmesi',ownMatched,'own')+renderMatchedGroup('Araştırma — video ve yorum eşleşmesi',researchMatched,'research');
+        commentDiag.innerHTML='<h2>Yorum çekme ve video eşleştirme</h2><p>Kanal: '+ownComments.filter(v=>v.available).length+'/'+ownComments.length+' seçili videoda istek başarılı. Araştırma: '+researchComments.filter(v=>v.available).length+'/'+researchComments.length+' seçili videoda istek başarılı.</p><p>Her yorum örneği tam video ID üzerinden ilgili video ve metriklerine bağlandı. Araştırmada yorum için en fazla 8 video seçilir: aboneye göre izlenme, günlük hız, mutlak izlenme, yorum/beğeni oranları ve özellikle 7–15 saniyelik videoların performansı. Bu örneklem farklı sinyalleri karşılaştırır; tek başına başarı nedenini kanıtlamaz. Bu çeşitlendirme fikir seçimine yardımcı olur; başarı nedenini tek başına kanıtlamaz.</p>'+(failures.length?'<p><strong>Hata ayrıntıları ilgili video kaydında gösterilir.</strong></p>':'<p>Seçilen videolarda API isteği hata vermedi. Sıfır yorum, o videolarda sonuç dönmediği anlamına gelir.</p>')+renderMatchedGroup('Boş Dükkân — video, performans ve yorum eşleşmesi',ownMatched,'own')+renderMatchedGroup('Araştırma — video ve yorum eşleşmesi',researchMatched,'research');
         const txt=[
           "ROL: Boş Dükkân için veri analisti ve yaratıcı yönetmen. Veriye dayalı karşılaştırma yap; korelasyonu nedensellik diye sunma.",
           "KANAL SABİTLERİ: 8 saniye, dikey 9:16, diyalogsuz, doğal ASMR, İngilizce başlık. Mizah gerçekçi insan davranışından doğmalı; güçlü ilk 0,3 saniye ve tamamlanmış final olmalı.",
@@ -465,7 +468,7 @@ $('#goOwn').onclick=async()=>{
           "4) Video süresi, görüntülenme, izlenen yüzde, ortalama izleme süresi ve beğeni/yorum sayıları arasındaki örüntüleri; örneklem boyutunu ve seçilim yanlılığını hesaba katarak karşılaştır.",
           "5) YORUM-PERFORMANS EŞLEŞTİRMESİ: Her video kaydındaki commentSample, yalnızca aynı tam video ID'sine ait yorum örneğidir. Her videoyu kendi izlenme/izleme süresi/izlenen yüzde/beğeni/toplam yorum metrikleriyle birlikte analiz et; başka videonun yorumunu asla bağlama. Yorum örneği olmayan videolar için çıkarım yapma.",
           "6) YORUM ANALİZİ: Araştırma ve kanal yorum örneklerindeki tekrar eden izleyici tepkilerini, izleyicinin açıkça belirttiği komik anları, şaşkınlık/duygu ifadelerini, alıntılanan replik veya meme referanslarını ve kafa karışıklığını ayrı kümelere ayır. Yorumların sahneyi gerçekten açıklayıp açıklamadığını değerlendir; yorumlarda bulunmayan sahne ayrıntılarını uydurma.",
-          "7) Yorum örnekleri en fazla 5 video başına 8 yorumdur ve YouTube'un relevance sıralamasına dayanır; temsili anket değildir. Beğeniler ve yorumlar sessiz izleyicileri temsil etmez. Alay, spam, bot, dil ve kültür farkı ile seçilim yanlılığını belirt. Tek bir yorumdan genelleme yapma; tekrar eden örüntüleri kanıt düzeyine göre etiketle.",
+          "7) Yorum örnekleri en fazla 8 video başına 8 yorumdur ve YouTube'un relevance sıralamasına dayanır; temsili anket değildir. Beğeniler ve yorumlar sessiz izleyicileri temsil etmez. Alay, spam, bot, dil ve kültür farkı ile seçilim yanlılığını belirt. Tek bir yorumdan genelleme yapma; tekrar eden örüntüleri kanıt düzeyine göre etiketle.",
           "8) Ortalama izlenme yüzdesi %100'ü aşıyorsa bunu tekrar izleme/loop için olası sinyal olarak not et; doğrudan tekrar sayısı diye adlandırma. API'de doğrudan tekrar oynatma sayısı yoksa bunu açıkça söyle. Eksik metrikleri tahmin etme.",
           "9) Sonuçta Boş Dükkân için test edilmeye değer en fazla 3 farklı mizah mekanizması öner; her birini hangi kanal metriği ve hangi yorum örüntüsünün desteklediğiyle ilişkilendir. Sadece yorumlarda insanların 'komik' demesini mekanizma kanıtı sayma.",
           "10) 8 saniyelik format için somut sonraki test planı ver: neyi değiştireceğiz, hangi metriği ölçeceğiz, hangi sonuç tekrar test etmeyi hak edecek.",
