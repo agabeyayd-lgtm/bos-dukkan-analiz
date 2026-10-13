@@ -119,7 +119,7 @@ a{color:var(--acc)}
     <iframe id="youtubeFrame" title="YouTube Shorts önizlemesi" style="width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
   </div>
   <p class="note">Desteklenen tarayıcılarda oynatılan görüntüyü ekran paylaşımıyla yakalamayı deneyebilirsin. İzin penceresinde panel sekmesini paylaşmayı seç. Telefon tarayıcısı ekran yakalamayı desteklemiyorsa aşağıdan ekran kaydı dosyası seç.</p>
-  <p class="note">Alternatif yol: ekran kaydı veya video dosyası gerektirmeden YouTube'un herkese açık küçük önizleme karelerini istemeyi dene. Bu yöntem deneysel bir harici çözümleyici kullanır; video ID'si dışında kendi kanal anahtarın gönderilmez. Dönen kareler düşük çözünürlüklü olabilir veya hiç sunulmayabilir.</p>
+  <p class="note">Önizleme çizelgesi deneysel bir harici hizmetten alınır. Bazı kısa videolarda/Shorts'larda çizelge hiç olmayabilir. Başarısız olursa panel yalnızca kapak görselini ve video bağlantısını sunar; kapak sahne kanıtı değildir. Android ekran kaydı çalışmıyorsa aynı kayıt adımını tekrar etmene gerek yok.</p>
   <div class="bar">
     <button id="fetchStoryboardFrames" type="button">YouTube önizleme karelerini getir</button>
   </div>
@@ -918,7 +918,61 @@ $('#fetchStoryboardFrames').addEventListener('click', async () => {
     storyboardResult.appendChild(packetCard);
     storyboardStatus.textContent = 'Önizleme bulundu: ' + urls.length + ' çizelge. Görseller yükleniyorsa gerçek video akışının yerine geçmezler; video indirme veya kayıt gerekmez.';
   } catch (e) {
-    storyboardStatus.textContent = 'Otomatik önizleme bu videoda çalışmadı: ' + (e && e.message ? e.message : String(e)) + ' Bu, konu motorunun hata mesajıdır; aynı indirme/kayıt yöntemlerini otomatik başlatmayacağım.';
+    const reason = String(e && e.message ? e.message : e);
+    storyboardStatus.textContent = 'Gerçek önizleme çizelgesi alınamadı. Kısa Shorts videolarında bu veri hiç bulunmayabilir. Ekran kaydı adımını tekrarlamıyorum; yalnızca kapak görseli + bağlantı paketi hazırlıyorum. Ayrıntı: ' + reason;
+    const card = document.createElement('div');
+    card.className = 'msg';
+    const heading = document.createElement('strong');
+    heading.textContent = 'Yedek yol — kapak görseli (tam sahne karesi değildir)';
+    const cover = document.createElement('img');
+    cover.alt = 'YouTube videosunun kapak görseli; tam video karesi değildir';
+    cover.loading = 'lazy';
+    cover.style.cssText = 'display:block;width:100%;max-width:360px;height:auto;margin:10px 0;border-radius:8px;background:#111';
+    cover.onerror = () => {
+      if (!cover.dataset.secondTry) {
+        cover.dataset.secondTry = '1';
+        cover.src = 'https://i.ytimg.com/vi/' + encodeURIComponent(id) + '/default.jpg';
+      } else {
+        cover.alt = 'Kapak görseli de yüklenemedi.';
+        cover.style.display = 'none';
+      }
+    };
+    cover.src = 'https://i.ytimg.com/vi/' + encodeURIComponent(id) + '/hqdefault.jpg';
+    const link = document.createElement('a');
+    link.href = 'https://www.youtube.com/shorts/' + encodeURIComponent(id);
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = 'YouTube Shorts videosunu aç';
+    const packet = {
+      source: 'YouTube URL fallback; no storyboard frames retrieved',
+      videoId: id,
+      videoUrl: 'https://www.youtube.com/shorts/' + id,
+      thumbnailUrl: 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg',
+      storyboardAvailable: false,
+      failureReason: reason,
+      observedSceneNotes: String(frameSceneNotes.value || generalSceneNotes.value || '').trim() || null,
+      limitation: 'Kapak görseli sahne dizisini kanıtlamaz. Görsel eylemler yalnızca doğrulanmış izleyici gözleminden alınmalı; eksik olan bilinmiyor kalmalı.'
+    };
+    const area = document.createElement('textarea');
+    area.readOnly = true;
+    area.rows = 7;
+    area.value = JSON.stringify(packet, null, 2);
+    area.style.cssText = 'display:block;width:100%;max-width:100%;box-sizing:border-box;margin:10px 0;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)';
+    const copy = document.createElement('button');
+    copy.type = 'button';
+    copy.textContent = 'Yedek paketi kopyala';
+    copy.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(area.value);
+        copy.textContent = 'Kopyalandı ✓';
+      } catch (_) {
+        area.focus(); area.select();
+        let ok = false; try { ok = document.execCommand('copy'); } catch (_) {}
+        copy.textContent = ok ? 'Kopyalandı ✓' : 'Metin seçildi — Kopyala seçeneğini kullan';
+      }
+    };
+    card.append(heading, cover, link, area, copy);
+    storyboardResult.appendChild(card);
   } finally {
     btn.disabled = false;
     btn.textContent = 'YouTube önizleme karelerini getir';
