@@ -123,7 +123,18 @@ def try_embedded_player_frames(video_id):
             page = browser.new_page(viewport={"width": 720, "height": 1280}, device_scale_factor=1)
             # Load a real parent origin first: YouTube requires a Referer for embedded playback.
             page.goto("https://agabeyayd-lgtm.github.io/bos-dukkan-analiz/", wait_until="domcontentloaded", timeout=30000)
-            page.set_content(f'<html><body style="margin:0"><iframe id="yt-player" width="720" height="1280" src="{embed_url}" allow="autoplay; encrypted-media; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe></body></html>')
+            page.evaluate("""(url) => {
+                document.body.style.margin = '0';
+                document.body.replaceChildren();
+                const iframe = document.createElement('iframe');
+                iframe.id = 'yt-player';
+                iframe.width = '720';
+                iframe.height = '1280';
+                iframe.allow = 'autoplay; encrypted-media; picture-in-picture; web-share';
+                iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+                iframe.src = url;
+                document.body.appendChild(iframe);
+            }""", embed_url)
             page.wait_for_timeout(7000)
             for frame in page.frames:
                 try:
