@@ -1,0 +1,108 @@
+name: Test YouTube storyboard-only extraction
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/test-youtube-storyboards.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  storyboard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install yt-dlp and image tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install --upgrade yt-dlp pillow
+      - name: Try storyboard preview sheets without downloading video
+        shell: bash
+        run: |
+          set +e
+          mkdir -p storyboard-probe
+          ids=("v__e4whKJSs" "c7IqboV6qVw")
+          clients=("ios" "android_vr" "web_embedded" "tv_embedded" "default")
+          successes=0
+          for client in "${clients[@]}"; do
+            for id in "${ids[@]}"; do
+              echo "=== STORYBOARD CLIENT=$client VIDEO=$id ==="
+              args=()
+              if [ "$client" != "default" ]; then
+                args=(--extractor-args "youtube:player_client=$client")
+              fi
+              yt-dlp --no-warnings --no-playlist "${args[@]}" --list-formats "https://www.youtube.com/watch?v=$id" 2>&1 | tee "storyboard-probe/formats-$client-$id.txt"
+              if grep -qE 'sb[0-9]+[[:space:]]+mhtml' "storyboard-probe/formats-$client-$id.txt"; then
+                yt-dlp --no-warnings --no-playlist "${args[@]}" --skip-download --write-pages --write-thumbnail --format "sb0/sb1/sb2" -o "storyboard-probe/$client-$id.%(ext)s" "https://www.youtube.com/watch?v=$id"
+                rc=$?
+                find storyboard-probe -maxdepth 1 -type f -name "$client-$id.*" -printf 'FOUND_FILE %p %s bytes\n'
+                if [ "$rc" -eq 0 ]; then
+                  successes=$((successes+1))
+                  echo "STORYBOARD_COMMAND_OK client=$client video=$id"
+                else
+                  echo "STORYBOARD_DOWNLOAD_FAILED client=$client video=$id"
+                fi
+              else
+                echo "NO_STORYBOARD_FORMAT client=$client video=$id"
+              fi
+            done
+          done
+          echo "Storyboard format/download attempts completed: $successes" | tee storyboard-probe/summary.txt
+          python - <<'PY'
+          from pathlib import Path
+          from email import policy
+          from email.parser import BytesParser
+          from PIL import Image, ImageDraw
+          import io
+          root=Path("storyboard-probe")
+          frames=[]
+          for path in root.glob("*.mhtml"):
+              try:
+                  msg=BytesParser(policy=policy.default).parsebytes(path.read_bytes())
+                  for part in msg.walk():
+                      if part.get_content_maintype()=="image":
+                          payload=part.get_payload(decode=True)
+                          if not payload: continue
+                          try:
+                              im=Image.open(io.BytesIO(payload)).convert("RGB")
+                              im.thumbnail((240,430))
+                              card=Image.new("RGB",(270,470),"white")
+                              card.paste(im,((270-im.width)//2,28))
+                              ImageDraw.Draw(card).text((6,6),path.stem,fill="black")
+                              frames.append(card)
+                          except Exception:
+                              pass
+              except Exception as e:
+                  print(f"MHTML_PARSE_ERROR {path}: {e}")
+          for path in root.glob("*.jpg"):
+              try:
+                  im=Image.open(path).convert("RGB")
+                  im.thumbnail((240,430))
+                  card=Image.new("RGB",(270,470),"white")
+                  card.paste(im,((270-im.width)//2,28))
+                  ImageDraw.Draw(card).text((6,6),path.stem,fill="black")
+                  frames.append(card)
+              except Exception:
+                  pass
+          if frames:
+              cols=3
+              sheet=Image.new("RGB",(cols*270,((len(frames)+cols-1)//cols)*470),"#ddd")
+              for i,im in enumerate(frames):
+                  sheet.paste(im,((i%cols)*270,(i//cols)*470))
+              sheet.save(root/"storyboard-contact-sheet.jpg",quality=88)
+              print(f"CONTACT_SHEET_OK images={len(frames)}")
+          else:
+              print("NO_STORYBOARD_IMAGES_PARSED")
+          PY
+      - name: Upload storyboard diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: youtube-storyboard-probe
+          path: storyboard-probe/
+          if-no-files-found: warn
+          retention-days: 3
