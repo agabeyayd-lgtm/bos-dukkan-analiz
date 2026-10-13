@@ -805,14 +805,19 @@ $('#fetchStoryboardFrames').addEventListener('click', async () => {
     });
     if (!response.ok) throw new Error('Önizleme hizmeti HTTP ' + response.status + ' döndürdü.');
     const data = await response.json();
-    const timeline = data && data.timeline;
+    // API nests both timeline and storyboard inside data.storyboard.
+    const storyboardData = data && data.storyboard ? data.storyboard : {};
+    const timeline = storyboardData.timeline || data.timeline || null;
     const medium = timeline && timeline.medium && Array.isArray(timeline.medium.frames) ? timeline.medium.frames : [];
     const high = timeline && timeline.high && Array.isArray(timeline.high.frames) ? timeline.high.frames : [];
     const low = timeline && timeline.low && Array.isArray(timeline.low.frames) ? timeline.low.frames : [];
     const preferred = medium.length ? medium : (high.length ? high : low);
     let urls = [...new Set(preferred.map(item => item && item.url).filter(url => typeof url === 'string' && /^https:\/\//.test(url)))];
-    if (!urls.length && data && data.storyboard && Array.isArray(data.storyboard.url)) {
-      urls = data.storyboard.url.filter(url => typeof url === 'string' && /^https:\/\//.test(url)).slice(0, 3);
+    const storyboardSheets = storyboardData.storyboard && Array.isArray(storyboardData.storyboard.url)
+      ? storyboardData.storyboard.url
+      : (data && data.storyboard && Array.isArray(data.storyboard.url) ? data.storyboard.url : []);
+    if (!urls.length && storyboardSheets.length) {
+      urls = storyboardSheets.filter(url => typeof url === 'string' && /^https:\/\//.test(url)).slice(0, 3);
     }
     if (!urls.length) throw new Error('Bu video için YouTube önizleme kareleri dönmedi; tüm videolarda çizelge bulunmayabilir.');
     const title = typeof data.title === 'string' ? data.title : '';
