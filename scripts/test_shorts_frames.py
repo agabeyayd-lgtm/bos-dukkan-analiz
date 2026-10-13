@@ -16,6 +16,9 @@ URLS = [
 CLIENTS = [
     "default", "tv,web_safari", "web_safari,tv", "web", "web_embedded",
     "web_safari", "tv_embedded", "mweb", "ios", "android", "android_vr", "tv",
+    # Newer client variants not included in the first diagnostic run.
+    "tv_downgraded", "web_creator", "tv_simply", "web_music",
+    "web,android_vr,tv_downgraded", "tv_downgraded,web_creator,mweb", "default,all",
 ]
 OUT = Path("shorts-frame-test")
 OUT.mkdir(exist_ok=True)
@@ -54,7 +57,7 @@ for url in URLS:
     info = None
     for client in CLIENTS:
         cmd = [
-            "yt-dlp", "--ignore-config", "--js-runtimes", "deno",
+            "yt-dlp", "--ignore-config", "--js-runtimes", "deno", "--force-ipv4",
             "--dump-single-json", "--skip-download", "--no-warnings",
             "--no-check-formats", "--socket-timeout", "15",
         ]
