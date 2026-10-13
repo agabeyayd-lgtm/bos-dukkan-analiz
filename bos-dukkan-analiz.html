@@ -108,7 +108,13 @@ a{color:var(--acc)}
   <div id="youtubePreview" style="display:none;margin-top:12px;aspect-ratio:9/16;max-height:520px;background:#000;border-radius:10px;overflow:hidden">
     <iframe id="youtubeFrame" title="YouTube Shorts önizlemesi" style="width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
   </div>
-  <p class="note">Kare çıkarma için aşağıdan aynı videonun ekran kaydını seçebilirsin.</p>
+  <p class="note">Desteklenen tarayıcılarda oynatılan görüntüyü ekran paylaşımıyla yakalamayı deneyebilirsin. İzin penceresinde panel sekmesini paylaşmayı seç. Telefon tarayıcısı ekran yakalamayı desteklemiyorsa aşağıdan ekran kaydı dosyası seç.</p>
+  <div class="bar">
+    <button id="startScreenCapture" type="button">Ekran görüntüsünü bağla</button>
+    <button id="captureLiveFrames" type="button" class="ghost" disabled>Oynatılan görüntüden kareleri yakala</button>
+    <button id="stopScreenCapture" type="button" class="ghost" disabled>Yakalamayı durdur</button>
+  </div>
+  <video id="captureStreamVideo" muted playsinline autoplay style="display:none"></video>
   <div class="bar">
     <input id="frameFile" type="file" accept="video/*" aria-label="Telefondan video veya ekran kaydı seç">
     <label style="display:flex;align-items:center;gap:6px">Başlangıç sn <input id="frameStart" type="number" min="0" step="0.1" value="0" style="width:90px;flex:none"></label>
@@ -574,7 +580,97 @@ $('#goOwn').onclick=async()=>{
   }catch(e){fail(el,e)}
 };
 
-/* ---------- 4. YOUTUBE LINK PREVIEW + LOCAL SHORTS FRAME EXTRACTION ---------- */
+/* ---------- 4. YOUTUBE LINK PREVIEW + LIVE SCREEN CAPTURE + LOCAL FILE EXTRACTION ---------- */
+const captureStreamVideo = $('#captureStreamVideo');
+const startScreenCaptureBtn = $('#startScreenCapture');
+const captureLiveFramesBtn = $('#captureLiveFrames');
+const stopScreenCaptureBtn = $('#stopScreenCapture');
+let screenCaptureStream = null;
+function stopLiveScreenCapture() {
+  if (screenCaptureStream) screenCaptureStream.getTracks().forEach(track => track.stop());
+  screenCaptureStream = null;
+  captureStreamVideo.srcObject = null;
+  captureLiveFramesBtn.disabled = true;
+  stopScreenCaptureBtn.disabled = true;
+  startScreenCaptureBtn.disabled = false;
+}
+startScreenCaptureBtn.addEventListener('click', async () => {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+    frameStatus.textContent = 'Bu tarayıcı canlı ekran yakalamayı desteklemiyor. YouTube videosunun ekran kaydını alıp aşağıdaki video seçeneğinden yükle.';
+    return;
+  }
+  try {
+    screenCaptureStream = await navigator.mediaDevices.getDisplayMedia({video:{frameRate:15},audio:false});
+    captureStreamVideo.srcObject = screenCaptureStream;
+    await captureStreamVideo.play();
+    captureLiveFramesBtn.disabled = false;
+    stopScreenCaptureBtn.disabled = false;
+    startScreenCaptureBtn.disabled = true;
+    frameStatus.textContent = 'Ekran paylaşımı bağlı. Paylaşım penceresinde panel sekmesini seçtiysen Shorts oynarken “Oynatılan görüntüden kareleri yakala” düğmesine bas.';
+    screenCaptureStream.getVideoTracks()[0].addEventListener('ended', stopLiveScreenCapture, {once:true});
+  } catch (e) {
+    frameStatus.textContent = 'Ekran yakalama başlatılamadı veya izin verilmedi. Telefon ekran kaydı dosyasını seçerek devam edebilirsin.';
+    stopLiveScreenCapture();
+  }
+});
+stopScreenCaptureBtn.addEventListener('click', () => {
+  stopLiveScreenCapture();
+  frameStatus.textContent = 'Ekran yakalama durduruldu.';
+});
+captureLiveFramesBtn.addEventListener('click', async () => {
+  const source = captureStreamVideo;
+  if (!screenCaptureStream || !source.videoWidth || !source.videoHeight) {
+    frameStatus.textContent = 'Önce ekran görüntüsünü bağla ve paylaşımın başladığını doğrula.';
+    return;
+  }
+  captureLiveFramesBtn.disabled = true;
+  $('#frameResult').innerHTML = '';
+  frameStatus.textContent = 'Paylaşılan görüntüden 8 kare alınıyor…';
+  try {
+    const count = Number($('#frameCount').value) || 8;
+    const vw = source.videoWidth, vh = source.videoHeight;
+    const cellW = 240, cellH = Math.round(cellW * vh / vw), labelH = 30, cols = 2;
+    const canvas = document.createElement('canvas');
+    canvas.width = cols * cellW;
+    canvas.height = Math.ceil(count / cols) * (cellH + labelH);
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#f5f5f5'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    for (let i=0; i<count; i++) {
+      if (!screenCaptureStream || !source.videoWidth) throw new Error('Ekran paylaşımı sona erdi.');
+      await new Promise(resolve => setTimeout(resolve, 550));
+      const x = (i % cols) * cellW, y = Math.floor(i / cols) * (cellH + labelH);
+      ctx.drawImage(source, x, y, cellW, cellH);
+      ctx.fillStyle = '#fff'; ctx.fillRect(x, y + cellH, cellW, labelH);
+      ctx.fillStyle = '#14213d'; ctx.font = '16px sans-serif';
+      ctx.fillText('Yakalama ' + (i+1), x+8, y+cellH+20);
+      frameStatus.textContent = 'Canlı görüntü: ' + (i+1) + '/' + count + ' kare';
+    }
+    const preview = document.createElement('img');
+    preview.alt = 'Paylaşılan ekrandan yakalanan kareler';
+    preview.src = canvas.toDataURL('image/jpeg', 0.9);
+    preview.style.cssText = 'display:block;width:100%;max-width:520px;border:1px solid var(--line);border-radius:10px;background:white';
+    const save = document.createElement('button');
+    save.textContent = 'Yakalanan kareleri JPG kaydet';
+    save.onclick = () => { const a=document.createElement('a'); a.href=preview.src; a.download='canli-ekran-kareleri.jpg'; document.body.appendChild(a); a.click(); a.remove(); };
+    const copy = document.createElement('button');
+    copy.className = 'ghost'; copy.textContent = 'Görseli panoya kopyala';
+    copy.onclick = async () => {
+      try {
+        if (!navigator.clipboard || !window.ClipboardItem) throw new Error('Panoya kopyalama desteklenmiyor.');
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+        frameStatus.textContent = 'Yakalanan kareler panoya kopyalandı.';
+      } catch (_) { frameStatus.textContent = 'Panoya kopyalanamadı; JPG kaydet düğmesini kullan.'; }
+    };
+    const controls=document.createElement('div'); controls.className='bar'; controls.style.marginBottom='10px'; controls.append(save,copy);
+    $('#frameResult').append(controls,preview);
+    frameStatus.textContent = 'Tamamlandı: paylaşılan ekrandan ' + count + ' kare yakalandı. Önizlemede ekranın tamamı görünebilir.';
+  } catch (e) {
+    frameStatus.textContent = 'Canlı kare yakalama başarısız: ' + (e.message || String(e)) + ' Ekran kaydı dosyasıyla devam edebilirsin.';
+  } finally {
+    captureLiveFramesBtn.disabled = !screenCaptureStream;
+  }
+});
 const videoUrlInput = $('#videoUrl');
 const youtubePreview = $('#youtubePreview');
 const youtubeFrame = $('#youtubeFrame');
