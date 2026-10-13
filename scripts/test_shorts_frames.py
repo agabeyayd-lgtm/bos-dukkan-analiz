@@ -110,6 +110,48 @@ def download_storyboard(spec, video_id):
             saved.append({"level": level, "url_status": "failed", "error": str(e)[:240]})
     return saved
 
+
+def try_invidious_frames(video_id):
+    """Use only public Invidious APIs/stream URLs; no cookies, login, or guessed YouTube signatures."""
+    instances = [
+        "https://inv.nadeko.net",
+        "https://invidious.nerdvpn.de",
+        "https://yt.chocolatemoo53.com",
+        "https://invidious.tiekoetter.com",
+    ]
+    attempts = []
+    for base in instances:
+        try:
+            api_url = base + "/api/v1/videos/" + urllib.parse.quote(video_id)
+            req = urllib.request.Request(api_url, headers={"User-Agent": "BoşDükkan-Shorts-Diagnostic/1.0", "Accept": "application/json"})
+            with urllib.request.urlopen(req, timeout=12) as resp:
+                data = json.loads(resp.read(5 * 1024 * 1024).decode("utf-8", "replace"))
+            streams = data.get("formatStreams") or []
+            adaptive = data.get("adaptiveFormats") or []
+            # Prefer a progressive MP4 with video+audio; otherwise a video-only MP4 is enough for frames.
+            candidates = [x for x in streams if x.get("url") and "mp4" in (x.get("type") or "").lower()]
+            candidates += [x for x in adaptive if x.get("url") and "video/mp4" in (x.get("type") or "").lower()]
+            attempts.append({"instance": base, "api": "ok", "format_streams": len(streams), "adaptive_formats": len(adaptive), "candidates": len(candidates)})
+            for n, stream in enumerate(candidates[:3]):
+                for stamp in (0.3, 1.5, 3.0):
+                    out = OUT / f"{video_id}-invidious-{n}-{str(stamp).replace('.', '_')}.jpg"
+                    cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin", "-y", "-ss", str(stamp),
+                           "-i", stream["url"], "-frames:v", "1", "-vf", "scale=640:-2", str(out)]
+                    try:
+                        subprocess.run(cmd, check=True, timeout=25, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+                        if out.exists() and out.stat().st_size > 1000:
+                            with Image.open(out) as im:
+                                width, height = im.size
+                            return {"success": True, "instance": base, "title": data.get("title"),
+                                    "duration_seconds": data.get("lengthSeconds"), "frames": [
+                                        {"timestamp_seconds": stamp, "file": str(out), "width": width, "height": height}
+                                    ], "attempts": attempts}
+                    except Exception as e:
+                        attempts.append({"instance": base, "frame_timestamp": stamp, "error": str(e)[:180]})
+        except Exception as e:
+            attempts.append({"instance": base, "api": "failed", "error": str(e)[:220]})
+    return {"success": False, "attempts": attempts}
+
 for url in URLS:
     video_id = url.rstrip("/").split("/")[-1]
     item = {"video_id": video_id, "url": url, "attempts": [], "public_endpoint_probes": {}}
@@ -145,6 +187,13 @@ for url in URLS:
     else:
         item["watch_page_storyboard_spec_found"] = False
         item["watch_page_storyboards"] = []
+
+    # Alternate public route: Invidious API exposes stream URLs on some healthy instances.
+    # This is a bounded fallback, not an authentication bypass; no cookies or account data are used.
+    invidious = {"success": False, "attempts": []}
+    if not spec:
+        invidious = try_invidious_frames(video_id)
+    item["invidious_fallback"] = invidious
 
     if info:
         storyboards = info.get("storyboards")
