@@ -24,15 +24,7 @@
   </div>
   <p class="muted">Arama sorguları sistem tarafından çalıştırılır; kullanıcı video veya konu girmez. Sonuçlar yalnızca YouTube'un döndürdüğü arama örneklemidir, bütün Shorts evreni değildir.</p>
 </div>
-<div class="panel warn">
-  <h2>Gerçek sahne analizi — ücretsiz başlangıç kredisi</h2>
-  <p class="muted">YouTube doğrudan kare vermediği için ayrı bir video-analiz servisi kullanılır. FrameFetch yeni anahtara $0,05 başlangıç kredisi verdiğini bildiriyor. Görsel analiz yaklaşık $0,03/video; bu krediyle genellikle yalnızca 1 video analiz edilebilir. Kart ekleme veya otomatik yükleme yapma; bu panel yalnızca sen tek tek tıkladığında analiz çağırır.</p>
-  <div class="row"><input id="ffEmail" type="email" placeholder="E-posta — ücretsiz anahtar için" autocomplete="email"><button id="createFfKey">Ücretsiz anahtar oluştur</button></div>
-  <div class="row"><input id="ffKey" type="password" placeholder="FrameFetch anahtarı (ff_…)" autocomplete="off"><button id="saveFfKey">Anahtarı kaydet</button><button id="checkFfBalance">Kalan krediyi kontrol et</button></div>
-  <p class="muted">Anahtar yalnızca bu tarayıcıda saklanır. Anahtarı sohbete veya herkese açık GitHub dosyasına yapıştırma. Görsel analiz için her aday kartındaki düğmeye ayrıca basılır; otomatik toplu harcama yoktur.</p>
-  <div id="ffStatus" class="status">Görsel analiz henüz başlatılmadı.</div>
-</div>
-<div id="status" class="panel status">Hazır. Keşif başlatılmadı.</div>
+<div class="panel"><h2>Gerçek sahne analizi — ücretsiz yöntem</h2><p>Bu sayfa ücretli video-analiz servisi kullanmaz. Adayı açıp videoyu izle; ilk kare, olayın gelişimi ve finalin göründüğü 3–4 ekran görüntüsünü bu sohbette paylaş. Görüntüleri gerçek sahne mekanizması, ilk 0,3 saniye kancası ve tamamlanmış final açısından inceleyebilirim.</p><p class="muted">YouTube Data API anahtarı adayları aramak içindir ve standart kullanımda ücretsiz kotası vardır. Küçük resimden gerçek sahne analizi yapılmaz.</p></div><div id="status" class="panel status">Hazır. Keşif başlatılmadı.</div>
 <div id="out"></div>
 <script>
 const $=s=>document.querySelector(s);
@@ -40,39 +32,6 @@ const API='https://www.googleapis.com/youtube/v3/';
 let key='';try{key=localStorage.getItem('yt_key')||''}catch(e){}
 $('#key').value=key;
 $('#save').onclick=()=>{key=$('#key').value.trim();try{localStorage.setItem('yt_key',key)}catch(e){}$('#status').textContent='YouTube anahtarı bu tarayıcıda kaydedildi.'};
-let ffKey='';try{ffKey=localStorage.getItem('framefetch_key')||''}catch(e){}
-$('#ffKey').value=ffKey;
-$('#saveFfKey').onclick=()=>{ffKey=$('#ffKey').value.trim();try{localStorage.setItem('framefetch_key',ffKey)}catch(e){}$('#ffStatus').textContent='FrameFetch anahtarı bu tarayıcıda kaydedildi.'};
-async function ffRequest(path,method='GET',body=null){
- const opts={method,headers:{Authorization:'Bearer '+ffKey}};
- if(body){opts.headers['Content-Type']='application/json';opts.body=JSON.stringify(body)}
- const r=await fetch('https://framefetch.net'+path,opts);
- const j=await r.json().catch(()=>({}));
- if(!r.ok)throw new Error(j.error?.message||j.message||('FrameFetch HTTP '+r.status));
- return j;
-}
-$('#createFfKey').onclick=async()=>{
- const email=$('#ffEmail').value.trim(),btn=$('#createFfKey');
- if(!email||!email.includes('@')){ $('#ffStatus').textContent='Önce geçerli e-posta gir.';return }
- if(!confirm('E-posta FrameFetch servisine gönderilecek. Servis yeni anahtara $0,05 başlangıç kredisi verdiğini söylüyor. Devam edilsin mi?'))return;
- btn.disabled=true;
- try{
-  const r=await fetch('https://framefetch.net/v1/keys',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
-  const j=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(j.error?.message||j.message||('HTTP '+r.status));
-  if(!j.key)throw new Error('Servis anahtar döndürmedi. Anahtarı FrameFetch belgelerinden oluşturmayı dene.');
-  ffKey=j.key;$('#ffKey').value=ffKey;try{localStorage.setItem('framefetch_key',ffKey)}catch(e){}
-  $('#ffStatus').textContent='Anahtar oluşturuldu ve bu tarayıcıya kaydedildi. Anahtar bir kez gösterilir; burada saklı tut. Şimdi kalan krediyi kontrol et.';
- }catch(e){$('#ffStatus').textContent='Anahtar oluşturulamadı: '+(e.message||String(e))+'\nAlternatif: https://framefetch.net/docs adresindeki “Get a key” bölümünü kullan. Anahtarı sohbete gönderme.'}
- finally{btn.disabled=false}
-};
-$('#checkFfBalance').onclick=async()=>{
- if(!ffKey){$('#ffStatus').textContent='Önce FrameFetch anahtarını kaydet.';return}
- const btn=$('#checkFfBalance');btn.disabled=true;
- try{const a=await ffRequest('/v1/account');$('#ffStatus').textContent='Kalan kredi: $'+(Number(a.balance_micros||0)/1000000).toFixed(5)+' · Bugünkü harcama: $'+(Number(a.spend_today_micros||0)/1000000).toFixed(5)+' · Otomatik yükleme: '+(a.auto_topup?.enabled?'AÇIK':'kapalı');}
- catch(e){$('#ffStatus').textContent='Bakiye kontrolü başarısız: '+(e.message||String(e))}
- finally{btn.disabled=false}
-};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>new Intl.NumberFormat('tr-TR',{maximumFractionDigits:1}).format(Number(n)||0);
 const dur=s=>{const m=String(s||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);return m?(+(m[1]||0)*3600+ +(m[2]||0)*60+ +(m[3]||0)):0};
@@ -110,37 +69,10 @@ async function discover(){
  const top=new Map();for(const v of [...bySpeed.slice(0,25),...byBreakout.slice(0,25)])top.set(v.id,v);
  const candidates=[...top.values()].sort((a,b)=>b.viewsPerDay-a.viewsPerDay);
  window.autoCompetitorResearch={createdAt:new Date().toISOString(),source:'YouTube Data API v3 search.list + videos.list + channels.list',windowDays:Number($('#days').value),seedQueries:seeds,returnedUniqueVideos:all.length,candidateCount:candidates.length,metricNote:'YouTube Data API does not provide average view duration/percentage for competitor videos. Do not infer visual scene content from title or thumbnail.',visualAccess:'NOT_VERIFIED',candidates:candidates.map(v=>({...v,thumbnail:undefined}))};
- $('#out').innerHTML='<h2>Aday videolar ('+candidates.length+')</h2><p class="muted">Adaylar günlük izlenme hızı ve izlenme/abone oranı olarak ayrı sıralanır; tek bir keyfî birleşik puan kullanılmaz. Bu oranlar başarı nedeni olduğunu kanıtlamaz. Süre filtresi '+min+'–'+max+' sn.</p><div class="cards">'+candidates.map(v=>'<article class="card"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(v.thumbnail)+'" alt="YouTube küçük resmi"></a><div class="body"><div class="title"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener">'+esc(v.title)+'</a></div><div class="muted">'+esc(v.channel)+' · '+v.seconds+' sn · '+Math.round(v.ageDays)+' gün önce</div><div class="metrics"><span class="pill">'+fmt(v.views)+' izlenme</span><span class="pill">'+fmt(v.viewsPerDay)+'/gün</span><span class="pill">'+(v.viewsPerSubscriber==null?'Abone oranı yok':fmt(v.viewsPerSubscriber)+'x izlenme/abone')+'</span><span class="pill">'+fmt(v.likes)+' beğeni</span></div><div class="small">Bulunduğu aramalar: '+esc(v.seeds.join(' · '))+'</div><p class="small">Görüntü durumu: yalnızca küçük resim/metadata. Gerçek sahne analizi henüz yapılmadı.</p><button class="analysis" data-visual-id="'+esc(v.id)+'">Gerçek sahne analizi (yaklaşık $0,03)</button><div class="scene-result" id="scene-'+esc(v.id)+'" hidden></div></div></article>').join('')+'</div><h2>Veri özeti</h2><div class="panel"><p>Arama penceresi: son '+$('#days').value+' gün. Benzersiz video sonucu: '+all.length+'. Gösterilen aday: '+candidates.length+'.</p><p>Kaynak: YouTube Data API v3. Ortalama izleme süresi ve ortalama izlenen yüzde rakip kanallar için bu API ile alınmadı; tahmin edilmedi.</p><button id="copyJson">Aday verisini kopyala</button> <button id="downloadJson">JSON indir</button></div>';
- document.querySelectorAll('[data-visual-id]').forEach(btn=>{btn.onclick=()=>analyzeVisual(btn.dataset.visualId,btn)});
+ $('#out').innerHTML='<h2>Aday videolar ('+candidates.length+')</h2><p class="muted">Adaylar günlük izlenme hızı ve izlenme/abone oranı olarak ayrı sıralanır; tek bir keyfî birleşik puan kullanılmaz. Bu oranlar başarı nedeni olduğunu kanıtlamaz. Süre filtresi '+min+'–'+max+' sn.</p><div class="cards">'+candidates.map(v=>'<article class="card"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(v.thumbnail)+'" alt="YouTube küçük resmi"></a><div class="body"><div class="title"><a href="https://www.youtube.com/shorts/'+encodeURIComponent(v.id)+'" target="_blank" rel="noopener">'+esc(v.title)+'</a></div><div class="muted">'+esc(v.channel)+' · '+v.seconds+' sn · '+Math.round(v.ageDays)+' gün önce</div><div class="metrics"><span class="pill">'+fmt(v.views)+' izlenme</span><span class="pill">'+fmt(v.viewsPerDay)+'/gün</span><span class="pill">'+(v.viewsPerSubscriber==null?'Abone oranı yok':fmt(v.viewsPerSubscriber)+'x izlenme/abone')+'</span><span class="pill">'+fmt(v.likes)+' beğeni</span></div><div class="small">Bulunduğu aramalar: '+esc(v.seeds.join(' · '))+'</div><p class="small">Görüntü durumu: yalnızca küçük resim/metadata. Gerçek sahne analizi henüz yapılmadı.</p><p class="small">Ücretsiz sahne incelemesi: videoyu aç, 3–4 kareyi ekran görüntüsü olarak bu sohbete gönder. Bu kart yalnızca metadata ve küçük resim içerir.</p></div></article>').join('')+'</div><h2>Veri özeti</h2><div class="panel"><p>Arama penceresi: son '+$('#days').value+' gün. Benzersiz video sonucu: '+all.length+'. Gösterilen aday: '+candidates.length+'.</p><p>Kaynak: YouTube Data API v3. Ortalama izleme süresi ve ortalama izlenen yüzde rakip kanallar için bu API ile alınmadı; tahmin edilmedi.</p><button id="copyJson">Aday verisini kopyala</button> <button id="downloadJson">JSON indir</button></div>';
  $('#copyJson').onclick=async()=>{const t=JSON.stringify(window.autoCompetitorResearch,null,2);try{await navigator.clipboard.writeText(t);$('#copyJson').textContent='Kopyalandı ✓'}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();document.execCommand('copy');a.remove();$('#copyJson').textContent='Kopyalandı ✓'}};
  $('#downloadJson').onclick=()=>{const b=new Blob([JSON.stringify(window.autoCompetitorResearch,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bos-dukkan-competitor-discovery.json';a.click();URL.revokeObjectURL(a.href)};
  $('#status').textContent='Keşif tamamlandı. Gerçek sahne analizi için bir aday kartındaki düğmeye bas; analiz yapılmadan küçük resimden sahne sonucu çıkarılmaz.';
-}
-async function analyzeVisual(videoId,btn){
- const out=$('#scene-'+videoId);
- if(!ffKey){$('#ffStatus').textContent='Önce ücretsiz FrameFetch anahtarı oluştur veya gir.';return}
- if(!confirm('Bu videonun gerçek karelerini yapay zekâ ile analiz et. Tahmini ücret yaklaşık $0,03/video; yalnızca mevcut başlangıç kredisi kullanılabilir. Bakiye yetersizse işlem durdurulur. Devam?'))return;
- btn.disabled=true;out.hidden=false;out.textContent='Önce kalan kredi kontrol ediliyor…';
- try{
-  const account=await ffRequest('/v1/account');
-  const balance=Number(account.balance_micros||0);
-  if(balance<35000)throw new Error('Kalan kredi $'+(balance/1000000).toFixed(5)+'; güvenli analiz eşiği $0,035. Ek ödeme yapılmadı, işlem durduruldu.');
-  out.textContent='Video kareleri çıkarılıyor ve sahne analizi yapılıyor…';
-  const result=await ffRequest('/v1/extract','POST',{url:'https://www.youtube.com/shorts/'+videoId,fields:['structured']});
-  const s=result.structured;
-  if(!s){out.textContent='Servis sahne analizi döndürmedi.\n'+(result.warnings||[]).join('\n');}
-  else{
-   const parts=[];
-   if(s.key_moments?.length)parts.push('ÖNEMLİ ANLAR\n'+s.key_moments.map(x=>'• '+(x.timestamp_sec??'?')+' sn — '+x.description).join('\n'));
-   if(s.chapters?.length)parts.push('SAHNE / BÖLÜM ÖZETİ\n'+s.chapters.map(x=>'• '+(x.start_sec??'?')+'–'+(x.end_sec??'?')+' sn: '+x.title+' — '+x.summary).join('\n'));
-   if(s.entities?.length)parts.push('GÖRÜLEN / DUYULAN\n'+s.entities.map(x=>'• '+x.name+' ('+x.type+')').join('\n'));
-   parts.push('Yöntem: FrameFetch yapılandırılmış video analizi. Bu çıktı aday sahne bulmaya yardım eder; komedi mekanizmasının güçlü olup olmadığını ayrıca eleştirel değerlendirmek gerekir.');
-   out.textContent=parts.join('\n\n')+'\n\nBu işlem maliyeti: $'+(Number(result.cost?.totalMicros||0)/1000000).toFixed(5);
-  }
-  const left=await ffRequest('/v1/account');
-  $('#ffStatus').textContent='Analiz tamamlandı. Kalan kredi: $'+(Number(left.balance_micros||0)/1000000).toFixed(5)+'. Otomatik yükleme açılmadı.';
- }catch(e){out.textContent='Görsel analiz yapılamadı: '+(e.message||String(e))+'\nKapak görselinden sahne sonucu uydurulmadı.';$('#ffStatus').textContent=out.textContent}
- finally{btn.disabled=false}
 }
 $('#run').onclick=async()=>{const b=$('#run');b.disabled=true;$('#out').innerHTML='';try{await discover()}catch(e){$('#status').textContent='Keşif hatası: '+(e.message||String(e))}finally{b.disabled=false}};
 </script>
