@@ -25,8 +25,8 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - name: Install latest yt-dlp prerelease
-        run: python -m pip install --disable-pip-version-check --upgrade --pre yt-dlp
+      - name: Install diagnostic dependencies
+        run: python -m pip install --disable-pip-version-check --upgrade --pre yt-dlp Pillow
       - name: Test public Shorts metadata and storyboard fields
         run: python scripts/test_shorts_frames.py
       - name: Save diagnostic report
