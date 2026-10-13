@@ -119,6 +119,12 @@ a{color:var(--acc)}
     <iframe id="youtubeFrame" title="YouTube Shorts önizlemesi" style="width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
   </div>
   <p class="note">Desteklenen tarayıcılarda oynatılan görüntüyü ekran paylaşımıyla yakalamayı deneyebilirsin. İzin penceresinde panel sekmesini paylaşmayı seç. Telefon tarayıcısı ekran yakalamayı desteklemiyorsa aşağıdan ekran kaydı dosyası seç.</p>
+  <p class="note">Alternatif yol: ekran kaydı veya video dosyası gerektirmeden YouTube'un herkese açık küçük önizleme karelerini istemeyi dene. Bu yöntem deneysel bir harici çözümleyici kullanır; video ID'si dışında kendi kanal anahtarın gönderilmez. Dönen kareler düşük çözünürlüklü olabilir veya hiç sunulmayabilir.</p>
+  <div class="bar">
+    <button id="fetchStoryboardFrames" type="button">YouTube önizleme karelerini getir</button>
+  </div>
+  <div id="storyboardStatus" class="msg" aria-live="polite">Bağlantıyı yukarıya yapıştırıp “Videoyu panelde aç” düğmesine bastıktan sonra önizleme karelerini burada deneyebilirsin.</div>
+  <div id="storyboardResult" style="display:grid;gap:10px;margin-top:12px"></div>
   <div class="bar">
     <button id="startScreenCapture" type="button">Ekran görüntüsünü bağla</button>
     <button id="captureLiveFrames" type="button" class="ghost" disabled>Oynatılan görüntüden kareleri yakala</button>
@@ -775,6 +781,88 @@ function parseYouTubeId(raw) {
   } catch (_) {}
   return '';
 }
+const storyboardStatus = $('#storyboardStatus');
+const storyboardResult = $('#storyboardResult');
+$('#fetchStoryboardFrames').addEventListener('click', async () => {
+  const id = parseYouTubeId(videoUrlInput.value);
+  const btn = $('#fetchStoryboardFrames');
+  if (!id) {
+    storyboardStatus.textContent = 'Önce geçerli bir YouTube / Shorts bağlantısı yapıştır.';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Önizleme aranıyor…';
+  storyboardResult.innerHTML = '';
+  storyboardStatus.textContent = 'Video için herkese açık önizleme çizelgesi isteniyor. Bu işlem video indirmez ve ekran kaydı istemez.';
+  try {
+    const endpoint = new URL('https://youtube-browser-api.netlify.app/content');
+    endpoint.searchParams.set('id', id);
+    endpoint.searchParams.set('params', 'storyboard,title,channel');
+    const response = await fetch(endpoint.toString(), {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-store'
+    });
+    if (!response.ok) throw new Error('Önizleme hizmeti HTTP ' + response.status + ' döndürdü.');
+    const data = await response.json();
+    const timeline = data && data.timeline;
+    const medium = timeline && timeline.medium && Array.isArray(timeline.medium.frames) ? timeline.medium.frames : [];
+    const high = timeline && timeline.high && Array.isArray(timeline.high.frames) ? timeline.high.frames : [];
+    const low = timeline && timeline.low && Array.isArray(timeline.low.frames) ? timeline.low.frames : [];
+    const preferred = medium.length ? medium : (high.length ? high : low);
+    let urls = [...new Set(preferred.map(item => item && item.url).filter(url => typeof url === 'string' && /^https:\/\//.test(url)))];
+    if (!urls.length && data && data.storyboard && Array.isArray(data.storyboard.url)) {
+      urls = data.storyboard.url.filter(url => typeof url === 'string' && /^https:\/\//.test(url)).slice(0, 3);
+    }
+    if (!urls.length) throw new Error('Bu video için YouTube önizleme kareleri dönmedi; tüm videolarda çizelge bulunmayabilir.');
+    const title = typeof data.title === 'string' ? data.title : '';
+    if (title) {
+      const heading = document.createElement('div');
+      heading.className = 'msg';
+      heading.textContent = 'Video: ' + title + ' · ' + urls.length + ' önizleme çizelgesi';
+      storyboardResult.appendChild(heading);
+    }
+    let loaded = 0;
+    let failed = 0;
+    urls.slice(0, 4).forEach((url, index) => {
+      const card = document.createElement('div');
+      card.className = 'wrap';
+      card.style.padding = '8px';
+      const label = document.createElement('p');
+      label.className = 'note';
+      label.textContent = 'Önizleme çizelgesi ' + (index + 1) + ' · küçük resimlerden oluşan bir sayfa; tek başına tam sahne analizi değildir.';
+      const img = document.createElement('img');
+      img.alt = 'YouTube önizleme kareleri ' + (index + 1);
+      img.loading = 'lazy';
+      img.referrerPolicy = 'no-referrer';
+      img.style.cssText = 'display:block;width:100%;height:auto;max-height:620px;object-fit:contain;background:#111;border-radius:6px';
+      img.onload = () => {
+        loaded++;
+        storyboardStatus.textContent = 'Önizleme çizelgesi yüklendi (' + loaded + '/' + (loaded + failed + (urls.length - index - 1)) + '). Kareleri gösteriyorum; bunlar tam çözünürlüklü video değil.';
+      };
+      img.onerror = () => {
+        failed++;
+        img.remove();
+        label.textContent += ' (Bu imza/bağlantı artık geçerli değil veya görüntü yüklenemedi.)';
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.textContent = 'Önizleme çizelgesini ayrı aç';
+        card.appendChild(link);
+      };
+      img.src = url;
+      card.append(label, img);
+      storyboardResult.appendChild(card);
+    });
+    storyboardStatus.textContent = 'Önizleme bulundu: ' + urls.length + ' çizelge. Görseller yükleniyorsa gerçek video akışının yerine geçmezler; video indirme veya kayıt gerekmez.';
+  } catch (e) {
+    storyboardStatus.textContent = 'Otomatik önizleme bu videoda çalışmadı: ' + (e && e.message ? e.message : String(e)) + ' Bu, konu motorunun hata mesajıdır; aynı indirme/kayıt yöntemlerini otomatik başlatmayacağım.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'YouTube önizleme karelerini getir';
+  }
+});
 $('#pasteVideoUrl').addEventListener('click', async () => {
   try {
     if (!navigator.clipboard || !navigator.clipboard.readText) throw new Error('Panoya otomatik erişim yok.');
