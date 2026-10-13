@@ -3,11 +3,1102 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="refresh" content="0; url=bos-dukkan-analiz.html?v=20261013framesnotes">
 <title>Boş Dükkân Analiz Paneli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e8ebe8;--panel:#f6f7f5;--ink:#14213d;--mute:#5b6577;--line:#cfd5d1;--acc:#0f7f82;--ok:#1d7a46;--bad:#b3362b;--warn:#b27a00}
+@media (prefers-color-scheme:dark){:root{--bg:#10151f;--panel:#182030;--ink:#e8ecf3;--mute:#93a0b5;--line:#2a3550;--acc:#3cc4c7;--ok:#4cc388;--bad:#ef7468;--warn:#e3b341}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans",system-ui,sans-serif;padding:16px;max-width:1100px;margin:0 auto}
+h1{font:800 26px/1.1 "Bricolage Grotesque",system-ui,sans-serif;margin:4px 0 2px}
+h2{font:700 18px "Bricolage Grotesque",system-ui,sans-serif;margin:22px 0 8px}
+.sub{color:var(--mute);margin:0 0 14px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+input,select,button{font:inherit;color:inherit}
+input,select{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-width:0}
+input{flex:1 1 180px}
+button{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-weight:600;cursor:pointer}
+@media (prefers-color-scheme:dark){button{color:#06222a}}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:focus-visible,input:focus-visible,select:focus-visible,.tab:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.tabs{display:flex;gap:0;margin:16px 0 12px;border-bottom:2px solid var(--line)}
+.tab{background:none;color:var(--mute);border-radius:0;padding:10px 16px;border-bottom:3px solid transparent;margin-bottom:-2px;font-weight:600}
+.tab.on{color:var(--ink);border-bottom-color:var(--acc)}
+.pane{display:none}.pane.on{display:block}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:12px 0}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat b{display:block;font:800 22px "Bricolage Grotesque",system-ui,sans-serif}
+.stat span{color:var(--mute);font-size:13px}
+.wrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+td.t{white-space:normal;min-width:220px}
+th{color:var(--mute);font-weight:600;cursor:pointer}
+tr:last-child td{border-bottom:0}
+.y{color:var(--ok);font-weight:700}.n{color:var(--bad);font-weight:700}
+.bars{display:grid;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+.bar-row{display:grid;grid-template-columns:42px 1fr 80px;gap:8px;align-items:center;font-size:13px}
+.bar-row i{display:block;height:14px;background:var(--acc);border-radius:3px}
+.msg{padding:12px;border-radius:10px;background:var(--panel);border:1px solid var(--line);margin-top:12px}
+.msg.err{border-color:var(--bad);color:var(--bad)}
+.note{color:var(--mute);font-size:13px;margin-top:8px}
+a{color:var(--acc)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:13px}
+@media (prefers-reduced-motion:no-preference){.bars i{transition:width .4s}}
+</style>
 </head>
 <body>
-<p>Panel açılıyor…</p>
-<a href="bos-dukkan-analiz.html?v=20261013framesnotes">Panele git</a>
+<h1>Boş Dükkân Analiz Paneli</h1>
+<p class="sub">Kendi kanalının gerçek performansı + rakip keşfi + davranış temelli konu motoru. Kanal adı bir marka; konu sınırı değil.</p>
+
+<div class="bar" role="group" aria-label="API anahtarı">
+  <input id="key" type="password" placeholder="YouTube Data API v3 anahtarı" autocomplete="off">
+  <button id="saveKey" class="ghost">Anahtarı kaydet</button>
+</div>
+<p class="note">Anahtar yalnızca bu tarayıcıda saklanır. Google Cloud'da "YouTube Data API v3" etkinleştirip ücretsiz anahtar alabilirsin.</p>
+
+<div class="tabs" role="tablist">
+  <button class="tab on" role="tab" data-p="gen">1. Genel analiz</button>
+  <button class="tab" role="tab" data-p="kan">2. Kanal analizi</button>
+  <button class="tab" role="tab" data-p="own">3. Kendi performansım + konu motoru</button>
+  <button class="tab" role="tab" data-p="frames">4. Gerçek kareler</button>
+</div>
+
+<section id="gen" class="pane on">
+  <div class="bar">
+    <input id="q" placeholder="Anahtar kelime (örn. auto repair funny)">
+    <select id="days"><option value="7">Son 7 gün</option><option value="30" selected>Son 30 gün</option><option value="90">Son 90 gün</option></select>
+    <select id="ord"><option value="viewCount">En çok izlenen</option><option value="date">En yeni</option><option value="relevance">Alakalı</option></select>
+    <select id="srt"><option value="brk" selected>Fırlamaya göre</option><option value="vpd">Günlük izlenmeye göre</option></select>
+    <label style="display:flex;align-items:center;gap:6px"><input id="only60" type="checkbox" checked style="flex:none"> ≤60 sn</label>
+    <button id="goGen">Analiz et</button>
+  </div>
+  <details class="note" style="margin-top:10px"><summary>Gerçek sahne notları (isteğe bağlı, yalnızca gördüğün şeyler)</summary>
+    <p>Video URL'si/ID'si ve mümkünse saniyeyle eşleştir. Yalnızca gerçekten izlediğin sahneleri yaz; başlık veya küçük resimden olay uydurma. Kare erişimi yoksa boş bırak; motor bu eksikliği açıkça belirtecek.</p>
+    <textarea id="sceneNotes" rows="4" placeholder="Video URL/ID — 0.0–1.0 sn: ilk kare; 1.0–4.0 sn: görülen davranış; final: gerçekten görülen sonuç..." style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
+  </details>
+  <div id="outGen"></div>
+</section>
+
+<section id="kan" class="pane">
+  <div class="bar">
+    <input id="ch" placeholder="@kanaladi veya kanal linki / UC... kimliği">
+    <select id="cnt"><option value="50">Son 50 video</option><option value="100" selected>Son 100 video</option><option value="150">Son 150 video</option></select>
+    <button id="goKan">Analiz et</button>
+  </div>
+  <div id="outKan"></div>
+</section>
+
+<section id="own" class="pane">
+  <div class="bar">
+    <input id="cid" placeholder="OAuth istemci kimliği (...apps.googleusercontent.com)">
+    <select id="odays"><option value="28" selected>Son 28 gün</option><option value="90">Son 90 gün</option><option value="365">Son 365 gün</option></select>
+    <button id="goOwn">Google ile bağlan ve getir</button>
+  </div>
+  <p class="note">Yalnızca kendi kanalın için çalışır. Google Cloud'da OAuth istemcisini "Web uygulaması" olarak oluştur, yetkili JavaScript kaynağı olarak <code>https://agabeyayd-lgtm.github.io</code> ekle ve "YouTube Analytics API"yi de etkinleştir.</p>
+  <div class="panel" style="margin:10px 0">
+    <label for="ideaHistory"><strong>Fikir geçmişi / tekrar engeli</strong></label>
+    <p class="note">Yayımlanmış, denenmiş, reddedilmiş veya istemediğin fikirleri buraya yaz. Bu alan yalnızca bu tarayıcıda saklanır ve konu motoru paketine eklenir.</p>
+    <textarea id="ideaHistory" rows="4" placeholder="Fikir / temel davranış / neden denendi veya reddedildi..." style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
+  </div>
+  <div id="outOwn"></div>
+</section>
+
+<section id="frames" class="pane">
+  <h2>Rakip Shorts'tan gerçek kare çıkar</h2>
+  <p class="note">YouTube Shorts bağlantısını aşağıya yapıştırıp panelde açabilirsin. YouTube oynatıcısından doğrudan kare alma tarayıcı güvenliği nedeniyle mümkün değil; gerçek kare çıkarmak için ekran kaydını veya video dosyasını seç. Dosya sunucuya yüklenmez.</p>
+  <div class="bar" aria-label="YouTube video bağlantısı">
+    <input id="videoUrl" type="url" inputmode="url" autocomplete="off" placeholder="YouTube Shorts bağlantısını buraya yapıştır" aria-label="YouTube video bağlantısı">
+    <button id="pasteVideoUrl" class="ghost" type="button">Panodan yapıştır</button>
+    <button id="openVideoUrl" type="button">Videoyu panelde aç</button>
+    <button id="screenRecordHelp" type="button" class="ghost">Telefonda ekran kaydı al</button>
+  </div>
+  <div id="youtubePreview" style="display:none;margin-top:12px;aspect-ratio:9/16;max-height:520px;background:#000;border-radius:10px;overflow:hidden">
+    <iframe id="youtubeFrame" title="YouTube Shorts önizlemesi" style="width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  </div>
+  <p class="note">Desteklenen tarayıcılarda oynatılan görüntüyü ekran paylaşımıyla yakalamayı deneyebilirsin. İzin penceresinde panel sekmesini paylaşmayı seç. Telefon tarayıcısı ekran yakalamayı desteklemiyorsa aşağıdan ekran kaydı dosyası seç.</p>
+  <p class="note">Alternatif yol: ekran kaydı veya video dosyası gerektirmeden YouTube'un herkese açık küçük önizleme karelerini istemeyi dene. Bu yöntem deneysel bir harici çözümleyici kullanır; video ID'si dışında kendi kanal anahtarın gönderilmez. Dönen kareler düşük çözünürlüklü olabilir veya hiç sunulmayabilir.</p>
+  <div class="bar">
+    <button id="fetchStoryboardFrames" type="button">YouTube önizleme karelerini getir</button>
+  </div>
+  <div id="storyboardStatus" class="msg" aria-live="polite">Bağlantıyı yukarıya yapıştırıp “Videoyu panelde aç” düğmesine bastıktan sonra önizleme karelerini burada deneyebilirsin.</div>
+  <div id="storyboardResult" style="display:grid;gap:10px;margin-top:12px"></div>
+  <div class="bar">
+    <button id="startScreenCapture" type="button">Ekran görüntüsünü bağla</button>
+    <button id="captureLiveFrames" type="button" class="ghost" disabled>Oynatılan görüntüden kareleri yakala</button>
+    <button id="stopScreenCapture" type="button" class="ghost" disabled>Yakalamayı durdur</button>
+  </div>
+  <video id="captureStreamVideo" muted playsinline autoplay style="display:none"></video>
+  <div class="bar">
+    <input id="frameFile" type="file" accept="video/*" aria-label="Telefondan video veya ekran kaydı seç">
+    <label style="display:flex;align-items:center;gap:6px">Başlangıç sn <input id="frameStart" type="number" min="0" step="0.1" value="0" style="width:90px;flex:none"></label>
+    <label style="display:flex;align-items:center;gap:6px">Kare sayısı <select id="frameCount" style="width:90px;flex:none"><option>6</option><option selected>8</option><option>10</option><option>12</option></select></label>
+    <button id="extractFrames" disabled>Kareleri çıkar</button>
+  </div>
+  <div id="frameStatus" class="msg">YouTube bağlantısını yapıştırıp açabilir veya telefondan video/ekran kaydı seçebilirsin.</div>
+  <video id="frameVideo" controls playsinline preload="metadata" style="display:none;width:100%;max-height:420px;margin-top:12px;border-radius:10px;background:#000"></video>
+  <div id="frameResult" style="margin-top:12px"></div>
+  <div class="msg" style="margin-top:12px">
+    <h3 style="margin:0 0 6px">Kare gözlemleri → Konu Motoru</h3>
+    <p class="note" style="margin:0 0 8px">Kareleri bu sohbetle paylaşıp görsel analizi aldıktan sonra zaman damgalı gözlemleri buraya yaz. Bu alan mevcut Konu Motoru paketine otomatik bağlanır; panel tek başına görüntüleri yorumladığını iddia etmez.</p>
+    <textarea id="frameSceneNotes" rows="5" placeholder="Video ID / başlık (varsa) — 0.0–0.3 sn: ilk gerçek görüntü; 0.3–1.5 sn: davranış; 1.5–4.5 sn: gelişme; 4.5–8.0 sn: sonuç. Belirsiz olanı 'bilinmiyor' yaz." style="display:block;width:100%;max-width:100%;box-sizing:border-box;margin:8px 0;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
+    <div class="bar" style="padding:0;border:0;background:transparent">
+      <button id="syncFrameNotes" type="button">Notları Konu Motoru'na bağla</button>
+      <button id="clearFrameNotes" class="ghost" type="button">Notları temizle</button>
+    </div>
+    <p id="frameNotesStatus" class="note" aria-live="polite">Notlar, Genel Analiz bölümündeki sahne notlarıyla eş zamanlı tutulur.</p>
+  </div>
+  <p class="note">İpucu: Ekran kaydında önce YouTube oynatıcısını aç, Shorts'u tam ekrana al ve oynat. Kayıt videonun başından önce menü/arama ekranı içeriyorsa “Başlangıç sn” değerini artır. Bu araç kareleri görselleştirir; kendi başına mizah veya sahne yorumu üretmez.</p>
+</section>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+const $=s=>document.querySelector(s);
+const API='https://www.googleapis.com/youtube/v3/';
+const GUN=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
+let key=''; try{key=localStorage.getItem('yt_key')||''}catch(e){}
+$('#key').value=key;
+$('#saveKey').onclick=()=>{key=$('#key').value.trim();try{localStorage.setItem('yt_key',key)}catch(e){}flash('Anahtar kaydedildi.')};
+try { $('#sceneNotes').value=localStorage.getItem('bd_scene_notes')||''; } catch(e) {}
+try { $('#ideaHistory').value=localStorage.getItem('bd_idea_history')||''; } catch(e) {}
+$('#sceneNotes').addEventListener('input',()=>{try{localStorage.setItem('bd_scene_notes',$('#sceneNotes').value)}catch(e){}});
+$('#ideaHistory').addEventListener('input',()=>{try{localStorage.setItem('bd_idea_history',$('#ideaHistory').value)}catch(e){}});
+function flash(t){const d=document.createElement('div');d.className='msg';d.textContent=t;$('.note').after(d);setTimeout(()=>d.remove(),2000)}
+async function copyTable(tableSelector,buttonSelector){const table=$(tableSelector),btn=$(buttonSelector);if(!table||!btn)return;const text=Array.from(table.rows).map(row=>Array.from(row.cells).map(cell=>cell.innerText.trim().replace(/\s+/g,' ')).join('\t')).join('\n');try{await navigator.clipboard.writeText(text);btn.textContent='Kopyalandı ✓';}catch(e){const area=document.createElement('textarea');area.value=text;area.style.position='fixed';area.style.opacity='0';document.body.appendChild(area);area.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}area.remove();btn.textContent=ok?'Kopyalandı ✓':'Tabloyu seçip kopyala';if(!ok){const visible=document.createElement('textarea');visible.value=text;visible.rows=8;visible.style.width='100%';visible.style.marginTop='8px';table.parentElement.after(visible);visible.focus();visible.select();}}}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id===b.dataset.p));
+});
+
+async function yt(path,params){
+  if(!key) throw new Error('Önce API anahtarını gir ve kaydet.');
+  const u=new URL(API+path);
+  Object.entries({...params,key}).forEach(([k,v])=>u.searchParams.set(k,v));
+  const r=await fetch(u); const j=await r.json();
+  if(!r.ok) throw new Error(j.error&&j.error.message||('Hata '+r.status));
+  return j;
+}
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dur=iso=>{const m=iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);return (+m[1]||0)*3600+(+m[2]||0)*60+(+m[3]||0)};
+const fmt=n=>new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(Math.round(Number(n)||0));
+const median=a=>{if(!a.length)return 0;const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2};
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+const isEn=t=>!/[çğıöşüÇĞİÖŞÜ]/.test(t)&&(t.replace(/[^\x00-\x7F]/g,'').length/t.length)>0.9;
+const inSlot=d=>(d.getDay()===3||d.getDay()===0)&&d.getHours()>=18&&d.getHours()<=19;
+const ageDays=d=>Math.max((Date.now()-d)/864e5,0.5);
+
+async function details(ids){
+  const out=[];
+  for(let i=0;i<ids.length;i+=50){
+    const j=await yt('videos',{part:'snippet,statistics,contentDetails',id:ids.slice(i,i+50).join(',')});
+    out.push(...j.items);
+  }
+  return out.map(v=>{const date=new Date(v.snippet.publishedAt),views=+v.statistics.viewCount||0;
+    return{id:v.id,title:v.snippet.title,channel:v.snippet.channelTitle,channelId:v.snippet.channelId,date,sec:dur(v.contentDetails.duration),
+      views,likes:+v.statistics.likeCount||0,comments:+v.statistics.commentCount||0,vpd:views/ageDays(date)}});
+}
+async function subsMap(ids){
+  const m={};
+  for(let i=0;i<ids.length;i+=50){
+    const j=await yt('channels',{part:'statistics',id:ids.slice(i,i+50).join(',')});
+    (j.items||[]).forEach(c=>{m[c.id]=c.statistics.hiddenSubscriberCount?null:(+c.statistics.subscriberCount||0)});
+  }
+  return m;
+}
+
+/* Yorum örnekleri, yaratıcı karar için çeşitli performans sinyallerini temsil edecek şekilde seçilir. */
+function chooseOwnCommentVideos(videos,maxVideos=5){
+  const pool=[...videos].filter(v=>v&&v.id),chosen=[],used=new Set();
+  const pick=(rank,reason)=>{const v=rank.find(x=>!used.has(x.id));if(v&&chosen.length<maxVideos){used.add(v.id);chosen.push({...v,commentSelectionReason:reason});}};
+  const measured=pool.filter(v=>v.hasAnalytics),p=measured.length?measured:pool;
+  pick([...p].filter(v=>Number.isFinite(v.pct)).sort((a,b)=>b.pct-a.pct),'En yüksek ortalama izlenen yüzde');
+  pick([...p].filter(v=>Number.isFinite(v.pct)).sort((a,b)=>a.pct-b.pct),'En düşük ortalama izlenen yüzde');
+  pick([...p].filter(v=>Number.isFinite(v.subs)&&Number.isFinite(v.views)&&v.views>0).sort((a,b)=>(b.subs/b.views)-(a.subs/a.views)),'İzlenmeye göre yüksek abone kazanımı');
+  pick([...p].filter(v=>Number.isFinite(v.views)).sort((a,b)=>b.views-a.views),'Seçili dönemde en çok izlenen');
+  pick([...pool].sort((a,b)=>new Date(b.date)-new Date(a.date)),'En yeni video');
+  return chosen;
+}
+function chooseResearchCommentVideos(videos,maxVideos=8){
+  const pool=[...videos].filter(v=>v&&v.id),chosen=[],used=new Set();
+  const pick=(rank,reason)=>{
+    const v=rank.find(x=>!used.has(x.id));
+    if(v&&chosen.length<maxVideos){used.add(v.id);chosen.push({...v,commentSelectionReason:reason});}
+  };
+  const desc=key=>[...pool].sort((a,b)=>(Number(b[key])||0)-(Number(a[key])||0));
+  pick(desc('viewsPerSub'),'Kanal abonesine göre yüksek izlenme');
+  pick(desc('viewsPerDay'),'Günlük izlenme hızı yüksek');
+  pick([...pool].sort((a,b)=>Math.abs((Number(a.seconds)||60)-8)-Math.abs((Number(b.seconds)||60)-8)||(b.views||0)-(a.views||0)),'8 saniyelik formata süre bakımından en yakın');
+  pick([...pool].sort((a,b)=>(b.comments||0)/Math.max(1,b.views||0)-(a.comments||0)/Math.max(1,a.views||0)),'İzlenmeye göre yorum oranı yüksek');
+  pick([...pool].sort((a,b)=>(b.likes||0)/Math.max(1,b.views||0)-(a.likes||0)/Math.max(1,a.views||0)),'İzlenmeye göre beğeni oranı yüksek');
+  pick(desc('views'),'Mutlak görüntülenmesi en yüksek');
+  pick([...pool].filter(v=>Number(v.seconds)>=7&&Number(v.seconds)<=15).sort((a,b)=>(b.viewsPerSub??-1)-(a.viewsPerSub??-1)),'7–15 saniye aralığında aboneye göre güçlü performans');
+  pick([...pool].filter(v=>Number(v.seconds)>=7&&Number(v.seconds)<=15).sort((a,b)=>(b.comments||0)/Math.max(1,b.views||0)-(a.comments||0)/Math.max(1,a.views||0)),'7–15 saniye aralığında yüksek yorum oranı');
+  return chosen;
+}
+async function sampleComments(videos,maxVideos=5,perVideo=8){
+  const chosen=[...videos].filter(v=>v&&v.id).slice(0,maxVideos),out=[];
+  for(const v of chosen){
+    try{
+      const j=await yt('commentThreads',{part:'snippet',videoId:v.id,maxResults:Math.min(perVideo,100),order:'relevance',textFormat:'plainText'});
+      const comments=(j.items||[]).map(x=>{
+        const c=x.snippet?.topLevelComment?.snippet||{};
+        return {text:String(c.textDisplay||c.textOriginal||'').slice(0,700),likes:+c.likeCount||0,published:c.publishedAt||null};
+      }).filter(c=>c.text.trim());
+      out.push({videoId:v.id,title:v.title,selectionReason:v.commentSelectionReason||'Kanalın en çok izlenen videoları',available:true,sampled:comments.length,comments});
+    }catch(e){
+      out.push({videoId:v.id,title:v.title,selectionReason:v.commentSelectionReason||'Kanalın en çok izlenen videoları',available:false,reason:String(e.message||e).slice(0,180),sampled:0,comments:[]});
+    }
+  }
+  return out;
+}
+function askClaude(vs,q){
+  const pool=vs.filter(v=>v.brk!=null).sort((a,b)=>b.brk-a.brk).slice(0,10);
+  const lines=pool.map((v,i)=>(i+1)+'. "'+v.title+'" | '+v.channel+' | '+fmt(v.subs)+' abone | '+fmt(v.views)+' izlenme | '+v.sec+' sn | '+v.brk.toFixed(1)+'x').join('\n');
+  const avoid=$('#avoidIdeas')?.value.trim()||'Belirtilmedi.';
+  const txt=[
+    "ROLÜN: Yalnızca harici rakip keşif verisini denetleyen analistsin. Bu aşamada nihai konu veya çekim senaryosu seçme.",
+    "",
+    "SABİT SINIRLAR: 8 saniye, dikey 9:16, diyalog yok, doğal ASMR sesleri. İngilizce başlık. Yayın Çarşamba ve Pazar 19:00.",
+    "Mizah gerçekçi gündelik akıştan doğmalı. Zorlama tezat, rastgele absürtlük, imkânsız fizik, yalnızca nesneyi büyütme/değiştirme ve açıklama yazısı yok.",
+    "İnsan davranışı, beklenti, karar ve sonuç mizahı taşımalı. Karakterler olan biteni doğal karşılamalı.",
+    "İlk 0,3 saniyede güçlü görsel kanca; olay 8 saniyede anlaşılır; doğal yükseliş ve tamamlanmış somut final. Sırf loop için sonu yarım bırakma.",
+    "",
+    'ARAŞTIRMA VERİSİ — arama: "'+q+'". Yüksek izlenme/abone oranıyla seçilen videolar; bu oran tek başına neden-sonuç kanıtı değildir:',
+    lines,
+    "",
+    "ÖNCEKİ FİKİRLER / KAÇINILACAK TEKRARLAR:",
+    avoid,
+    "",
+    "KENDİ KANALIMI BU AŞAMADA DAHİL ETME. Yalnızca bu aramada bulunan harici videoları analiz et; kendi kanal metrikleri, videoları ve yorumları kullanılmayacak.",
+    "GÖREV — ÖNCEDEN BELİRLENMİŞ FİKİR LİSTESİ VE MİZAH MEKANİZMASI KATALOĞU KULLANMA:",
+    "1) Önce gerçek ölçümleri göster: veri kaynağı, örneklem sayısı, zaman aralığı ve eksik alanlar. İzlenme/abone oranını, izlenen yüzdeyi ve ortalama izleme süresini farklı metrikler olarak tut; birbirinin yerine kullanma.",
+    "2) Başarılı ve zayıf videoları kendi uygun karşılaştırma grubuyla kıyasla. Video yaşı, süre, kanal büyüklüğü ve dağıtım farklarını hesaba kat. Tek örnekten kural çıkarma; korelasyonu neden-sonuç gibi sunma.",
+    "3) Yorumları yalnızca doğru video ID'sine bağlı olduklarında kullan. Yorum örneklerini tüm izleyicilerin temsili sayma; sahne ayrıntılarını başlık veya yorumdan uydurma.",
+    "4) Sabit bir mizah mekanizması listesi, önceden seçilmiş konu ailesi, elle yazılmış başarı formülü veya keyfî puan eşiği dayatma. Verilerde görülen örüntüleri kanıt gücüyle birlikte çıkar; veri desteklemiyorsa 'bilinmiyor' de.",
+    "5) Bu aşamada nihai video konusu veya çekim senaryosu seçme. Yalnızca ölçümleri, seçilim yanlılığını, eksik veriyi ve doğrulanması gereken görsel kanıtı raporla.",
+    "6) Tek nihai video önerme. Görsel kareler incelenmediyse sahne mekanizmasını bilinmiyor olarak işaretle. Nihai karar, 3. sekmedeki birleşik Konu Motoru paketiyle verilecek.",
+    "7) Yayın sonrası ölçüm planı ver: hangi metrikleri mevcut kanal tabanıyla karşılaştıracağımızı ve hangi sonucun yeniden test gerektireceğini belirt. Başarı garantisi verme; tam kanal manifestosu bu panele bağlı değilse bunu saklama."
+  ].join('\n');
+  const ta=$('#askTxt');ta.value=txt;ta.style.display='block';ta.select();
+  const done=ok=>{$('#ask').textContent=ok?"Kopyalandı ✓ Claude'a yapıştır":'Metni elle kopyala (aşağıda)'};
+  const old=()=>{try{done(document.execCommand('copy'))}catch(e){done(false)}};
+  if(navigator.clipboard)navigator.clipboard.writeText(txt).then(()=>done(true)).catch(old);else old();
+}
+const link=v=>`<a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">${esc(v.title)}</a>`;
+const stat=(b,s)=>`<div class="stat"><b>${b}</b><span>${s}</span></div>`;
+const busy=(el,t)=>{el.innerHTML=`<div class="msg">${t}</div>`};
+const fail=(el,e)=>{el.innerHTML=`<div class="msg err">${esc(e.message)}</div>`};
+
+/* ---------- 1. GENEL ANALİZ ---------- */
+$('#goGen').onclick=async()=>{
+  const el=$('#outGen'),q=$('#q').value.trim(); if(!q)return;
+  busy(el,'Aranıyor…');
+  try{
+    const after=new Date(Date.now()-$('#days').value*864e5).toISOString();
+    const s=await yt('search',{part:'id',q,type:'video',maxResults:50,order:$('#ord').value,publishedAfter:after,videoDuration:'short'});
+    let vs=await details(s.items.map(i=>i.id.videoId));
+    if($('#only60').checked) vs=vs.filter(v=>v.sec<=60);
+    if(!vs.length){busy(el,'Sonuç yok. Süreyi genişlet veya ≤60 sn filtresini kapat.');return}
+    busy(el,'Kanal büyüklükleri alınıyor…');
+    const sm=await subsMap([...new Set(vs.map(v=>v.channelId))]);
+    vs.forEach(v=>{v.subs=sm[v.channelId]??null;v.brk=v.subs?v.views/v.subs:null});
+    window.bosResearchSnapshot={query:q,source:'YouTube Data API v3 search.list + videos.list + channels.list',searchDays:+$('#days').value,searchStartedAt:new Date(Date.now()-$('#days').value*864e5).toISOString(),searchEndedAt:new Date().toISOString(),sortMode:$('#srt').value,requestedOrder:$('#ord').value,videoCount:vs.length,videos:vs.map(v=>({id:v.id,title:v.title,channel:v.channel,channelId:v.channelId,subscribers:v.subs,views:v.views,likes:v.likes,comments:v.comments,seconds:v.sec,publishedAt:v.date.toISOString(),ageDays:Number(ageDays(v.date).toFixed(2)),viewsPerSub:v.brk,viewsPerDay:Number(v.vpd.toFixed(2)),likeRate:v.views?v.likes/v.views:null,commentRate:v.views?v.comments/v.views:null,averageViewSeconds:null,averageViewedPercent:null}))};
+    if($('#srt').value==='brk') vs.sort((a,b)=>(b.brk??-1)-(a.brk??-1)); else vs.sort((a,b)=>b.vpd-a.vpd);
+    const words={};const stop=new Set('this that with from your what when they have just video shorts short funny'.split(' '));
+    vs.forEach(v=>v.title.toLowerCase().replace(/[^a-z0-9ğüşöçı\s]/g,'').split(/\s+/).forEach(w=>{if(w.length>3&&!stop.has(w))words[w]=(words[w]||0)+1}));
+    const top=Object.entries(words).sort((a,b)=>b[1]-a[1]).slice(0,12);
+    const md=median(vs.map(v=>v.views));
+    el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(md),'medyan izlenme')}${stat(fmt(Math.max(...vs.map(v=>v.vpd))),'en yüksek günlük izlenme')}${stat(vs.filter(v=>v.brk!=null).length,'abone oranı hesaplanabilen video')}${stat(avg(vs.map(v=>v.sec)).toFixed(1)+' sn','ortalama süre')}${stat(Math.round(vs.filter(v=>v.sec>=7&&v.sec<=9).length/vs.length*100)+'%','8 sn civarı')}</div>
+    <h2>Başlıklarda sık geçen kelimeler</h2><div class="chips">${top.map(([w,c])=>`<span class="chip">${esc(w)} · ${c}</span>`).join('')}</div>
+    <h2>Videolar</h2><p><button class="ghost" id="copyGen">Tabloyu kopyala</button></p><div class="wrap"><table id="tg"><tr><th>Başlık</th><th>Kanal</th><th>Abone</th><th>İzlenme</th><th>Fırlama</th><th>İzl./gün</th><th>Beğeni %</th><th>Yorum</th><th>Süre</th><th>Gün-saat</th></tr>
+    ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${esc(v.channel)}</td><td>${v.subs==null?'–':fmt(v.subs)}</td><td>${fmt(v.views)}</td><td class="${v.brk>=5?'y':''}">${v.brk==null?'–':v.brk.toFixed(1)+'x'}</td><td>${fmt(v.vpd)}</td><td>${v.views?(v.likes/v.views*100).toFixed(1):'–'}</td><td>${fmt(v.comments)}</td><td>${v.sec} sn</td><td>${GUN[v.date.getDay()]} ${String(v.date.getHours()).padStart(2,'0')}:00</td></tr>`).join('')}</table></div>
+    <p class="note">İzlenme/abone = keşif sinyalidir; tek başına başarı veya neden-sonuç kanıtı değildir. Video yaşı, süre ve dağıtım farkları karşılaştırmayı etkiler. YouTube Data API bu aramada ortalama izleme süresi ve izlenen yüzde sağlamaz. Arama sonuçları, seçilen tarih aralığındaki ve YouTube'un döndürdüğü en fazla 50 videoyla sınırlıdır.</p>
+    <h2>Rakip keşfi — ön çalışma</h2>
+    <p class="note">Tek düğme, rakip videoları ve video ID’siyle eşleşen yorum örneklerini toplar; kanıt/hipotez ayrımını ve Boş Dükkân’ın sabit kurallarını içeren analiz talimatıyla birlikte tek bir paket hazırlar. Bu adım yalnızca harici rakip keşfidir; kendi kanal performansı ve doğrulanmış sahne analizi içermediği için nihai konu seçmez. Önce Genel Analiz’i çalıştır, sonra düğmeye bas ve kopyalanan paketi ChatGPT’ye buraya yapıştır. Bu sürüm paketi hazırlar; yapay zekâ analizini kendi kendine çalıştırmaz. Google/OAuth ile kendi kanalına bağlanman gerekmez.</p>
+    <p><button id="makeCompetitorPacket">Rakip keşif verisini kopyala (ön çalışma)</button></p>
+    <div id="competitorDiag" class="note" aria-live="polite">Önce Genel Analiz’i çalıştır; ardından rakip verisi + analiz talimatı tek pakette hazırlanır.</div>
+    <textarea id="competitorPacket" readonly rows="10" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
+    <h2>Önceki fikirler / tekrar filtresi</h2>
+    <p class="note">Daha önce üretilen fikirleri veya kaçınılacak mizah mekanizmalarını buraya yapıştır. Yeni istem bunların tekrar edilmemesini şart koşar.</p>
+    <textarea id="avoidIdeas" rows="3" placeholder="Örn. gevşek somun, küçük hata→şaşkın tepki, aynı final tipi..." style="width:100%;max-width:100%;margin:4px 0 10px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
+    <p><button id="ask">Rakip verisi için ön analiz istemi</button></p>
+    <textarea id="askTxt" readonly rows="10" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
+    $('#copyGen').onclick=()=>copyTable('#tg','#copyGen');
+    $('#ask').onclick=()=>askClaude(vs,q);
+    $('#makeCompetitorPacket').onclick=async()=>{
+      const btn=$('#makeCompetitorPacket'),diag=$('#competitorDiag'),ta=$('#competitorPacket');
+      btn.disabled=true;btn.textContent='Rakip yorumları alınıyor…';
+      diag.textContent='Harici videolar ve yorumlar tam video ID ile eşleştiriliyor…';
+      try{
+        const research=window.bosResearchSnapshot;
+        if(!research||!Array.isArray(research.videos)||!research.videos.length)throw new Error('Önce Genel Analiz aramasını çalıştır.');
+        const picks=chooseResearchCommentVideos(research.videos,8);
+        const samples=picks.length?await sampleComments(picks,8,8):[];
+        const byId=new Map(samples.map(x=>[x.videoId,x]));
+        research.commentSamples=samples;
+        research.videoCommentMatches=research.videos.map(v=>({...v,commentSample:byId.get(v.id)||{videoId:v.id,available:false,reason:'Bu video yorum örneklemi için seçilmedi.',sampled:0,comments:[]}}));
+        research.commentSampleDesign={selection:'En fazla 8 video; farklı performans sinyallerine göre; her video için relevance sıralı en fazla 8 üst düzey yorum',selectedVideoIds:picks.map(v=>v.id),sampledComments:samples.reduce((n,v)=>n+v.sampled,0),commentRequestsSucceeded:samples.filter(v=>v.available).length,commentRequestsFailed:samples.filter(v=>!v.available).length};
+        const payload={
+          role:'Rakip keşif denetçisi; yalnızca ölçülen harici veriyi ve eksik kanıtı raporla, nihai konu seçme.',
+          constraints:{durationSeconds:8,aspectRatio:'9:16',dialogue:false,audio:'natural ASMR',titleLanguage:'English',postingSchedule:'Wednesday and Sunday 19:00',humor:'realistic everyday human behavior, expectation, decision and consequence',mustHave:['strong visual hook in first 0.3 seconds','causal progression','concrete completed ending'],avoid:['forced contrast','random absurdity','impossible physics','only enlarging/changing an object','explanatory text','unfinished loop ending']},
+          sourceAndSample:{source:research.source||'YouTube Data API v3',query:research.query,requestedPublishedWindowDays:research.searchDays,windowStart:research.searchStartedAt,windowEnd:research.searchEndedAt,returnedVideoCount:research.videos.length,selection:'YouTube search results; no random or population-representative sample',selectionBias:'The search API returns a relevance/ranking-limited sample (max 50 here); videos are not a representative sample of all comedy Shorts.',ownChannelIncluded:false,ownChannelVideosIncluded:false,ownChannelCommentsIncluded:false},
+          researchData:{
+            videos:research.videos.slice().sort((a,b)=>(Number(b.views)||0)-(Number(a.views)||0)).slice(0,12).map(v=>({
+              id:v.id,title:v.title,channel:v.channel,channelId:v.channelId,publishedAt:v.publishedAt||v.date||null,ageDays:v.ageDays??null,
+              subscribers:v.subscribers??v.subs??null,views:v.views??null,likes:v.likes??null,comments:v.comments??null,
+              durationSeconds:v.durationSeconds??v.sec??null,viewsPerSubscriber:v.viewsPerSubscriber??v.viewsPerSub??v.brk??null,
+              viewsPerDay:v.viewsPerDay??v.vpd??null,likeRate:v.likeRate??null,commentRate:v.commentRate??null,
+              averageViewSeconds:null,averageViewedPercent:null
+            })),
+            commentSamples:(research.videoCommentMatches||[]).filter(v=>v.commentSample&&v.commentSample.available).slice(0,6).map(v=>({
+              videoId:v.id,title:v.title,channel:v.channel,selectionReason:v.commentSelectionReason||null,
+              sampled:v.commentSample.sampled,comments:(v.commentSample.comments||[]).slice(0,4).map(c=>({text:c.text||c.textDisplay||c.comment||'',likes:c.likes??c.likeCount??null}))
+            })),
+            note:'Kısaltılmış paket: en fazla 12 video ve en fazla 6 videoda 4 yorum. Ortalama izleme süresi/yüzdesi bu kaynakta yoktur.'
+          },
+          analysisInstructions:[
+            'Önce gerçek ölçümleri raporla: kaynak, örneklem sayısı, arama sorgusu, tarih aralığı ve veri eksikleri.',
+            'İzlenme/abone oranı, izlenme/gün, beğeni oranı, ortalama izleme süresi ve ortalama izlenen yüzdeyi ayrı metrikler olarak tut. averageViewSeconds ve averageViewedPercent null/eksik ise bunları tahmin etme; YouTube Data API bu aramada bunları sağlamaz.',
+            'Videoları süre, video yaşı ve kanal büyüklüğü bakımından uygun gruplarda kıyasla. Video yaşı ve dağıtım farklılıklarını not et. Başarı ve zayıflık yalnızca gözlenen örneklem içinde söylenebilir; izlenme/abone oranı tek başına neden-sonuç değildir.',
+            'Yorumları yalnızca aynı tam YouTube video ID’sinin commentSample alanıyla eşleştir. Yorumlar relevance sıralı küçük örneklemdir; tüm izleyicileri temsil etmez. Başlık veya yorumdan sahne uydurma. Görsel içerik gerçekten incelenmediyse bunu açıkça belirt.',
+            'Önceden tanımlı mizah mekanizması kataloğu, konu ailesi, başarı formülü veya keyfî eşik kullanma. Veri desteklemiyorsa “bilinmiyor” de.',
+            'Bu paket yalnızca harici rakip keşfidir. Nihai konu, yeni video fikri veya çekim senaryosu seçme; kendi kanal verisi bu pakette yoktur.',
+            'Başlık, thumbnail, görüntülenme veya yorumdan sahne uydurma. Gerçek kareler/gözle doğrulanmış sahne notları yoksa görsel mekanizmayı bilinmiyor olarak işaretle.',
+            'Çıktı: gözlenen ölçümler; örneklem ve seçilim yanlılığı; video yaşı/süre/kanal büyüklüğü sınırlamaları; tam video ID ile eşleşen yorumların sınırlı anlamı; sahne analizi için eksik kanıt.'
+          ]
+        };
+        ta.value=JSON.stringify(payload,null,2);ta.style.display='block';ta.focus();ta.select();
+        let copied=false;try{await navigator.clipboard.writeText(ta.value);copied=true}catch(e){try{copied=document.execCommand('copy')}catch(_){}}
+        diag.textContent='Kısa paket hazır: en fazla 12 video ve 24 yorum. '+(copied?'Kopyalandı; buraya yapıştır.':'Metin aşağıda seçili; Kopyala ile al.');
+        btn.textContent=copied?'Kopyalandı ✓':'Paket hazır';
+      }catch(e){diag.textContent='Hata: '+(e.message||String(e));btn.textContent='Tekrar dene';}
+      finally{btn.disabled=false;}
+    };
+  }catch(e){fail(el,e)}
+};
+
+/* ---------- 2. KANAL ANALİZİ ---------- */
+async function resolveChannel(input){
+  let m;
+  if((m=input.match(/(UC[\w-]{22})/))) return (await yt('channels',{part:'snippet,statistics,contentDetails',id:m[1]})).items[0];
+  const h=(input.match(/@[\w.\-]+/)||[input.replace(/^@?/,'@')])[0];
+  return (await yt('channels',{part:'snippet,statistics,contentDetails',forHandle:h})).items[0];
+}
+$('#goKan').onclick=async()=>{
+  const el=$('#outKan'),inp=$('#ch').value.trim(); if(!inp)return;
+  busy(el,'Kanal bulunuyor…');
+  try{
+    const c=await resolveChannel(inp); if(!c){busy(el,'Kanal bulunamadı.');return}
+    const want=+$('#cnt').value; let ids=[],tok='';
+    do{
+      const p=await yt('playlistItems',{part:'contentDetails',playlistId:c.contentDetails.relatedPlaylists.uploads,maxResults:50,...(tok?{pageToken:tok}:{})});
+      ids.push(...p.items.map(i=>i.contentDetails.videoId)); tok=p.nextPageToken||'';
+    }while(tok&&ids.length<want);
+    busy(el,'Videolar analiz ediliyor…');
+    const vs=(await details(ids.slice(0,want))).filter(v=>v.sec<=180).sort((a,b)=>b.date-a.date);
+    if(!vs.length){busy(el,'Bu kanalda Shorts benzeri (≤3 dk) video bulunamadı.');return}
+    vs.forEach(v=>{v.ok8=v.sec>=7&&v.sec<=9;v.en=isEn(v.title);v.slot=inSlot(v.date);v.score=(v.ok8?1:0)+(v.en?1:0)+(v.slot?1:0)});
+    const pct=f=>Math.round(vs.filter(f).length/vs.length*100)+'%';
+    const byDay=GUN.map((g,i)=>{const a=vs.filter(v=>v.date.getDay()===i);return{g,n:a.length,avg:avg(a.map(v=>v.views))}});
+    const mx=Math.max(...byDay.map(d=>d.avg),1);
+    const slotV=vs.filter(v=>v.slot),offV=vs.filter(v=>!v.slot);
+    const best=[...vs].sort((a,b)=>b.vpd-a.vpd)[0];
+    const cmp=slotV.length&&offV.length?`Rutin slotunda (Çar/Paz ~19:00) ortalama ${fmt(avg(slotV.map(v=>v.views)))}, diğer saatlerde ${fmt(avg(offV.map(v=>v.views)))} izlenme. Küçük örneklemde bu fark tesadüf olabilir.`:'Rutin slotu ile diğer saatleri kıyaslamak için her iki gruptan da video gerekli.';
+    el.innerHTML=`<h2>${esc(c.snippet.title)}</h2>
+    <div class="stats">${stat(fmt(+c.statistics.subscriberCount||0),'abone')}${stat(vs.length,'analiz edilen video')}${stat(fmt(median(vs.map(v=>v.views))),'medyan izlenme')}${stat(fmt(avg(vs.map(v=>v.views))),'ortalama izlenme')}</div>
+    <h2>Manifesto uyumu</h2>
+    <div class="stats">${stat(pct(v=>v.ok8),'8 sn (7–9 sn)')}${stat(pct(v=>v.en),'İngilizce başlık')}${stat(pct(v=>v.slot),'Çar/Paz 18–20 arası yayın')}</div>
+    <p class="note">En hızlı giden video: ${link(best)} (${fmt(best.vpd)} izlenme/gün). ${cmp}</p>
+    <h2>Yayın gününe göre ortalama izlenme</h2>
+    <div class="bars">${byDay.map(d=>`<div class="bar-row"><span>${d.g}</span><span><i style="width:${d.avg/mx*100}%"></i></span><span>${fmt(d.avg)} (${d.n})</span></div>`).join('')}</div>
+    <h2>Videolar</h2><div class="wrap"><table id="tk"><tr><th>Başlık</th><th>İzlenme</th><th>İzl./gün</th><th>Beğeni %</th><th>Süre</th><th>Yayın</th><th>8 sn</th><th>EN</th><th>Slot</th></tr>
+    ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${fmt(v.vpd)}</td><td>${v.views?(v.likes/v.views*100).toFixed(1):'–'}</td><td>${v.sec} sn</td><td>${GUN[v.date.getDay()]} ${v.date.toLocaleDateString('tr-TR')} ${String(v.date.getHours()).padStart(2,'0')}:00</td>${[v.ok8,v.en,v.slot].map(x=>`<td class="${x?'y':'n'}">${x?'✓':'✗'}</td>`).join('')}</tr>`).join('')}</table></div>
+    <p class="note">Tutma oranı (retention) ve loop verisi yalnızca kanal sahibi girişiyle YouTube Analytics API'den alınabilir; bunun için 3. sekmeyi kullan. Yayın saatleri tarayıcının yerel saat dilimine göredir.</p>
+    <p><button class="ghost" id="copyKan">Tabloyu kopyala</button> <button class="ghost" id="csv">CSV indir</button></p>`;
+    $('#copyKan').onclick=()=>copyTable('#tk','#copyKan');
+    $('#csv').onclick=()=>{
+      const rows=[['baslik','izlenme','begeni','yorum','sure_sn','yayin','8sn','ingilizce','slot','url'],
+        ...vs.map(v=>[v.title,v.views,v.likes,v.comments,v.sec,v.date.toISOString(),v.ok8,v.en,v.slot,'https://youtu.be/'+v.id])];
+      const csv=rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));a.download='kanal-analiz.csv';a.click();
+    };
+  }catch(e){fail(el,e)}
+};
+
+/* ---------- 3. TUTMA ORANI (kanal sahibi, OAuth) ---------- */
+let cid='',tok='';try{cid=localStorage.getItem('yt_cid')||''}catch(e){}
+$('#cid').value=cid;
+function connect(){
+  return new Promise((res,rej)=>{
+    cid=$('#cid').value.trim();
+    if(!cid) return rej(new Error('OAuth istemci kimliğini gir.'));
+    try{localStorage.setItem('yt_cid',cid)}catch(e){}
+    if(!window.google||!google.accounts) return rej(new Error('Google giriş kütüphanesi yüklenemedi. İnternet bağlantını kontrol edip sayfayı yenile.'));
+    google.accounts.oauth2.initTokenClient({
+      client_id:cid,
+      scope:'https://www.googleapis.com/auth/yt-analytics.readonly https://www.googleapis.com/auth/youtube.readonly',
+      callback:r=>r.access_token?res(r.access_token):rej(new Error(r.error_description||r.error||'Giriş başarısız.')),
+      error_callback:e=>rej(new Error('Giriş penceresi kapandı veya engellendi ('+(e.type||'hata')+').'))
+    }).requestAccessToken();
+  });
+}
+const pctCls=p=>p>=55?'y':'n';
+$('#goOwn').onclick=async()=>{
+  const el=$('#outOwn'); busy(el,'Google ile bağlanılıyor…');
+  try{
+    if(!tok) tok=await connect();
+    busy(el,'Rapor alınıyor…');
+    const au={headers:{Authorization:'Bearer '+tok}};
+    const day=x=>x.toISOString().slice(0,10);
+    const q=new URLSearchParams({ids:'channel==MINE',startDate:day(new Date(Date.now()-$('#odays').value*864e5)),endDate:day(new Date()),
+      metrics:'views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,subscribersGained',dimensions:'video',sort:'-views',maxResults:200});
+    const r=await fetch('https://youtubeanalytics.googleapis.com/v2/reports?'+q,au);
+    const j=await r.json();
+    if(!r.ok){if(r.status===401)tok='';throw new Error((j.error&&j.error.message)||('Hata '+r.status))}
+    const rows=j.rows||[];
+    const analyticsDebug={satirSayisi:rows.length,ilkSatirlar:rows.slice(0,3)};
+    if(!rows.length){
+      throw new Error('Video listesi alınabiliyor ama YouTube Analytics bu tarih aralığı için hiçbir istatistik satırı döndürmedi. Bu yüzden önceki sürüm videoların istatistiklerini yanlış biçimde 0 gösteriyordu. Son 90 günü seçip tekrar dene; yine aynıysa Google hesabının Boş Dükkan kanalının sahibi/yöneticisi olduğundan ve YouTube Analytics API erişiminin açık olduğundan emin olmamız gerekiyor.');
+    }
+    // Analytics raporu yalnızca seçili dönemde ölçümü olan videoları döndürebilir.
+    // Son yüklenen videoları ayrıca alıp raporla birleştir; böylece yeni video listede kaybolmaz.
+    const cr=await fetch(API+'channels?part=snippet,statistics,contentDetails&mine=true',au);
+    const cj=await cr.json();
+    if(!cr.ok)throw new Error((cj.error&&cj.error.message)||('Kanal listesi alınamadı: '+cr.status));
+    const uploads=cj.items&&cj.items[0]&&cj.items[0].contentDetails.relatedPlaylists.uploads;
+    if(!uploads)throw new Error('Kanalın yüklenen videolar oynatma listesi bulunamadı.');
+    const pr=await fetch(API+'playlistItems?part=contentDetails&playlistId='+encodeURIComponent(uploads)+'&maxResults=50',au);
+    const pj=await pr.json();
+    if(!pr.ok)throw new Error((pj.error&&pj.error.message)||('Son videolar alınamadı: '+pr.status));
+    const ids=[...new Set([...rows.map(x=>x[0]),...(pj.items||[]).map(x=>x.contentDetails.videoId)])];
+    if(!ids.length){busy(el,'Bu dönemde veya kanalda video bulunamadı.');return}
+    const meta={};
+    for(let i=0;i<ids.length;i+=50){
+      const batch=ids.slice(i,i+50).join(',');
+      const vr=await fetch(API+'videos?part=snippet,contentDetails,statistics&id='+batch,au);
+      const vj=await vr.json();
+      if(!vr.ok)throw new Error((vj.error&&vj.error.message)||('Video bilgileri alınamadı: '+vr.status));
+      (vj.items||[]).forEach(v=>meta[v.id]={title:v.snippet.title,sec:dur(v.contentDetails.duration),date:new Date(v.snippet.publishedAt),publicViews:+(v.statistics&&v.statistics.viewCount||0),publicLikes:+(v.statistics&&v.statistics.likeCount||0),publicComments:+(v.statistics&&v.statistics.commentCount||0)});
+    }
+    const metrics=new Map(rows.map(x=>[x[0],x]));
+    // OAuth video metadata's statistics can be absent for an item; retry missing/zero public counts with the saved Data API key.
+    const fallbackIds=ids.filter(id=>!meta[id]||!meta[id].publicViews||!meta[id].sec);
+    if(fallbackIds.length&&key){
+      for(let i=0;i<fallbackIds.length;i+=50){
+        try{
+          const fj=await yt('videos',{part:'snippet,statistics,contentDetails',id:fallbackIds.slice(i,i+50).join(',')});
+          (fj.items||[]).forEach(v=>{
+            const date=new Date(v.snippet.publishedAt),prev=meta[v.id]||{};
+            const fallbackSec=dur(v.contentDetails&&v.contentDetails.duration||'');
+            meta[v.id]={
+              title:prev.title||v.snippet.title,
+              sec:prev.sec>0?prev.sec:fallbackSec,
+              date:prev.date||date,
+              publicViews:prev.publicViews>0?prev.publicViews:+(v.statistics&&v.statistics.viewCount||0),
+              publicLikes:prev.publicLikes>0?prev.publicLikes:+(v.statistics&&v.statistics.likeCount||0),
+              publicComments:prev.publicComments>0?prev.publicComments:+(v.statistics&&v.statistics.commentCount||0)
+            };
+          });
+        }catch(e){/* Keep OAuth response; diagnostics below expose missing metadata. */}
+      }
+    }
+    const vs=ids.map(id=>{
+      const x=metrics.get(id)||[];
+      const m=meta[id]||{title:id,sec:0,publicViews:0}; const hasAnalytics=metrics.has(id); return {id,views:hasAnalytics?+(x[1]||0):m.publicViews,min:hasAnalytics?+(x[2]||0):null,avgSec:hasAnalytics?+(x[3]||0):null,pct:hasAnalytics?+(x[4]||0):null,likes:hasAnalytics?+(x[5]||0):null,subs:hasAnalytics?+(x[6]||0):null,hasAnalytics,...m};
+    }).filter(v=>v.sec<=180).sort((a,b)=>b.date-a.date);
+    analyticsDebug.sonVideolar=vs.slice(0,10).map(v=>({id:v.id,title:v.title,views:v.views,publicViews:v.publicViews,hasAnalytics:v.hasAnalytics,metadataFound:!!meta[v.id],seconds:v.sec}));
+    if(!vs.length){busy(el,'Kanalda analiz edilecek video bulunamadı.');return}
+    const analyticsVideos=vs.filter(v=>v.hasAnalytics&&Number.isFinite(v.views)&&v.views>0);
+    const tv=analyticsVideos.reduce((a,v)=>a+v.views,0);
+    const reported=vs.filter(v=>v.hasAnalytics&&v.pct!=null&&v.views>0);
+    const reportedViews=reported.reduce((a,v)=>a+v.views,0);
+    const wpct=reportedViews?reported.reduce((a,v)=>a+v.pct*v.views,0)/reportedViews:NaN;
+    // No fixed retention threshold is used as a success rule.
+    const best=reported.length?[...reported].sort((a,b)=>b.pct-a.pct)[0]:null;
+    // Stage 3: compare the channel's own videos against robust baselines; treat patterns as correlations, not causes.
+    const withViews=vs.filter(v=>v.hasAnalytics&&v.views>0);
+    const viewMedian=withViews.length?median(withViews.map(v=>v.views)):NaN;
+    const retentionMedian=reported.length?median(reported.map(v=>v.pct)):NaN;
+    const aboveBaseline=withViews.filter(v=>v.views>=viewMedian);
+    const belowBaseline=withViews.filter(v=>v.views<viewMedian);
+    const retentionGroups=[
+      {label:'Kısa (0–9 sn)',items:reported.filter(v=>v.sec<=9)},
+      {label:'Orta (10–20 sn)',items:reported.filter(v=>v.sec>=10&&v.sec<=20)},
+      {label:'Uzun (21–180 sn)',items:reported.filter(v=>v.sec>=21)}
+    ].filter(g=>g.items.length);
+    const durationFindings=retentionGroups.map(g=>({label:g.label,n:g.items.length,avgViews:avg(g.items.map(v=>v.views)),avgRetention:avg(g.items.map(v=>v.pct))}));
+    const bestRetention=reported.length?[...reported].sort((a,b)=>b.pct-a.pct)[0]:null;
+    const weakRetention=reported.length?[...reported].sort((a,b)=>a.pct-b.pct)[0]:null;
+    const comparisonHtml=`<h2>Aşama 3 · Performans karşılaştırması</h2>
+      <div class="stats">${stat(Number.isFinite(viewMedian)?fmt(viewMedian):'—','medyan video izlenmesi')}${stat(aboveBaseline.length,'medyanı yakalayan/aşan')}${stat(Number.isFinite(retentionMedian)?retentionMedian.toFixed(0)+'%':'—','medyan izlenen kısım')}${stat(reported.length,'tutma verisi bulunan video')}</div>
+      <p class="note">Karşılaştırma yalnızca bu listede bulunan videolara dayanır. Medyan, birkaç aşırı yüksek izlenmeli videonun ortalamayı bozmasını azaltır. Bu ilişkiler tek başına neden-sonuç kanıtlamaz.</p>
+      ${durationFindings.length?`<h3>Süre grupları · raporlu videolar</h3><div class="wrap"><table><tr><th>Süre grubu</th><th>Video</th><th>Ort. izlenme</th><th>Ort. izlenen kısım</th></tr>${durationFindings.map(g=>`<tr><td>${g.label}</td><td>${g.n}</td><td>${fmt(g.avgViews)}</td><td>${g.avgRetention.toFixed(1)}%</td></tr>`).join('')}</table></div>`:'<p class="note">Süre gruplarını karşılaştırmak için henüz yeterli raporlu video yok.</p>'}
+      ${bestRetention&&weakRetention&&reported.length>1?`<h3>Uç örnekler</h3><ul><li>En yüksek izlenen kısım: ${link(bestRetention)} — ${bestRetention.pct.toFixed(1)}%.</li><li>En düşük izlenen kısım: ${link(weakRetention)} — ${weakRetention.pct.toFixed(1)}%.</li></ul>`:''}
+      <p class="note">Bir sonraki aşamada bu karşılaştırmaların başlık/konu ve görsel olay özellikleriyle eşleştirilmesi gerekir; mevcut API verileri tek başına videonun sahne içeriğini açıklamaz.</p>`;
+    el.innerHTML=`${comparisonHtml}<div class="stats">${stat(vs.length,'video')}${stat(fmt(tv),'dönem izlenmesi toplamı')}${stat(Number.isFinite(wpct)?wpct.toFixed(0)+'%':'—','ağırlıklı ort. izlenen kısım')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct!=null).length+'/'+vs.filter(v=>v.hasAnalytics).length,'tutma verisi bulunan video')}${stat(vs.filter(v=>v.hasAnalytics&&v.pct>100).length,'%100 üstü (loop sinyali)')}</div>
+    <p class="note">Seçili dönem izlenmesi yalnızca Analytics satırı bulunan videolarda gösterilir; herkese açık toplam izlenme ayrı kolondadır. Farklı zaman aralıklarına ait sayılar aynı toplamda veya medyanda karıştırılmaz. %100'ün üstü tekrar izleme/loop için olası sinyaldir; doğrudan tekrar sayısı değildir.</p>
+    <h2>Videolar (en yeni önce)</h2><p><button class="ghost" id="copyOwn">Tabloyu kopyala</button> <button class="ghost" id="copyOwnShort">Kısa çıktıyı kopyala (son 10)</button></p><div class="wrap"><table id="to"><tr><th>Başlık</th><th>İzlenme (dönem)</th><th>Kamusal toplam izlenme</th><th>Ort. izleme</th><th>İzlenen kısım</th><th>Süre</th><th>Beğeni (dönem)</th><th>Yeni abone (dönem)</th></tr>
+    ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${v.hasAnalytics?fmt(v.views):'—'}</td><td>${v.publicViews==null?'—':fmt(v.publicViews)}</td><td>${v.avgSec==null?'—':v.avgSec.toFixed(1)+' sn'}</td><td class="${v.pct==null?'':pctCls(v.pct)}">${v.pct==null?'—':v.pct.toFixed(0)+'%'}</td><td>${v.sec} sn</td><td>${v.likes==null?'—':fmt(v.likes)}</td><td>${v.subs==null?'—':v.subs}</td></tr>`).join('')}</table></div>
+    <details class="note"><summary>Teknik teşhis (istatistikler neden 0?)</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(analyticsDebug,null,2)}</pre></details>
+    <p class="note">Hazır bir başarı eşiği kullanılmaz. Videoları kendi karşılaştırılabilir dönemleri içinde değerlendir; %100 üzeri izlenen kısım, tekrar izleme için olası bir sinyaldir, tek başına başarı nedeni değildir.</p>
+    <h2>Konu Motoru · kanal verisi + rakip keşfi</h2>
+    <p class="note">Sıra: önce <b>Genel Analiz</b> bölümünde aramayı çalıştır, sonra bu bölümde Google ile kanal verisini getir, en son aşağıdaki düğmeye bas. Paket kendi kanalının performansını, harici rakip keşfini, tam video ID'sine bağlı iki grup yorum örneğini, varsa doğrulanmış sahne notlarını ve fikir geçmişini birleştirir. Kanal adı/markası konu filtresi değildir: market, boşaltma veya araba zorunluluğu yoktur. Paket otomatik kopyalanır; istersen dosya olarak da indirebilirsin. Bu sayfa kendi başına yapay zekâ sonucu üretmez; paketi bu sohbete gönderdiğinde analizi ben yaparım. Yorumlar kapalıysa örnek alınamayabilir.</p>
+    <p><button id="copyCompare">Konu Motoru paketini oluştur ve kopyala</button> <button id="downloadCompare" class="ghost" disabled>Konu paketini indir (.txt)</button></p>
+    <div id="commentDiag" class="note" aria-live="polite">Yorum teşhisi henüz çalıştırılmadı. Yukarıdaki düğmeye bastığında yorumların alınıp alınmadığı ve varsa API hatası burada gösterilecek.</div>
+    <textarea id="compareTxt" readonly rows="8" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
+    $('#copyOwn').onclick=()=>copyTable('#to','#copyOwn');
+    $('#copyOwnShort').onclick=async()=>{
+      const btn=$('#copyOwnShort');
+      const recent=vs.slice(0,10);
+      const lines=['Boş Dükkân · kısa tutma çıktısı (son '+recent.length+' video)',
+        ...recent.map(v=>[
+          String(v.title||v.id).replace(/\s+/g,' ').slice(0,90),
+          'Süre: '+(v.sec?v.sec+' sn':'Yok'),
+          'İzlenme: '+fmt(v.views),
+          'Ort. izleme: '+(v.avgSec==null?'Yok':v.avgSec.toFixed(1)+' sn'),
+          'Ort. izlenen: '+(v.pct==null?'Yok':v.pct.toFixed(1)+'%')
+        ].join(' | ')),
+        'Saniye bazlı düşüş noktaları: Bu API raporunda yok; tahmin edilmedi.'];
+      const textOut=lines.join('\n');
+      try{await navigator.clipboard.writeText(textOut);btn.textContent='Kısa çıktı kopyalandı ✓';}
+      catch(e){
+        const area=document.createElement('textarea');area.value=textOut;area.rows=8;area.style.width='100%';area.style.marginTop='8px';
+        btn.parentElement.after(area);area.focus();area.select();
+        let ok=false;try{ok=document.execCommand('copy')}catch(_){}
+        btn.textContent=ok?'Kısa çıktı kopyalandı ✓':'Metni seçip kopyala';
+      }
+    };
+    $('#copyCompare').onclick=async()=>{
+      const btn=$('#copyCompare');
+      const commentDiag=$('#commentDiag');
+      btn.disabled=true;
+      btn.textContent='Yorum örnekleri alınıyor…';
+      commentDiag.innerHTML='<h2>Yorum çekme teşhisi</h2><p>İşlem başladı. Videolar ve yorum erişimi kontrol ediliyor…</p>';
+      try {
+        const periodDays=Number($('#odays').value)||28;
+        const own=vs.map(v=>{
+          const age=Math.max((Date.now()-new Date(v.date).getTime())/864e5,0.5);
+          const observedDays=Math.max(0.5,Math.min(periodDays,age));
+          const viewsInWindow=v.hasAnalytics&&Number.isFinite(v.views)?v.views:null;
+          return {id:v.id,title:v.title,published:new Date(v.date).toISOString().slice(0,10),publishedAt:new Date(v.date).toISOString(),seconds:v.sec,analyticsWindowDays:periodDays,analyticsAvailable:!!v.hasAnalytics,viewsInWindow,publicLifetimeViews:Number.isFinite(v.publicViews)?v.publicViews:null,averageViewSeconds:v.hasAnalytics&&Number.isFinite(v.avgSec)?v.avgSec:null,averageViewedPercent:v.hasAnalytics&&Number.isFinite(v.pct)?v.pct:null,likesInWindow:v.hasAnalytics&&Number.isFinite(v.likes)?v.likes:null,subscribersGainedInWindow:v.hasAnalytics&&Number.isFinite(v.subs)?v.subs:null,publicLifetimeLikes:Number.isFinite(v.publicLikes)?v.publicLikes:null,publicLifetimeComments:Number.isFinite(v.publicComments)?v.publicComments:null,observedDaysSincePublish:Number(observedDays.toFixed(2)),viewsPerObservedDay:viewsInWindow==null?null:Number((viewsInWindow/observedDays).toFixed(2)),subscribersGainedPer1000WindowViews:viewsInWindow>0&&Number.isFinite(v.subs)?Number((v.subs/viewsInWindow*1000).toFixed(3)):null,likeRateInWindow:viewsInWindow>0&&Number.isFinite(v.likes)?Number((v.likes/viewsInWindow).toFixed(5)):null};
+        });
+        const analyticsOwn=own.filter(v=>v.analyticsAvailable);
+        const sceneNotes=$('#sceneNotes')?.value.trim()||'';
+        const ideaHistory=$('#ideaHistory')?.value.trim()||'';
+        const research=window.bosResearchSnapshot||null;
+        const researchVideos=research&&Array.isArray(research.videos)?research.videos:[];
+        // Yorum örneği için yalnızca en yüksek izlenmeyi değil, farklı performans sinyallerini temsil eden videolar seç.
+        const researchCommentPicks=chooseResearchCommentVideos(researchVideos,8);
+        const researchComments=researchCommentPicks.length?await sampleComments(researchCommentPicks,8,8):[];
+        const ownCommentPicks=chooseOwnCommentVideos(vs,5);
+        const ownComments=ownCommentPicks.length?await sampleComments(ownCommentPicks,5,8):[];
+        // Yorumları başlık benzerliğiyle değil, tam YouTube video ID'siyle eşleştir.
+        const ownCommentById=new Map(ownComments.map(x=>[x.videoId,x]));
+        const researchCommentById=new Map(researchComments.map(x=>[x.videoId,x]));
+        const ownPickedIds=new Set(ownCommentPicks.map(v=>v.id));
+        const ownMatched=own.filter(v=>ownPickedIds.has(v.id)).map(v=>({...v,views:v.viewsInWindow,likes:v.likesInWindow,comments:v.publicLifetimeComments,commentSample:ownCommentById.get(v.id)||{videoId:v.id,available:false,reason:'Yorum isteği bu video için başarısız oldu',sampled:0,comments:[]}}));
+        const researchPickedIds=new Set(researchCommentPicks.map(v=>v.id));
+        const researchMatched=researchCommentPicks.map(v=>({...v,commentSample:researchCommentById.get(v.id)||{videoId:v.id,available:false,reason:researchPickedIds.has(v.id)?'Yorum isteği başarısız oldu':'Yorum örneği yok',sampled:0,comments:[]}}));
+        if(research){research.commentSamples=researchComments;research.videoCommentMatches=researchMatched;}
+        window.bosOwnAnalyticsSnapshot={source:'YouTube Analytics API v2 + YouTube Data API v3 video metadata',reportingWindowDays:periodDays,requestedAt:new Date().toISOString(),channelSubscriberCount:Number(cj.items?.[0]?.statistics?.subscriberCount||0),totalVideoRows:own.length,analyticsVideoRows:analyticsOwn.length,note:'Analytics-window metrics and public lifetime counters must not be mixed.',videos:own,commentSamples:ownComments};
+        const renderMatchedGroup=(label,records,kind)=>'<h3>'+esc(label)+'</h3>'+((records&&records.length)?records.map(v=>{
+          const s=v.commentSample||{}, metrics=kind==='own'
+            ? 'Dönem izlenmesi: '+(Number.isFinite(v.views)?fmt(v.views):'veri yok')+' · Ort. izleme: '+(Number.isFinite(v.averageViewSeconds)?v.averageViewSeconds+' sn':'veri yok')+' · İzlenen: '+(Number.isFinite(v.averageViewedPercent)?v.averageViewedPercent+'%':'veri yok')+' · Dönem beğenisi: '+(Number.isFinite(v.likes)?fmt(v.likes):'veri yok')+' · Kamusal toplam yorum: '+(Number.isFinite(v.comments)?fmt(v.comments):'veri yok')
+            : 'İzlenme: '+fmt(v.views)+' · Süre: '+(v.seconds??'veri yok')+' sn · İzlenme/abone: '+(Number.isFinite(v.viewsPerSub)?v.viewsPerSub.toFixed(2)+'x':'veri yok')+' · Beğeni: '+fmt(v.likes)+' · Toplam yorum: '+fmt(v.comments);
+          return '<div style="margin:8px 0;padding:8px;border:1px solid var(--line);border-radius:8px"><strong>'+esc(v.title||v.id)+'</strong><p>'+esc(metrics)+'</p><p>Video ID: <code>'+esc(v.id||'')+'</code> · '+(s.available?'Yorum API başarılı · '+s.sampled+' örnek':'Yorum örneği yok'+(s.reason?' · '+esc(s.reason):''))+(kind==='research'&&s.selectionReason?' · Seçim nedeni: '+esc(s.selectionReason):'')+'</p>'+((s.comments||[]).length?'<ul>'+s.comments.map(x=>'<li>'+esc(x.text)+' <small>('+fmt(x.likes)+' beğeni)</small></li>').join('')+'</ul>':(s.available?'<p>API sonuçlarında gösterilebilir yorum yok.</p>':''))+'</div>';
+        }).join(''):'<p>Bu grupta video yok.</p>');
+        const failures=[...ownComments,...researchComments].filter(v=>!v.available);
+        commentDiag.innerHTML='<h2>Konu Motoru: kanal ve rakip kanıtları</h2><p>Araştırma: '+researchComments.filter(v=>v.available).length+'/'+researchComments.length+' seçili harici videoda istek başarılı.</p><p>Kendi kanalın ve rakipler ayrı gruplarda; her yorum tam video ID’siyle eşleşir. Analytics dönemi ile kamusal ömür boyu sayaçlar ayrıdır. Video başına en fazla 8 relevance sıralı yorum gösterilir; bu örneklem temsili anket değildir. Yorumlar görsel sahne kanıtı sayılmaz.</p>'+(failures.length?'<p><strong>Hata ayrıntıları ilgili video kaydında gösterilir.</strong></p>':'<p>Seçilen rakip videolarda API isteği hata vermedi. Sıfır yorum, o videolarda sonuç dönmediği anlamına gelir.</p>')+renderMatchedGroup('Kendi kanalım — performans ve aynı video ID\'sine bağlı yorumlar',ownMatched,'own')+renderMatchedGroup('Rakip videolar — performans ve aynı video ID\'sine bağlı yorumlar',researchMatched,'research');
+        const ownDataForPrompt={
+          source:window.bosOwnAnalyticsSnapshot.source,reportingWindowDays:periodDays,channelSubscriberCount:window.bosOwnAnalyticsSnapshot.channelSubscriberCount,totalVideoRows:own.length,analyticsVideoRows:analyticsOwn.length,
+          selectionNote:own.length>40?'Paket boyutu için performans uçlarından ve farklı tarihlerden en fazla 40 video aktarılır. Özetler tüm satırlar üzerinden hesaplanır.':'Tüm dönen video satırları aktarılır.',
+          videos:(()=>{
+            const ranked=[];
+            const pick=(list,why)=>{const v=list.find(x=>!ranked.some(y=>y.id===x.id));if(v&&ranked.length<40)ranked.push({...v,packetSelectionReason:why});};
+            const measured=own.filter(v=>v.analyticsAvailable);
+            pick([...measured].filter(v=>v.averageViewedPercent!=null).sort((a,b)=>b.averageViewedPercent-a.averageViewedPercent),'En yüksek ortalama izlenen yüzde');
+            pick([...measured].filter(v=>v.averageViewedPercent!=null).sort((a,b)=>a.averageViewedPercent-b.averageViewedPercent),'En düşük ortalama izlenen yüzde');
+            pick([...measured].filter(v=>v.viewsInWindow!=null).sort((a,b)=>b.viewsInWindow-a.viewsInWindow),'Seçili dönemde en çok izlenen');
+            pick([...measured].filter(v=>v.subscribersGainedPer1000WindowViews!=null).sort((a,b)=>b.subscribersGainedPer1000WindowViews-a.subscribersGainedPer1000WindowViews),'Dönem izlenmesine göre yüksek abone kazanımı');
+            pick([...measured].filter(v=>v.averageViewSeconds!=null).sort((a,b)=>b.averageViewSeconds-a.averageViewSeconds),'En yüksek ortalama izleme süresi');
+            pick([...measured].filter(v=>v.averageViewSeconds!=null).sort((a,b)=>a.averageViewSeconds-b.averageViewSeconds),'En düşük ortalama izleme süresi');
+            pick([...own].sort((a,b)=>new Date(b.publishedAt)-new Date(a.publishedAt)),'En yeni video');
+            for(const v of own){if(!ranked.some(y=>y.id===v.id)&&ranked.length<40)ranked.push(v);}
+            return ranked.slice(0,40);
+          })(),
+          summary:(()=>{
+            const viewWindow=own.filter(v=>v.viewsInWindow!=null).map(v=>v.viewsInWindow);
+            const retention=own.filter(v=>v.averageViewedPercent!=null).map(v=>v.averageViewedPercent);
+            const averageSeconds=own.filter(v=>v.averageViewSeconds!=null).map(v=>v.averageViewSeconds);
+            const z=own.filter(v=>v.averageViewedPercent!=null&&v.viewsInWindow>0),n=z.reduce((a,v)=>a+v.viewsInWindow,0);
+            return {medianViewsInWindow:viewWindow.length?median(viewWindow):null,medianAverageViewedPercent:retention.length?median(retention):null,medianAverageViewSeconds:averageSeconds.length?median(averageSeconds):null,viewWeightedAverageViewedPercent:n?Number((z.reduce((a,v)=>a+v.viewsInWindow*v.averageViewedPercent,0)/n).toFixed(3)):null,rowsWithRetention:retention.length,rowsWithAverageViewSeconds:averageSeconds.length};
+          })(),
+          comments:ownComments.map(c=>({videoId:c.videoId,title:c.title,available:c.available,reason:c.reason||null,selectionReason:c.selectionReason||null,comments:c.comments||[]})),
+          note:'Analytics-period metrics and public lifetime counters are separate. Missing retention is unknown, not zero.'
+        };
+        const txt=[
+          "ROL: Veri analisti + yaratıcı yönetmen + acımasız kalite hakemi. Kanalın gerçek performansından öğren; çok fikir sıralama, tek güçlü ve test edilebilir bir sonraki video seç.",
+          "",
+          "MARKA KURALI: “Boş Dükkân” yalnızca kanal adı/markasıdır; konu filtresi değildir. Market, dükkânın boşalması, alışveriş arabası, çalışan veya ürün toplama ZORUNLU DEĞİL. Bunları yalnızca seçilen fikrin doğal parçasıysa kullan; sırf kanal adı yüzünden konuya zorlama.",
+          "ASIL HEDEF: Diyalogsuz, dünya çapında anlaşılabilir görsel mizah. Mizah insan davranışından, beklenti/karar/hareket ile gerçek sonucunun ilişkisinden doğsun. Doğal ASMR/foley yalnızca ses katmanıdır; içerik hedefi görsel mizah ve komik sonuçtur.",
+          "SABİT ÇEKİM SINIRLARI: 8 saniye, dikey 9:16, diyalog yok, İngilizce başlık; ilk 0,3 saniyede net görsel kanca; doğal neden-sonuç; gerçekçi fizik; tamamlanmış ve tek bakışta anlaşılan final. Zorlama tezat, rastgele absürtlük, imkânsız fizik, yalnızca nesneyi büyütüp/değiştirme, açıklama yazısı ve yarım bırakılmış loop yok.",
+          "",
+          "A. KENDİ KANALIM — BİRİNCİL PERFORMANS KANITI:",
+          JSON.stringify(ownDataForPrompt,null,2),
+          "",
+          "B. HARİCİ RAKİP KEŞFİ — İKİNCİL BAĞLAM:",
+          research?JSON.stringify({source:research.source||'YouTube Data API v3',query:research.query||null,requestedPublishedWindowDays:research.searchDays??null,windowStart:research.searchStartedAt||null,windowEnd:research.searchEndedAt||null,returnedVideoCount:research.videos?.length||0,visualAccess:'NOT VERIFIED by API metadata. Unless actual watched-frame notes are supplied below, competitor scene mechanics are unknown.',sampleBias:'YouTube search ranking and query terms limit this sample; it is not a census of all Shorts.',videos:(research.videos||[]).slice().sort((a,b)=>(Number(b.viewsPerDay??b.vpd)||0)-(Number(a.viewsPerDay??a.vpd)||0)).slice(0,18),commentSampleDesign:research.commentSampleDesign||null,comments:(research.commentSamples||[]).slice(0,8)},null,2):'Genel Analiz henüz çalıştırılmamış. Rakip verisi yok; bunu açıkça belirt.',
+          "",
+          "C. GÖZLE DOĞRULANMIŞ SAHNE NOTLARI:",
+          sceneNotes||'Sahne notu yok. Rakiplerin gerçek görsel mekanizması bilinmiyor; başlık, küçük resim, izlenme veya yorumlardan sahne uydurma.',
+          "",
+          "D. TEKRAR ENGELİ / FİKİR GEÇMİŞİ:",
+          ideaHistory||'Fikir geçmişi girilmedi. Konuşmada açıkça reddedilmiş fikirleri tekrar önerme; bilinmeyen geçmişi kayıtlı gerçek gibi sunma.',
+          "",
+          "ZORUNLU ÇALIŞMA YÖNTEMİ:",
+          "1) Kaynağı, tarih aralığını, örneklem boyutunu ve eksik alanları bildir. Kendi kanalında averageViewSeconds/averageViewedPercent/likesInWindow/subscribersGainedInWindow seçili Analytics dönemine; publicLifetimeViews tüm ömre aittir. Bu zaman pencerelerini karıştırma. Rakiplerde ortalama izleme metrikleri yoksa tahmin etme.",
+          "2) Kendi videolarını kendi aralarında kıyasla. İzlenme, ortalama izleme süresi, ortalama izlenen yüzde, beğeni oranı ve abone kazanımını ayrı sinyaller olarak incele. Küçük örneklemi, video yaşını ve seçili tarih penceresini not et; korelasyonu nedensellik diye sunma.",
+          "3) Yorumları yalnızca tam video ID'sine bağlı kayıttan kullan. Bunlar küçük, relevance sıralı örneklemdir; tüm izleyicileri temsil etmez. Yorumlar sahne karesi veya görsel kanıt değildir.",
+          "4) Rakip izlenmeleri yalnızca hangi videoları daha fazla incelemeye değer bulacağımız için keşif sinyalidir. Başlık, thumbnail ve yorum gerçek sahne akışını kanıtlamaz. Görsel not yoksa mekanizmayı 'bilinmiyor' işaretle; uydurma sahne kurma.",
+          "Rakip sahne notlarının eksikliği özgün fikir üretimini otomatik durdurmaz. Kendi kanal verisinin gerçekten desteklediği performans bulgularını kullan; sahne mekanizması ölçülmediyse onu kanıt gibi sunma. Bağımsız gündelik insan davranışından yaratıcı bir hipotez üret ve hipotez diye etiketle. Yalnızca aday kalite kapısını geçmiyorsa fikir seçme.",
+          "5) Konu ararken kanal adını, marketi veya belirli bir mekânı şart koşma. Gerçek insan davranışlarından başla ve farklı bağlamları kendi içinde keşfet. Önceden hazırlanmış mizah/konu kataloğu, sabit başarı formülü veya keyfî birleşik puan kullanma.",
+          "6) İçeride genişçe alternatifler üret ve acımasızca ele; kullanıcıya fikir listesi sunma. Tek güçlü test kalırsa onu seç. Hiçbir fikir kalite kapısını geçmiyorsa bunu açıkça söyle; sırf cevap olsun diye zayıf fikir seçme.",
+          "7) Kalite kapısı: ilk kare 0,3 saniyede anlaşılır ve merak uyandırıcı; insan davranışı inandırıcı; her eylem öncekinden doğal biçimde doğuyor; diyalogsuz okunuyor; fizik tutarlı; final somut ve tamamlanmış; fikir geçmişteki reddedilenlerle aynı değil.",
+          "8) Nihai çıktı: ölçülen kanal bulgusu ve örnek sayısı; sahne kanıtının durumu; kanıt ile test edilmemiş hipotezin ayrımı; tek fikir; İngilizce başlık; ilk kare tarifi; 0.0–0.3, 0.3–1.5, 1.5–4.5, 4.5–8.0 saniyelik eylem/kamera/doğal ses; final; üretim riski ve neden diğer yolların elendiği.",
+          "9) Yayın sonrası görüntülenme, ortalama izleme süresi, izlenen yüzde, beğeni/yorum oranı ve abone kazanımını ayrı değerlendir. Başarı garantisi veya veride olmayan eşik verme.",
+          "10) Kanıt düzeylerini etiketle: ölçülmüş bulgu / gözle doğrulanmış sahne / yorumdan destek alan yorum / test edilmemiş yaratıcı hipotez."
+        ].join("\n");
+        const ta=$('#compareTxt');ta.value=txt;ta.style.display='block';ta.select();
+        const downloadBtn=$('#downloadCompare');downloadBtn.disabled=false;downloadBtn.onclick=()=>{const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='bos-dukkan-analiz-paketi.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+        try{await navigator.clipboard.writeText(txt);btn.textContent='Paket hazır ve kopyalandı ✓ Buraya yapıştır';}
+        catch(e){try{const ok=document.execCommand('copy');btn.textContent=ok?'Paket hazır ve kopyalandı ✓ Buraya yapıştır':'Paket hazır — metni aşağıdan kopyala';}catch(_){btn.textContent='Metni aşağıdan elle kopyala';}}
+      } catch(e) {
+        commentDiag.innerHTML='<h2>Yorum çekme teşhisi</h2><p><strong>İşlem sırasında hata oluştu:</strong> '+esc(String(e&&e.message||e))+'</p><p>Bu hata yorum isteğinden önce veya analiz verisi hazırlanırken oluşmuş olabilir.</p>';
+        btn.textContent='Hata oluştu — tekrar dene';
+      } finally {
+        btn.disabled=false;
+      }
+    };
+  }catch(e){fail(el,e)}
+};
+
+/* ---------- 4. YOUTUBE LINK PREVIEW + LIVE SCREEN CAPTURE + LOCAL FILE EXTRACTION ---------- */
+const captureStreamVideo = $('#captureStreamVideo');
+const startScreenCaptureBtn = $('#startScreenCapture');
+const captureLiveFramesBtn = $('#captureLiveFrames');
+const stopScreenCaptureBtn = $('#stopScreenCapture');
+let screenCaptureStream = null;
+function stopLiveScreenCapture() {
+  if (screenCaptureStream) screenCaptureStream.getTracks().forEach(track => track.stop());
+  screenCaptureStream = null;
+  captureStreamVideo.srcObject = null;
+  captureLiveFramesBtn.disabled = true;
+  stopScreenCaptureBtn.disabled = true;
+  startScreenCaptureBtn.disabled = false;
+}
+startScreenCaptureBtn.addEventListener('click', async () => {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+    frameStatus.textContent = 'Bu tarayıcı canlı ekran yakalamayı desteklemiyor. YouTube videosunun ekran kaydını alıp aşağıdaki video seçeneğinden yükle.';
+    return;
+  }
+  try {
+    screenCaptureStream = await navigator.mediaDevices.getDisplayMedia({video:{frameRate:15},audio:false});
+    captureStreamVideo.srcObject = screenCaptureStream;
+    await captureStreamVideo.play();
+    captureLiveFramesBtn.disabled = false;
+    stopScreenCaptureBtn.disabled = false;
+    startScreenCaptureBtn.disabled = true;
+    frameStatus.textContent = 'Ekran paylaşımı bağlı. Paylaşım penceresinde panel sekmesini seçtiysen Shorts oynarken “Oynatılan görüntüden kareleri yakala” düğmesine bas.';
+    screenCaptureStream.getVideoTracks()[0].addEventListener('ended', stopLiveScreenCapture, {once:true});
+  } catch (e) {
+    frameStatus.textContent = 'Ekran yakalama başlatılamadı veya izin verilmedi. Telefon ekran kaydı dosyasını seçerek devam edebilirsin.';
+    stopLiveScreenCapture();
+  }
+});
+stopScreenCaptureBtn.addEventListener('click', () => {
+  stopLiveScreenCapture();
+  frameStatus.textContent = 'Ekran yakalama durduruldu.';
+});
+captureLiveFramesBtn.addEventListener('click', async () => {
+  const source = captureStreamVideo;
+  if (!screenCaptureStream || !source.videoWidth || !source.videoHeight) {
+    frameStatus.textContent = 'Önce ekran görüntüsünü bağla ve paylaşımın başladığını doğrula.';
+    return;
+  }
+  captureLiveFramesBtn.disabled = true;
+  $('#frameResult').innerHTML = '';
+  frameStatus.textContent = 'Paylaşılan görüntüden 8 kare alınıyor…';
+  try {
+    const count = Number($('#frameCount').value) || 8;
+    const vw = source.videoWidth, vh = source.videoHeight;
+    const cellW = 240, cellH = Math.round(cellW * vh / vw), labelH = 30, cols = 2;
+    const canvas = document.createElement('canvas');
+    canvas.width = cols * cellW;
+    canvas.height = Math.ceil(count / cols) * (cellH + labelH);
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#f5f5f5'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    for (let i=0; i<count; i++) {
+      if (!screenCaptureStream || !source.videoWidth) throw new Error('Ekran paylaşımı sona erdi.');
+      await new Promise(resolve => setTimeout(resolve, 550));
+      const x = (i % cols) * cellW, y = Math.floor(i / cols) * (cellH + labelH);
+      ctx.drawImage(source, x, y, cellW, cellH);
+      ctx.fillStyle = '#fff'; ctx.fillRect(x, y + cellH, cellW, labelH);
+      ctx.fillStyle = '#14213d'; ctx.font = '16px sans-serif';
+      ctx.fillText('Yakalama ' + (i+1), x+8, y+cellH+20);
+      frameStatus.textContent = 'Canlı görüntü: ' + (i+1) + '/' + count + ' kare';
+    }
+    const preview = document.createElement('img');
+    preview.alt = 'Paylaşılan ekrandan yakalanan kareler';
+    preview.src = canvas.toDataURL('image/jpeg', 0.9);
+    preview.style.cssText = 'display:block;width:100%;max-width:520px;border:1px solid var(--line);border-radius:10px;background:white';
+    const save = document.createElement('button');
+    save.textContent = 'Yakalanan kareleri JPG kaydet';
+    save.onclick = () => { const a=document.createElement('a'); a.href=preview.src; a.download='canli-ekran-kareleri.jpg'; document.body.appendChild(a); a.click(); a.remove(); };
+    const copy = document.createElement('button');
+    copy.className = 'ghost'; copy.textContent = 'Görseli panoya kopyala';
+    copy.onclick = async () => {
+      try {
+        if (!navigator.clipboard || !window.ClipboardItem) throw new Error('Panoya kopyalama desteklenmiyor.');
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+        frameStatus.textContent = 'Yakalanan kareler panoya kopyalandı.';
+      } catch (_) { frameStatus.textContent = 'Panoya kopyalanamadı; JPG kaydet düğmesini kullan.'; }
+    };
+    const controls=document.createElement('div'); controls.className='bar'; controls.style.marginBottom='10px'; controls.append(save,copy);
+    $('#frameResult').append(controls,preview);
+    frameStatus.textContent = 'Tamamlandı: paylaşılan ekrandan ' + count + ' kare yakalandı. Önizlemede ekranın tamamı görünebilir.';
+  } catch (e) {
+    frameStatus.textContent = 'Canlı kare yakalama başarısız: ' + (e.message || String(e)) + ' Ekran kaydı dosyasıyla devam edebilirsin.';
+  } finally {
+    captureLiveFramesBtn.disabled = !screenCaptureStream;
+  }
+});
+const videoUrlInput = $('#videoUrl');
+const youtubePreview = $('#youtubePreview');
+const youtubeFrame = $('#youtubeFrame');
+function parseYouTubeId(raw) {
+  try {
+    const u = new URL(String(raw || '').trim());
+    const host = u.hostname.toLowerCase().replace(/^www\./, '');
+    if (host === 'youtu.be') return u.pathname.split('/').filter(Boolean)[0] || '';
+    if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com') {
+      if (u.pathname === '/watch') return u.searchParams.get('v') || '';
+      const parts = u.pathname.split('/').filter(Boolean);
+      if (['shorts','embed','live'].includes(parts[0])) return parts[1] || '';
+    }
+  } catch (_) {}
+  return '';
+}
+const storyboardStatus = $('#storyboardStatus');
+const storyboardResult = $('#storyboardResult');
+$('#fetchStoryboardFrames').addEventListener('click', async () => {
+  const id = parseYouTubeId(videoUrlInput.value);
+  const btn = $('#fetchStoryboardFrames');
+  if (!id) {
+    storyboardStatus.textContent = 'Önce geçerli bir YouTube / Shorts bağlantısı yapıştır.';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Önizleme aranıyor…';
+  storyboardResult.innerHTML = '';
+  storyboardStatus.textContent = 'Video için herkese açık önizleme çizelgesi isteniyor. Bu işlem video indirmez ve ekran kaydı istemez.';
+  try {
+    const endpoint = new URL('https://youtube-browser-api.netlify.app/content');
+    endpoint.searchParams.set('id', id);
+    endpoint.searchParams.set('params', 'storyboard,title,channel');
+    const response = await fetch(endpoint.toString(), {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-store'
+    });
+    if (!response.ok) throw new Error('Önizleme hizmeti HTTP ' + response.status + ' döndürdü.');
+    const data = await response.json();
+    // API nests both timeline and storyboard inside data.storyboard.
+    const storyboardData = data && data.storyboard ? data.storyboard : {};
+    const timeline = storyboardData.timeline || data.timeline || null;
+    const medium = timeline && timeline.medium && Array.isArray(timeline.medium.frames) ? timeline.medium.frames : [];
+    const high = timeline && timeline.high && Array.isArray(timeline.high.frames) ? timeline.high.frames : [];
+    const low = timeline && timeline.low && Array.isArray(timeline.low.frames) ? timeline.low.frames : [];
+    const preferred = medium.length ? medium : (high.length ? high : low);
+    let urls = [...new Set(preferred.map(item => item && item.url).filter(url => typeof url === 'string' && /^https:\/\//.test(url)))];
+    const storyboardSheets = storyboardData.storyboard && Array.isArray(storyboardData.storyboard.url)
+      ? storyboardData.storyboard.url
+      : (data && data.storyboard && Array.isArray(data.storyboard.url) ? data.storyboard.url : []);
+    if (!urls.length && storyboardSheets.length) {
+      urls = storyboardSheets.filter(url => typeof url === 'string' && /^https:\/\//.test(url)).slice(0, 3);
+    }
+    if (!urls.length) throw new Error('Bu video için YouTube önizleme kareleri dönmedi; tüm videolarda çizelge bulunmayabilir.');
+    const title = typeof data.title === 'string' ? data.title : '';
+    if (title) {
+      const heading = document.createElement('div');
+      heading.className = 'msg';
+      heading.textContent = 'Video: ' + title + ' · ' + urls.length + ' önizleme çizelgesi';
+      storyboardResult.appendChild(heading);
+    }
+    let loaded = 0;
+    let failed = 0;
+    urls.slice(0, 4).forEach((url, index) => {
+      const card = document.createElement('div');
+      card.className = 'wrap';
+      card.style.padding = '8px';
+      const label = document.createElement('p');
+      label.className = 'note';
+      label.textContent = 'Önizleme çizelgesi ' + (index + 1) + ' · küçük resimlerden oluşan bir sayfa; tek başına tam sahne analizi değildir.';
+      const img = document.createElement('img');
+      img.alt = 'YouTube önizleme kareleri ' + (index + 1);
+      img.loading = 'lazy';
+      img.referrerPolicy = 'no-referrer';
+      img.style.cssText = 'display:block;width:100%;height:auto;max-height:620px;object-fit:contain;background:#111;border-radius:6px';
+      img.onload = () => {
+        loaded++;
+        storyboardStatus.textContent = 'Önizleme çizelgesi yüklendi (' + loaded + '/' + (loaded + failed + (urls.length - index - 1)) + '). Kareleri gösteriyorum; bunlar tam çözünürlüklü video değil.';
+      };
+      img.onerror = () => {
+        failed++;
+        img.remove();
+        label.textContent += ' (Bu imza/bağlantı artık geçerli değil veya görüntü yüklenemedi.)';
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.textContent = 'Önizleme çizelgesini ayrı aç';
+        card.appendChild(link);
+      };
+      img.src = url;
+      card.append(label, img);
+      storyboardResult.appendChild(card);
+    });
+    const framePacket = {
+      source: 'YouTube Browser API — public storyboard preview, experimental',
+      videoId: id,
+      videoUrl: 'https://www.youtube.com/watch?v=' + id,
+      title: title || null,
+      channel: data && data.channel ? data.channel : null,
+      limitation: 'Preview storyboard sheets only; not the full video. Scene sequence must be visually checked; do not infer unseen actions.',
+      sheets: urls.slice(0, 4).map((url, index) => {
+        const item = preferred.find(x => x && x.url === url) || null;
+        const slot = item && item.slot ? item.slot : {};
+        return {
+          index: index + 1,
+          imageUrl: url,
+          intervalMs: Number.isFinite(Number(slot.interval)) ? Number(slot.interval) : null,
+          thumbnailWidth: Number.isFinite(Number(slot.thumbnailWidth)) ? Number(slot.thumbnailWidth) : null,
+          thumbnailHeight: Number.isFinite(Number(slot.thumbnailHeight)) ? Number(slot.thumbnailHeight) : null,
+          thumbnailCount: Number.isFinite(Number(item && item.thumbnailCount)) ? Number(item.thumbnailCount) : null
+        };
+      })
+    };
+    const packetCard = document.createElement('div');
+    packetCard.className = 'msg';
+    const packetLabel = document.createElement('p');
+    packetLabel.textContent = 'Görsel bağlantı paketi: bu metni sohbete gönderirsen kare bağlantılarını buradan incelemeyi deneyebilirim; bağlantılar süreli olabilir.';
+    const packetArea = document.createElement('textarea');
+    packetArea.rows = 6;
+    packetArea.readOnly = true;
+    packetArea.value = JSON.stringify(framePacket, null, 2);
+    packetArea.style.cssText = 'display:block;width:100%;max-width:100%;box-sizing:border-box;margin:8px 0;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)';
+    const packetCopy = document.createElement('button');
+    packetCopy.type = 'button';
+    packetCopy.textContent = 'Kare bağlantı paketini kopyala';
+    packetCopy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(packetArea.value);
+        packetCopy.textContent = 'Kopyalandı ✓ — sohbete yapıştır';
+      } catch (_) {
+        packetArea.focus();
+        packetArea.select();
+        let copied = false;
+        try { copied = document.execCommand('copy'); } catch (_) {}
+        packetCopy.textContent = copied ? 'Kopyalandı ✓ — sohbete yapıştır' : 'Metin seçildi — Kopyala seçeneğini kullan';
+      }
+    });
+    packetCard.append(packetLabel, packetArea, packetCopy);
+    storyboardResult.appendChild(packetCard);
+    storyboardStatus.textContent = 'Önizleme bulundu: ' + urls.length + ' çizelge. Görseller yükleniyorsa gerçek video akışının yerine geçmezler; video indirme veya kayıt gerekmez.';
+  } catch (e) {
+    storyboardStatus.textContent = 'Otomatik önizleme bu videoda çalışmadı: ' + (e && e.message ? e.message : String(e)) + ' Bu, konu motorunun hata mesajıdır; aynı indirme/kayıt yöntemlerini otomatik başlatmayacağım.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'YouTube önizleme karelerini getir';
+  }
+});
+$('#pasteVideoUrl').addEventListener('click', async () => {
+  try {
+    if (!navigator.clipboard || !navigator.clipboard.readText) throw new Error('Panoya otomatik erişim yok.');
+    const pasted = (await navigator.clipboard.readText()).trim();
+    if (!pasted) throw new Error('Pano boş görünüyor.');
+    videoUrlInput.value = pasted;
+    videoUrlInput.focus();
+    frameStatus.textContent = 'Bağlantı panodan alındı. Şimdi “Videoyu panelde aç” düğmesine bas.';
+  } catch (_) {
+    videoUrlInput.focus();
+    frameStatus.textContent = 'Bağlantı alanına dokunup basılı tut ve “Yapıştır”ı seç.';
+  }
+});
+$('#screenRecordHelp').addEventListener('click', () => {
+  const id = parseYouTubeId(videoUrlInput.value);
+  if (!id || !/^[A-Za-z0-9_-]{6,}$/.test(id)) {
+    frameStatus.textContent = 'Önce rakip Shorts bağlantısını yapıştır ve “Videoyu panelde aç” düğmesine bas.';
+    return;
+  }
+  window.open('https://www.youtube.com/watch?v=' + encodeURIComponent(id), '_blank', 'noopener');
+  frameStatus.textContent = 'Android’de: üstten iki kez aşağı kaydır → “Ekran kaydedici”yi seç → medya sesi açıksa seç → YouTube Shorts’u tam ekranda oynat → kaydı durdur. Sonra bu panele dön, video/ekran kaydı dosyasını seç ve “Kareleri çıkar”a bas. Hızlı ayarlarda Ekran kaydedici yoksa bildirim panelini düzenle bölümünden ekle.';
+});
+$('#openVideoUrl').addEventListener('click', () => {
+  const id = parseYouTubeId(videoUrlInput.value);
+  if (!id || !/^[A-Za-z0-9_-]{6,}$/.test(id)) {
+    frameStatus.textContent = 'Geçerli bir YouTube veya Shorts bağlantısı yapıştır.';
+    return;
+  }
+  youtubeFrame.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id);
+  youtubePreview.style.display = 'block';
+  frameStatus.textContent = 'YouTube videosu panelde açıldı. Gerçek kareleri çıkarmak için videonun ekran kaydını aşağıdan seç.';
+});
+let frameObjectUrl = '';
+const frameFile = $('#frameFile');
+const frameVideo = $('#frameVideo');
+const frameStatus = $('#frameStatus');
+const extractFramesBtn = $('#extractFrames');
+const frameSceneNotes = $('#frameSceneNotes');
+const frameNotesStatus = $('#frameNotesStatus');
+const generalSceneNotes = $('#sceneNotes');
+frameSceneNotes.value = generalSceneNotes.value || '';
+frameSceneNotes.addEventListener('input', () => {
+  generalSceneNotes.value = frameSceneNotes.value;
+  try { localStorage.setItem('bd_scene_notes', frameSceneNotes.value); } catch (_) {}
+  frameNotesStatus.textContent = 'Notlar kaydedildi ve Konu Motoru paketine bağlandı.';
+});
+generalSceneNotes.addEventListener('input', () => {
+  frameSceneNotes.value = generalSceneNotes.value;
+});
+$('#syncFrameNotes').addEventListener('click', () => {
+  generalSceneNotes.value = frameSceneNotes.value.trim();
+  try { localStorage.setItem('bd_scene_notes', generalSceneNotes.value); } catch (_) {}
+  frameNotesStatus.textContent = 'Tamam: bu gözlemler Konu Motoru paketine eklenecek. 3. sekmede güncel verileri getirip “Konu Motoru paketini oluştur ve kopyala” düğmesine bas.';
+});
+$('#clearFrameNotes').addEventListener('click', () => {
+  frameSceneNotes.value = '';
+  generalSceneNotes.value = '';
+  try { localStorage.removeItem('bd_scene_notes'); } catch (_) {}
+  frameNotesStatus.textContent = 'Sahne notları temizlendi.';
+});
+frameFile.addEventListener('change', () => {
+  $('#frameResult').innerHTML = '';
+  extractFramesBtn.disabled = true;
+  if (frameObjectUrl) URL.revokeObjectURL(frameObjectUrl);
+  const f = frameFile.files && frameFile.files[0];
+  if (!f) {
+    frameVideo.removeAttribute('src');
+    frameVideo.style.display = 'none';
+    frameStatus.textContent = 'Önce video veya ekran kaydı seç.';
+    return;
+  }
+  if (!f.type.startsWith('video/')) {
+    frameStatus.textContent = 'Bu dosya video olarak tanınmadı. MP4 veya cihazın desteklediği bir video dosyası seç.';
+    return;
+  }
+  frameObjectUrl = URL.createObjectURL(f);
+  frameVideo.src = frameObjectUrl;
+  frameVideo.style.display = 'block';
+  frameStatus.textContent = 'Video açılıyor… Dosya bu cihazda işleniyor.';
+  frameVideo.onloadedmetadata = () => {
+    const d = frameVideo.duration;
+    if (!Number.isFinite(d) || d <= 0) {
+      frameStatus.textContent = 'Video süresi okunamadı. Başka bir video biçimi dene.';
+      return;
+    }
+    $('#frameStart').max = Math.max(0, d - 0.05).toFixed(2);
+    frameStatus.textContent = 'Video hazır · ' + d.toFixed(2) + ' sn · ' + (f.name || 'video') + '. Kare çıkarmaya hazır.';
+    extractFramesBtn.disabled = false;
+  };
+  frameVideo.onerror = () => {
+    frameStatus.textContent = 'Tarayıcı bu videoyu açamadı. Mümkünse MP4 (H.264) ekran kaydı kullan.';
+    extractFramesBtn.disabled = true;
+  };
+});
+function seekTo(video, time) {
+  if (Math.abs(video.currentTime - time) < 0.015 && video.readyState >= 2) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const onSeeked = () => { cleanup(); resolve(); };
+    const onError = () => { cleanup(); reject(new Error('Video karesine gidilemedi.')); };
+    const cleanup = () => {
+      video.removeEventListener('seeked', onSeeked);
+      video.removeEventListener('error', onError);
+    };
+    video.addEventListener('seeked', onSeeked, {once:true});
+    video.addEventListener('error', onError, {once:true});
+    try { video.currentTime = time; } catch (e) { cleanup(); reject(e); }
+  });
+}
+extractFramesBtn.addEventListener('click', async () => {
+  const d = frameVideo.duration;
+  if (!Number.isFinite(d) || d <= 0) return;
+  const start = Math.max(0, Math.min(Number($('#frameStart').value) || 0, d - 0.05));
+  const count = Number($('#frameCount').value) || 8;
+  const end = Math.min(d - 0.04, start + 8);
+  if (end < start) {
+    frameStatus.textContent = 'Başlangıç değeri video süresinin içinde olmalı.';
+    return;
+  }
+  extractFramesBtn.disabled = true;
+  frameStatus.textContent = 'Kareler çıkarılıyor… Bu işlem yalnızca cihazında gerçekleşir.';
+  $('#frameResult').innerHTML = '';
+  try {
+    const times = count === 1 ? [start] : Array.from({length:count}, (_,i) => start + (end - start) * i / (count - 1));
+    const vw = frameVideo.videoWidth, vh = frameVideo.videoHeight;
+    if (!vw || !vh) throw new Error('Video görüntü boyutu okunamadı.');
+    const cellW = 240, cellH = Math.round(cellW * vh / vw), labelH = 30, cols = 2, rows = Math.ceil(count / cols);
+    const canvas = document.createElement('canvas');
+    canvas.width = cols * cellW;
+    canvas.height = rows * (cellH + labelH);
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#f5f5f5'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    for (let i=0; i<times.length; i++) {
+      frameStatus.textContent = 'Kare ' + (i+1) + '/' + count + ' hazırlanıyor…';
+      await seekTo(frameVideo, times[i]);
+      const x = (i % cols) * cellW, y = Math.floor(i / cols) * (cellH + labelH);
+      ctx.drawImage(frameVideo, x, y, cellW, cellH);
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(x, y + cellH, cellW, labelH);
+      ctx.fillStyle = '#14213d'; ctx.font = '16px sans-serif';
+      ctx.fillText('Kare ' + (i+1) + ' · ' + times[i].toFixed(2) + ' sn', x + 8, y + cellH + 20);
+    }
+    const preview = document.createElement('img');
+    preview.alt = 'Videodan çıkarılan gerçek karelerin iletişim sayfası';
+    preview.src = canvas.toDataURL('image/jpeg', 0.9);
+    preview.style.cssText = 'display:block;width:100%;max-width:520px;border:1px solid var(--line);border-radius:10px;background:white';
+    const save = document.createElement('button');
+    save.textContent = 'Kare sayfasını JPG olarak kaydet';
+    save.onclick = () => {
+      const a = document.createElement('a');
+      a.href = preview.src; a.download = 'rakip-shorts-gercek-kareler.jpg';
+      document.body.appendChild(a); a.click(); a.remove();
+    };
+    const copy = document.createElement('button');
+    copy.className = 'ghost'; copy.textContent = 'Görseli panoya kopyala';
+    copy.onclick = async () => {
+      try {
+        if (!navigator.clipboard || !window.ClipboardItem) throw new Error('Bu tarayıcı görsel kopyalamayı desteklemiyor.');
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+        frameStatus.textContent = 'Görsel panoya kopyalandı.';
+      } catch(e) {
+        frameStatus.textContent = 'Görsel kopyalanamadı; JPG olarak kaydet düğmesini kullan.';
+      }
+    };
+    const controls = document.createElement('div');
+    controls.className = 'bar'; controls.style.marginBottom = '10px';
+    controls.append(save, copy);
+    $('#frameResult').append(controls, preview);
+    frameStatus.textContent = 'Tamamlandı: ' + count + ' gerçek video karesi çıkarıldı. Kareler bu cihazda işlendi.';
+  } catch(e) {
+    frameStatus.textContent = 'Kare çıkarma başarısız: ' + (e && e.message ? e.message : String(e));
+  } finally {
+    extractFramesBtn.disabled = false;
+  }
+});
+
+</script>
 </body>
 </html>
