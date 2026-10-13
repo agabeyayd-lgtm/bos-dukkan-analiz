@@ -199,6 +199,7 @@ function askClaude(vs,q){
     "ÖNCEKİ FİKİRLER / KAÇINILACAK TEKRARLAR:",
     avoid,
     "",
+    "KENDİ KANALIMI BU AŞAMADA DAHİL ETME. Yalnızca bu aramada bulunan harici videoları analiz et; kendi kanal metrikleri, videoları ve yorumları kullanılmayacak.",
     "GÖREV — ÖNCEDEN BELİRLENMİŞ FİKİR LİSTESİ VE MİZAH MEKANİZMASI KATALOĞU KULLANMA:",
     "1) Önce gerçek ölçümleri göster: veri kaynağı, örneklem sayısı, zaman aralığı ve eksik alanlar. İzlenme/abone oranını, izlenen yüzdeyi ve ortalama izleme süresini farklı metrikler olarak tut; birbirinin yerine kullanma.",
     "2) Başarılı ve zayıf videoları kendi uygun karşılaştırma grubuyla kıyasla. Video yaşı, süre, kanal büyüklüğü ve dağıtım farklarını hesaba kat. Tek örnekten kural çıkarma; korelasyonu neden-sonuç gibi sunma.",
@@ -231,7 +232,7 @@ $('#goGen').onclick=async()=>{
     busy(el,'Kanal büyüklükleri alınıyor…');
     const sm=await subsMap([...new Set(vs.map(v=>v.channelId))]);
     vs.forEach(v=>{v.subs=sm[v.channelId]??null;v.brk=v.subs?v.views/v.subs:null});
-    window.bosResearchSnapshot={query:q,videos:vs.map(v=>({id:v.id,title:v.title,channel:v.channel,subs:v.subs,views:v.views,likes:v.likes,comments:v.comments,seconds:v.sec,viewsPerSub:v.brk,viewsPerDay:v.vpd}))};
+    window.bosResearchSnapshot={query:q,source:'YouTube Data API v3 search.list + videos.list + channels.list',searchDays:+$('#days').value,searchStartedAt:new Date(Date.now()-$('#days').value*864e5).toISOString(),searchEndedAt:new Date().toISOString(),sortMode:$('#srt').value,requestedOrder:$('#ord').value,videoCount:vs.length,videos:vs.map(v=>({id:v.id,title:v.title,channel:v.channel,channelId:v.channelId,subscribers:v.subs,views:v.views,likes:v.likes,comments:v.comments,seconds:v.sec,publishedAt:v.date.toISOString(),ageDays:Number(ageDays(v.date).toFixed(2)),viewsPerSub:v.brk,viewsPerDay:Number(v.vpd.toFixed(2)),likeRate:v.views?v.likes/v.views:null,commentRate:v.views?v.comments/v.views:null,averageViewSeconds:null,averageViewedPercent:null}))};
     if($('#srt').value==='brk') vs.sort((a,b)=>(b.brk??-1)-(a.brk??-1)); else vs.sort((a,b)=>b.vpd-a.vpd);
     const words={};const stop=new Set('this that with from your what when they have just video shorts short funny'.split(' '));
     vs.forEach(v=>v.title.toLowerCase().replace(/[^a-z0-9ğüşöçı\s]/g,'').split(/\s+/).forEach(w=>{if(w.length>3&&!stop.has(w))words[w]=(words[w]||0)+1}));
@@ -242,6 +243,11 @@ $('#goGen').onclick=async()=>{
     <h2>Videolar</h2><p><button class="ghost" id="copyGen">Tabloyu kopyala</button></p><div class="wrap"><table id="tg"><tr><th>Başlık</th><th>Kanal</th><th>Abone</th><th>İzlenme</th><th>Fırlama</th><th>İzl./gün</th><th>Beğeni %</th><th>Yorum</th><th>Süre</th><th>Gün-saat</th></tr>
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${esc(v.channel)}</td><td>${v.subs==null?'–':fmt(v.subs)}</td><td>${fmt(v.views)}</td><td class="${v.brk>=5?'y':''}">${v.brk==null?'–':v.brk.toFixed(1)+'x'}</td><td>${fmt(v.vpd)}</td><td>${v.views?(v.likes/v.views*100).toFixed(1):'–'}</td><td>${fmt(v.comments)}</td><td>${v.sec} sn</td><td>${GUN[v.date.getDay()]} ${String(v.date.getHours()).padStart(2,'0')}:00</td></tr>`).join('')}</table></div>
     <p class="note">İzlenme/abone = keşif sinyalidir; tek başına başarı veya neden-sonuç kanıtı değildir. Video yaşı, süre ve dağıtım farkları karşılaştırmayı etkiler. YouTube Data API bu aramada ortalama izleme süresi ve izlenen yüzde sağlamaz. Arama sonuçları, seçilen tarih aralığındaki ve YouTube'un döndürdüğü en fazla 50 videoyla sınırlıdır.</p>
+    <h2>Bağımsız rakip araştırma paketi</h2>
+    <p class="note">Bu paket yalnızca yukarıdaki harici araştırma videolarını ve seçilen videoların kendi video ID'lerine bağlı yorum örneklerini kullanır. Kendi kanalın, kendi videoların ve kendi yorumların bu akışa dahil edilmez. Önce Genel Analiz'i çalıştır, sonra aşağıdaki düğmeye bas. Google/OAuth ile kendi kanalına bağlanman gerekmez.</p>
+    <p><button id="makeCompetitorPacket">Rakip paketini oluştur ve kopyala</button></p>
+    <div id="competitorDiag" class="note" aria-live="polite">Araştırma sonuçları hazır olduğunda paket oluşturulabilir.</div>
+    <textarea id="competitorPacket" readonly rows="10" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
     <h2>Önceki fikirler / tekrar filtresi</h2>
     <p class="note">Daha önce üretilen fikirleri veya kaçınılacak mizah mekanizmalarını buraya yapıştır. Yeni istem bunların tekrar edilmemesini şart koşar.</p>
     <textarea id="avoidIdeas" rows="3" placeholder="Örn. gevşek somun, küçük hata→şaşkın tepki, aynı final tipi..." style="width:100%;max-width:100%;margin:4px 0 10px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
@@ -249,6 +255,43 @@ $('#goGen').onclick=async()=>{
     <textarea id="askTxt" readonly rows="10" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
     $('#copyGen').onclick=()=>copyTable('#tg','#copyGen');
     $('#ask').onclick=()=>askClaude(vs,q);
+    $('#makeCompetitorPacket').onclick=async()=>{
+      const btn=$('#makeCompetitorPacket'),diag=$('#competitorDiag'),ta=$('#competitorPacket');
+      btn.disabled=true;btn.textContent='Rakip yorumları alınıyor…';
+      diag.textContent='Harici videolar ve yorumlar tam video ID ile eşleştiriliyor…';
+      try{
+        const research=window.bosResearchSnapshot;
+        if(!research||!Array.isArray(research.videos)||!research.videos.length)throw new Error('Önce Genel Analiz aramasını çalıştır.');
+        const picks=chooseResearchCommentVideos(research.videos,8);
+        const samples=picks.length?await sampleComments(picks,8,8):[];
+        const byId=new Map(samples.map(x=>[x.videoId,x]));
+        research.commentSamples=samples;
+        research.videoCommentMatches=research.videos.map(v=>({...v,commentSample:byId.get(v.id)||{videoId:v.id,available:false,reason:'Bu video yorum örneklemi için seçilmedi.',sampled:0,comments:[]}}));
+        research.commentSampleDesign={selection:'En fazla 8 video; farklı performans sinyallerine göre; her video için relevance sıralı en fazla 8 üst düzey yorum',selectedVideoIds:picks.map(v=>v.id),sampledComments:samples.reduce((n,v)=>n+v.sampled,0),commentRequestsSucceeded:samples.filter(v=>v.available).length,commentRequestsFailed:samples.filter(v=>!v.available).length};
+        const payload={
+          role:'Boş Dükkân için yaratıcı yönetmen ve acımasız kalite hakemi; gerçek ölçümle hipotezi ayır, zayıf fikirleri reddet.',
+          constraints:{durationSeconds:8,aspectRatio:'9:16',dialogue:false,audio:'natural ASMR',titleLanguage:'English',postingSchedule:'Wednesday and Sunday 19:00',humor:'realistic everyday human behavior, expectation, decision and consequence',mustHave:['strong visual hook in first 0.3 seconds','causal progression','concrete completed ending'],avoid:['forced contrast','random absurdity','impossible physics','only enlarging/changing an object','explanatory text','unfinished loop ending']},
+          sourceAndSample:{source:research.source||'YouTube Data API v3',query:research.query,requestedPublishedWindowDays:research.searchDays,windowStart:research.searchStartedAt,windowEnd:research.searchEndedAt,returnedVideoCount:research.videos.length,selection:'YouTube search results; no random or population-representative sample',selectionBias:'The search API returns a relevance/ranking-limited sample (max 50 here); videos are not a representative sample of all comedy Shorts.',ownChannelIncluded:false,ownChannelVideosIncluded:false,ownChannelCommentsIncluded:false},
+          researchData:research,
+          analysisInstructions:[
+            'Önce gerçek ölçümleri raporla: kaynak, örneklem sayısı, arama sorgusu, tarih aralığı ve veri eksikleri.',
+            'İzlenme/abone oranı, izlenme/gün, beğeni oranı, ortalama izleme süresi ve ortalama izlenen yüzdeyi ayrı metrikler olarak tut. averageViewSeconds ve averageViewedPercent null/eksik ise bunları tahmin etme; YouTube Data API bu aramada bunları sağlamaz.',
+            'Videoları süre, video yaşı ve kanal büyüklüğü bakımından uygun gruplarda kıyasla. Video yaşı ve dağıtım farklılıklarını not et. Başarı ve zayıflık yalnızca gözlenen örneklem içinde söylenebilir; izlenme/abone oranı tek başına neden-sonuç değildir.',
+            'Yorumları yalnızca aynı tam YouTube video ID’sinin commentSample alanıyla eşleştir. Yorumlar relevance sıralı küçük örneklemdir; tüm izleyicileri temsil etmez. Başlık veya yorumdan sahne uydurma. Görsel içerik gerçekten incelenmediyse bunu açıkça belirt.',
+            'Önceden tanımlı mizah mekanizması kataloğu, konu ailesi, başarı formülü veya keyfî eşik kullanma. Veri desteklemiyorsa “bilinmiyor” de.',
+            'Ölçülmüş kanıtı, yorumlarla desteklenen yorumu ve test edilmemiş hipotezi ayrı sun. Birden fazla fikir listesi verme; tek bir sonraki test seç. Kanıt zayıfsa seçimin geçici olduğunu açıkla.',
+            'Seçilen testi çekime hazır yaz: İngilizce başlık; ilk kare; 0.0–1.0, 1.0–2.5, 2.5–5.5, 5.5–8.0 saniyelerde eylem/kamera/doğal ASMR; nedensel ilerleyiş ve tamamlanmış final.',
+            'Yayın sonrası ölçüm planında izlenme, ortalama izleme süresi, ortalama izlenen yüzde, beğeni/yorum oranı ve abone dönüşümünü ayrı tut. Kanal taban verisi bu pakette yoktur; kanal tabanı uydurma ve rakip verisini kendi kanalınla kıyaslama.',
+            'Başarı garantisi verme. Veriler yetersizse bunu açıkça belirt ama mevcut kanıta göre tek bir geçici test öner.'
+          ]
+        };
+        ta.value=JSON.stringify(payload,null,2);ta.style.display='block';ta.focus();ta.select();
+        let copied=false;try{await navigator.clipboard.writeText(ta.value);copied=true}catch(e){try{copied=document.execCommand('copy')}catch(_){}}
+        diag.textContent='Paket hazır: '+research.videos.length+' harici video, '+samples.length+' video için yorum isteği, '+research.commentSampleDesign.sampledComments+' yorum örneği. '+(copied?'Kopyalandı; buraya yapıştır.':'Metin aşağıda seçili; Kopyala ile al.');
+        btn.textContent=copied?'Kopyalandı ✓':'Paket hazır';
+      }catch(e){diag.textContent='Hata: '+(e.message||String(e));btn.textContent='Tekrar dene';}
+      finally{btn.disabled=false;}
+    };
   }catch(e){fail(el,e)}
 };
 
