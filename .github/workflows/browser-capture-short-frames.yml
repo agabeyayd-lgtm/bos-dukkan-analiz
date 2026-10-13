@@ -1,0 +1,121 @@
+name: Browser capture of real Shorts frames
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/browser-capture-short-frames.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install browser automation
+        run: |
+          npm init -y
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      - name: Open official YouTube player and capture rendered frames
+        shell: bash
+        run: |
+          mkdir -p browser-frames
+          node <<'JS'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
+            const results = [];
+            const ids = ['cP1lmemI0fk', 'sSt88cW5Bw8'];
+
+            for (const id of ids) {
+              const context = await browser.newContext({ viewport: { width: 430, height: 900 }, deviceScaleFactor: 1 });
+              const page = await context.newPage();
+              const errors = [];
+              page.on('pageerror', e => errors.push('pageerror: ' + e.message));
+              page.on('console', msg => { if (msg.type() === 'error') errors.push('console: ' + msg.text()); });
+
+              const record = { videoId: id, url: 'https://www.youtube.com/watch?v=' + id, frames: [], errors };
+              try {
+                await page.goto(record.url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+                await page.waitForTimeout(7000);
+
+                // Dismiss only the ordinary consent dialog if YouTube presents one.
+                for (const label of ['Accept all', 'Reject all', 'I agree']) {
+                  const button = page.getByRole('button', { name: label, exact: true }).first();
+                  if (await button.isVisible().catch(() => false)) {
+                    await button.click({ timeout: 2000 }).catch(() => {});
+                    await page.waitForTimeout(2000);
+                    break;
+                  }
+                }
+
+                const video = page.locator('video.html5-main-video').first();
+                await video.waitFor({ state: 'attached', timeout: 20000 });
+                await page.evaluate(() => {
+                  const v = document.querySelector('video.html5-main-video');
+                  if (v) { v.muted = true; v.play().catch(() => {}); }
+                });
+                await page.waitForTimeout(5000);
+
+                const initial = await video.evaluate(v => ({
+                  currentTime: v.currentTime, duration: Number.isFinite(v.duration) ? v.duration : null,
+                  readyState: v.readyState, paused: v.paused, videoWidth: v.videoWidth,
+                  videoHeight: v.videoHeight, error: v.error ? v.error.message : null
+                }));
+                record.initialPlayerState = initial;
+
+                if (initial.videoWidth > 0 && initial.videoHeight > 0) {
+                  const duration = initial.duration || 8;
+                  const times = [0.15, 0.35, 0.60, 0.85].map(f => Math.max(0, Math.min(duration - 0.25, duration * f)));
+                  for (let i = 0; i < times.length; i++) {
+                    await video.evaluate((v, t) => { v.currentTime = t; }, times[i]);
+                    await page.waitForTimeout(1400);
+                    const state = await video.evaluate(v => ({
+                      currentTime: v.currentTime, paused: v.paused, readyState: v.readyState,
+                      videoWidth: v.videoWidth, videoHeight: v.videoHeight
+                    }));
+                    const file = path.join('browser-frames', id + '_t' + String(i + 1) + '.png');
+                    await video.screenshot({ path: file, timeout: 15000 });
+                    record.frames.push({ file, requestedTime: times[i], playerState: state, bytes: fs.statSync(file).size });
+                  }
+                  record.status = record.frames.length === 4 ? 'CAPTURED_RENDERED_VIDEO_ELEMENT' : 'PARTIAL';
+                } else {
+                  record.status = 'NO_DECODED_VIDEO_FRAMES';
+                  await page.screenshot({ path: path.join('browser-frames', id + '_diagnostic.png'), fullPage: false }).catch(() => {});
+                }
+              } catch (e) {
+                record.status = 'ERROR';
+                record.error = String(e && e.message || e);
+                await page.screenshot({ path: path.join('browser-frames', id + '_diagnostic.png'), fullPage: false }).catch(() => {});
+              }
+              results.push(record);
+              await context.close();
+            }
+
+            fs.writeFileSync('browser-frames/status.json', JSON.stringify({
+              createdAt: new Date().toISOString(),
+              method: 'Playwright screenshot of the official YouTube HTML5 video element; no thumbnail URLs',
+              results
+            }, null, 2));
+            console.log(fs.readFileSync('browser-frames/status.json', 'utf8'));
+            await browser.close();
+          })().catch(e => { console.error(e); process.exit(1); });
+          JS
+
+      - name: Upload captured frames and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-rendered-short-frames
+          path: browser-frames/
+          if-no-files-found: warn
+          retention-days: 7
