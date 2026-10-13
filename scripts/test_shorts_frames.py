@@ -215,8 +215,14 @@ for url in URLS:
         probe_result, _ = probe(endpoint)
         item["public_endpoint_probes"][label] = probe_result
 
-    item["visual_access_confirmed"] = any(x.get("url_status") == "image_downloaded" for x in item["watch_page_storyboards"])
-    item["status"] = "storyboard_image_downloaded" if item["visual_access_confirmed"] else item.get("status", "no_storyboard_image")
+    storyboard_ok = any(x.get("url_status") == "image_downloaded" for x in item["watch_page_storyboards"])
+    item["visual_access_confirmed"] = storyboard_ok or bool(invidious.get("success"))
+    if storyboard_ok:
+        item["status"] = "storyboard_image_downloaded"
+    elif invidious.get("success"):
+        item["status"] = "invidious_frame_extracted"
+    else:
+        item["status"] = item.get("status", "no_visual_frame_access")
     (OUT / f"{video_id}.json").write_text(json.dumps(item, indent=2, ensure_ascii=False), encoding="utf-8")
     report["videos"].append(item)
 
