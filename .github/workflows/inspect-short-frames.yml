@@ -1,0 +1,86 @@
+name: Inspect public Shorts frames
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/inspect-short-frames.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg python3-pil
+          python -m pip install --upgrade yt-dlp
+
+      - name: Download public sample videos and extract frames
+        shell: bash
+        run: |
+          set +e
+          mkdir -p frames
+          ids=(
+            "v__e4whKJSs"
+            "c7IqboV6qVw"
+            "EbgDmaDz3w8"
+            "C2N1_RjnG2k"
+            "lJnLtaTyQcw"
+          )
+          for id in "${ids[@]}"; do
+            echo "Processing $id"
+            yt-dlp --no-warnings --no-playlist --format "best[height<=720]/best" --merge-output-format mp4 -o "frames/$id.%(ext)s" "https://www.youtube.com/watch?v=$id"
+            file=$(find frames -maxdepth 1 -type f -name "$id.*" ! -name '*.jpg' | head -n 1)
+            if [ -z "$file" ]; then
+              echo "DOWNLOAD_FAILED $id" | tee -a frames/status.txt
+              continue
+            fi
+            duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$file" 2>/dev/null)
+            if [ -z "$duration" ]; then
+              echo "PROBE_FAILED $id" | tee -a frames/status.txt
+              continue
+            fi
+            for fraction in 0.05 0.30 0.60 0.90; do
+              t=$(python -c "print(max(0,float('$duration')*float('$fraction')))")
+              ffmpeg -hide_banner -loglevel error -ss "$t" -i "$file" -frames:v 1 -vf "scale=360:-1" "frames/${id}_${fraction}.jpg" -y
+            done
+            echo "OK $id duration=$duration" | tee -a frames/status.txt
+            rm -f "$file"
+          done
+          python - <<'PY'
+          from PIL import Image, ImageOps, ImageDraw
+          from pathlib import Path
+          files=sorted(Path("frames").glob("*.jpg"))
+          if not files:
+              print("No frames were extracted.")
+              raise SystemExit(0)
+          thumbs=[]
+          for p in files:
+              im=Image.open(p).convert("RGB")
+              im.thumbnail((240,430))
+              canvas=Image.new("RGB",(260,470),"white")
+              canvas.paste(im,((260-im.width)//2,25))
+              ImageDraw.Draw(canvas).text((6,5),p.stem,fill="black")
+              thumbs.append(canvas)
+          cols=4
+          rows=(len(thumbs)+cols-1)//cols
+          sheet=Image.new("RGB",(cols*260,rows*470),"#dddddd")
+          for i,im in enumerate(thumbs):
+              sheet.paste(im,((i%cols)*260,(i//cols)*470))
+          sheet.save("frames/contact-sheet.jpg",quality=88)
+          print(f"Created contact sheet from {len(files)} frames")
+          PY
+
+      - name: Upload extracted frames
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shorts-frame-inspection
+          path: frames/
+          if-no-files-found: warn
+          retention-days: 3
