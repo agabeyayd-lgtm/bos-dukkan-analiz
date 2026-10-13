@@ -413,9 +413,9 @@ $('#goOwn').onclick=async()=>{
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${v.avgSec==null?'—':v.avgSec.toFixed(1)+' sn'}</td><td class="${v.pct==null?'':pctCls(v.pct)}">${v.pct==null?'—':v.pct.toFixed(0)+'%'}</td><td>${v.sec} sn</td><td>${v.likes==null?'—':fmt(v.likes)}</td><td>${v.subs==null?'—':v.subs}</td></tr>`).join('')}</table></div>
     <details class="note"><summary>Teknik teşhis (istatistikler neden 0?)</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(analyticsDebug,null,2)}</pre></details>
     <p class="note">%55 eşiği senin hedefin olarak işaretlendi. Bu eşik YouTube dağıtımını garanti etmez; yalnızca kendi videolarını kıyaslamak için kullan.</p>
-    <h2>Araştırma videolarıyla karşılaştır</h2>
-    <p class="note">Sıra: önce <b>Genel Analiz</b> bölümünde aramayı çalıştır, sonra bu bölümde Google ile kanal verisini getir, en son aşağıdaki düğmeye bas. Panel kanal metriklerini, araştırma videolarını ve erişilebilen yorum örneklerini tek bir ChatGPT analiz paketinde birleştirir. Paket otomatik kopyalanır; istersen dosya olarak da indirebilirsin. Bu sayfa kendi başına yapay zekâ sonucu üretmez; paketi bu sohbete gönderdiğinde analizi ben yaparım. Yorumlar kapalıysa örnek alınamayabilir.</p>
-    <p><button id="copyCompare">Hazır analiz paketini oluştur ve kopyala</button> <button id="downloadCompare" class="ghost" disabled>Analiz paketini indir (.txt)</button></p>
+    <h2>Bağımsız rakip araştırması</h2>
+    <p class="note">Sıra: önce <b>Genel Analiz</b> bölümünde aramayı çalıştır, sonra bu bölümde Google ile kanal verisini getir, en son aşağıdaki düğmeye bas. Paket yalnızca harici araştırma videolarını ve bu videolara ait yorum örneklerini içerir. Kendi kanalının metrikleri ve yorumları rakip analizine dahil edilmez. Paket otomatik kopyalanır; istersen dosya olarak da indirebilirsin. Bu sayfa kendi başına yapay zekâ sonucu üretmez; paketi bu sohbete gönderdiğinde analizi ben yaparım. Yorumlar kapalıysa örnek alınamayabilir.</p>
+    <p><button id="copyCompare">Rakip araştırma paketini oluştur ve kopyala</button> <button id="downloadCompare" class="ghost" disabled>Analiz paketini indir (.txt)</button></p>
     <div id="commentDiag" class="note" aria-live="polite">Yorum teşhisi henüz çalıştırılmadı. Yukarıdaki düğmeye bastığında yorumların alınıp alınmadığı ve varsa API hatası burada gösterilecek.</div>
     <textarea id="compareTxt" readonly rows="8" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
     $('#copyOwn').onclick=()=>copyTable('#to','#copyOwn');
@@ -432,7 +432,7 @@ $('#goOwn').onclick=async()=>{
         // Yorum örneği için yalnızca en yüksek izlenmeyi değil, farklı performans sinyallerini temsil eden videolar seç.
         const researchCommentPicks=chooseResearchCommentVideos(researchVideos,8);
         const researchComments=researchCommentPicks.length?await sampleComments(researchCommentPicks,8,8):[];
-        const ownComments=await sampleComments([...vs].sort((a,b)=>b.views-a.views),5,8);
+        const ownComments=[]; // Kullanıcının kanal yorumları rakip araştırmasına dahil edilmez.
         // Yorumları başlık benzerliğiyle değil, tam YouTube video ID'siyle eşleştir.
         const ownCommentById=new Map(ownComments.map(x=>[x.videoId,x]));
         const researchCommentById=new Map(researchComments.map(x=>[x.videoId,x]));
@@ -447,37 +447,37 @@ $('#goOwn').onclick=async()=>{
           return '<div style="margin:8px 0;padding:8px;border:1px solid var(--line);border-radius:8px"><strong>'+esc(v.title||v.id)+'</strong><p>'+esc(metrics)+'</p><p>Video ID: <code>'+esc(v.id||'')+'</code> · '+(s.available?'Yorum API başarılı · '+s.sampled+' örnek':'Yorum örneği yok'+(s.reason?' · '+esc(s.reason):''))+(kind==='research'&&s.selectionReason?' · Seçim nedeni: '+esc(s.selectionReason):'')+'</p>'+((s.comments||[]).length?'<ul>'+s.comments.map(x=>'<li>'+esc(x.text)+' <small>('+fmt(x.likes)+' beğeni)</small></li>').join('')+'</ul>':(s.available?'<p>API sonuçlarında gösterilebilir yorum yok.</p>':''))+'</div>';
         }).join(''):'<p>Bu grupta video yok.</p>');
         const failures=[...ownComments,...researchComments].filter(v=>!v.available);
-        commentDiag.innerHTML='<h2>Yorum çekme ve video eşleştirme</h2><p>Kanal: '+ownComments.filter(v=>v.available).length+'/'+ownComments.length+' seçili videoda istek başarılı. Araştırma: '+researchComments.filter(v=>v.available).length+'/'+researchComments.length+' seçili videoda istek başarılı.</p><p>Her yorum örneği tam video ID üzerinden ilgili video ve metriklerine bağlandı. Araştırmada yorum için en fazla 8 video seçilir: aboneye göre izlenme, günlük hız, mutlak izlenme, yorum/beğeni oranları ve özellikle 7–15 saniyelik videoların performansı. Bu örneklem farklı sinyalleri karşılaştırır; tek başına başarı nedenini kanıtlamaz. Bu çeşitlendirme fikir seçimine yardımcı olur; başarı nedenini tek başına kanıtlamaz.</p>'+(failures.length?'<p><strong>Hata ayrıntıları ilgili video kaydında gösterilir.</strong></p>':'<p>Seçilen videolarda API isteği hata vermedi. Sıfır yorum, o videolarda sonuç dönmediği anlamına gelir.</p>')+renderMatchedGroup('Boş Dükkân — video, performans ve yorum eşleşmesi',ownMatched,'own')+renderMatchedGroup('Araştırma — video ve yorum eşleşmesi',researchMatched,'research');
+        commentDiag.innerHTML='<h2>Rakip yorumlarını çekme ve video eşleştirme</h2><p>Araştırma: '+researchComments.filter(v=>v.available).length+'/'+researchComments.length+' seçili harici videoda istek başarılı.</p><p>Yalnızca rakip araştırması videoları ve bunların tam video ID ile eşleşen yorumları gösterilir. Kendi kanalının metrikleri ve yorumları bu analize dahil değildir. Örneklem, farklı performans sinyallerinden en fazla 8 video ve video başına en fazla 8 yorum içerir; başarı nedenini tek başına kanıtlamaz.</p>'+(failures.length?'<p><strong>Hata ayrıntıları ilgili rakip video kaydında gösterilir.</strong></p>':'<p>Seçilen rakip videolarda API isteği hata vermedi. Sıfır yorum, o videolarda sonuç dönmediği anlamına gelir.</p>')+renderMatchedGroup('Rakip videolar — performans ve yorum eşleşmesi',researchMatched,'research');
         const txt=[
           "ROL: Boş Dükkân için veri analisti ve yaratıcı yönetmen. Veriye dayalı karşılaştırma yap; korelasyonu nedensellik diye sunma.",
           "KANAL SABİTLERİ: 8 saniye, dikey 9:16, diyalogsuz, doğal ASMR, İngilizce başlık. Mizah gerçekçi insan davranışından doğmalı; güçlü ilk 0,3 saniye ve tamamlanmış final olmalı.",
           "",
-          "BOŞ DÜKKÂN KANAL VERİSİ (YouTube Analytics API ve video metaverisi):",
-          JSON.stringify({channel:((cj.items&&cj.items[0]&&cj.items[0].snippet&&cj.items[0].snippet.title)||'Kanal adı alınamadı'),subscriberCount:+(cj.items&&cj.items[0]&&cj.items[0].statistics&&cj.items[0].statistics.subscriberCount||0),periodDays:+$('#odays').value,summary:{videos:vs.length,totalViews:tv,medianViews:viewMedian,medianViewedPercent:Number.isFinite(retentionMedian)?retentionMedian:null,weightedAverageViewedPercent:Number.isFinite(wpct)?wpct:null},videos:ownMatched},null,2),
+          "KULLANICININ KANAL VERİSİ BİLİNÇLİ OLARAK DIŞARIDA BIRAKILDI.",
+          "Kanal metrikleri, videoları ve yorumları bu pakete eklenmez.",
           "",
-          "BOŞ DÜKKÂN VİDEOLARINDAN YORUM ÖRNEKLERİ (API'den çekilen gerçek sonuçlar; hata varsa reason alanında):",
-          JSON.stringify(ownComments,null,2),
+          "KULLANICININ KANAL YORUMLARI BİLİNÇLİ OLARAK DIŞARIDA BIRAKILDI.",
+          "Kanal yorumları bu pakete eklenmez.",
           "",
           "ARAŞTIRMA VİDEOLARI:",
           research?JSON.stringify(research,null,2):"Bu oturumda Genel Analiz araştırma sonuçları henüz alınmamış. Kanal verisi var; rakip karşılaştırmasını eksik veri diye açıkça belirt.",
           "",
           "GÖREV:",
-          "1) Kendi kanalımda yüksek/düşük performanslı videoları yalnızca mevcut veriye göre ayır. Ortalama izleme süresi ve izlenen yüzde eksik olanları tahmin etme.",
-          "2) Araştırma videolarındaki görüntülenme/abone oranını yalnızca keşif sinyali say; bunun neden-sonuç kanıtı olmadığını açıkla. Kanalımın retention verisiyle birebir aynı metrikmiş gibi kıyaslama.",
+          "1) Yalnızca harici araştırma videolarını analiz et. Kullanıcının kendi kanalını, videolarını, metriklerini ve yorumlarını dahil etme.",
+          "2) Araştırma videolarındaki görüntülenme/abone oranını yalnızca keşif sinyali say; bunun neden-sonuç kanıtı olmadığını açıkla. Kullanıcının kanal metrikleriyle kıyaslama yapma.",
           "3) Ortak olası kancaları, başlık örüntülerini ve farklılıkları çıkar. Video başlığı/izlenme sayısı tek başına sahne mekanizmasını kanıtlamaz; emin olmadığın yerde belirsizliği belirt.",
           "4) Video süresi, görüntülenme, izlenen yüzde, ortalama izleme süresi ve beğeni/yorum sayıları arasındaki örüntüleri; örneklem boyutunu ve seçilim yanlılığını hesaba katarak karşılaştır.",
           "5) YORUM-PERFORMANS EŞLEŞTİRMESİ: Her video kaydındaki commentSample, yalnızca aynı tam video ID'sine ait yorum örneğidir. Her videoyu kendi izlenme/izleme süresi/izlenen yüzde/beğeni/toplam yorum metrikleriyle birlikte analiz et; başka videonun yorumunu asla bağlama. Yorum örneği olmayan videolar için çıkarım yapma.",
           "6) YORUM ANALİZİ: Araştırma ve kanal yorum örneklerindeki tekrar eden izleyici tepkilerini, izleyicinin açıkça belirttiği komik anları, şaşkınlık/duygu ifadelerini, alıntılanan replik veya meme referanslarını ve kafa karışıklığını ayrı kümelere ayır. Yorumların sahneyi gerçekten açıklayıp açıklamadığını değerlendir; yorumlarda bulunmayan sahne ayrıntılarını uydurma.",
           "7) Yorum örnekleri en fazla 8 video başına 8 yorumdur ve YouTube'un relevance sıralamasına dayanır; temsili anket değildir. Beğeniler ve yorumlar sessiz izleyicileri temsil etmez. Alay, spam, bot, dil ve kültür farkı ile seçilim yanlılığını belirt. Tek bir yorumdan genelleme yapma; tekrar eden örüntüleri kanıt düzeyine göre etiketle.",
           "8) Ortalama izlenme yüzdesi %100'ü aşıyorsa bunu tekrar izleme/loop için olası sinyal olarak not et; doğrudan tekrar sayısı diye adlandırma. API'de doğrudan tekrar oynatma sayısı yoksa bunu açıkça söyle. Eksik metrikleri tahmin etme.",
-          "9) Sonuçta Boş Dükkân için test edilmeye değer en fazla 3 farklı mizah mekanizması öner; her birini hangi kanal metriği ve hangi yorum örüntüsünün desteklediğiyle ilişkilendir. Sadece yorumlarda insanların 'komik' demesini mekanizma kanıtı sayma.",
+          "9) Harici araştırmada desteklenen en fazla 3 mizah mekanizmasını belirle; her birini rakip videoların ölçümleri ve yorum örüntüleriyle ilişkilendir. Kullanıcının kanalından veri kullanma.",
           "10) 8 saniyelik format için somut sonraki test planı ver: neyi değiştireceğiz, hangi metriği ölçeceğiz, hangi sonuç tekrar test etmeyi hak edecek.",
           "11) FİNAL KARARI: Bana fikir listesi verme ve seçimi kullanıcıya bırakma. Veriler yeterliyse tek bir en güçlü sonraki video seç ve neden diğer olasılıklardan daha güçlü olduğunu kanıtlarla açıkla. Veriler yetersizse bunu dürüstçe söyle; eksik veriyi uydurma ama mevcut kanıta göre en makul geçici testi yine seç.",
           "12) SEÇİLEN VİDEOYU ÇEKİME HAZIR YAZ: İngilizce kısa başlık; ilk karede tam olarak görülen şey; 0.0–1.0, 1.0–2.5, 2.5–5.5 ve 5.5–8.0 saniye aralıklarında eylem, kamera ve duyulacak doğal ASMR; karakterlerin doğal davranışı; yükselen ama fiziksel olarak inandırıcı mekanik; net görsel sonuç/final. Diyalog ve açıklama yok.",
           "13) SENARYO KALİTE KAPISI: İlk kare kaydırmayı durduracak kadar anlaşılır ve tuhaf olmalı; olay insan davranışından doğmalı; her sonraki hareket bir öncekinin doğal sonucu olmalı; final gerçekten tamamlanmış olmalı. Yalnızca nesneyi büyütme, rastgele absürtlük, yapay tezat, sırf loop için yarım bırakma ve klişe tekrar yok. Bunlardan biri sağlanmıyorsa senaryoyu kendi içinde düzelt, zayıf taslak sunma.",
           "14) KANIT / TAHMİN AYRIMI: Kararın altında (A) doğrudan ölçülen bulgular, (B) yorum örneklerinden destek alan yorumlar, (C) henüz test edilmemiş hipotezler başlıklarını ayrı tut. Başarı garantisi verme. Yorumlar veya başlıklar sahneyi kanıtlamıyorsa görsel olay uydurma; video görseli incelenmediyse bunu belirt.",
-          "15) YAYIN SONRASI ÖLÇÜM: Seçilen testin başarı ölçütlerini kanalın mevcut taban verisine göre belirle; görüntülenme dağıtımını izleyici tutma metriklerinden ayır. İlk sonuç zayıfsa tek videodan genel kural çıkarma; ne zaman tekrar deneneceğini ve ne zaman bırakılacağını açıkça yaz.",
-          "16) Bu veri tek başına başarıyı garanti etmez. Tam manifesto dosyası panele bağlı değil; yalnızca yukarıdaki verileri kullan."
+          "15) Kullanıcının kanal taban verisi bu pakete dahil değildir; bu nedenle kanala özel başarı eşiği uydurma. Gelecekteki testler ayrı değerlendirilmelidir.",
+          "16) Bu paket yalnızca harici araştırma verilerini içerir. Kullanıcının kanal verilerini ekleme veya kıyaslama. Başarı garantisi verme."
         ].join("\n");
         const ta=$('#compareTxt');ta.value=txt;ta.style.display='block';ta.select();
         const downloadBtn=$('#downloadCompare');downloadBtn.disabled=false;downloadBtn.onclick=()=>{const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='bos-dukkan-analiz-paketi.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);};
