@@ -6,6 +6,20 @@
 
 Birincil amaç, diyalogsuz ve dünya çapında anlaşılabilen görsel mizah üretmektir. Doğal ASMR/foley ses tasarımıdır; içerik hedefi değildir.
 
+## Duygu ilkesi (2026-10-15 — hipotez, kanal verisiyle sınanır)
+
+Fikirler önce net bir **insani duygudan** doğar; gag bu duygunun üzerine kurulur. Duygu gag’in süsü değil, motorudur.
+
+- Her fikrin tek, adı konabilen bir duygusu olur (örn. yas, gurur, pişmanlık, utanç, şefkat, hayal kırıklığı, nostalji). Bu bir kontrol listesi değil örnek yelpazesidir; sabit duygu kataloğu veya konu ailesi dayatılmaz.
+- Karakterler duyguyu tamamen ciddiye alır; göz kırpma, kendini ele verme veya “komik olduğunu bilme” yoktur.
+- Mizah, duygunun beklenmedik ama inandırıcı bir nesneye ya da duruma yönelmesinden çıkar. Duygu olmadan yalnızca tuhaf/görsel ilginç sahne yeterli sayılmaz.
+- Duygu tek bir jest, bakış veya sessizlikle taşınır; diyalog ve açıklama yazısı gerekmez.
+- İzleyicinin kendini yerleştirebileceği bir insan bağı (dokunuş, bakış, ortak sessizlik) tercih edilir.
+
+**Gözlenen dayanak (küçük örneklem, kesin kural değil):** “ASMR Sanayi Ustası” taziye videosu (motora başsağlığı) ilk saatlerde çorap/dev kedi banyo videosundan belirgin biçimde daha hızlı izlendi; yayın saatleri ve video yaşı farklı olduğundan bu bir neden-sonuç kanıtı değildir. Kullanıcı ayrıca daha önceki dükkân/dondurma/dedeler videolarının da benzer etkileşim aldığını bildirdi; bu videoların rakamları panele henüz bağlı değil.
+
+**Sınama:** Yayın sonrası, duygu odaklı videoları kendi kanal tabanıyla; ortalama izlenen yüzde, kaydırmadan izleyenlerin oranı, izlenme/gün ve abone dönüşümü olarak ayrı ayrı karşılaştır. Duygu ilkesi veriyle desteklenmezse bu bölüm revize edilir.
+
 ## Kanıt katmanları
 
 1. **Kendi kanal verisi — birincil performans kanıtı.** Seçili YouTube Analytics dönemindeki görüntülenme, ortalama izleme süresi, ortalama izlenen yüzde, beğeni ve kazanılan abone ayrı alanlarda tutulur. Video ömrü boyunca biriken kamusal sayaçlar ayrı tutulur; farklı zaman pencereleri tek toplam/medyan içine karıştırılmaz.
@@ -19,9 +33,9 @@ Birincil amaç, diyalogsuz ve dünya çapında anlaşılabilen görsel mizah ür
 1. Veri penceresini, örneklem sayısını ve eksik alanları raporla.
 2. Kendi videolarını kendi aralarında; süre, yaş ve ölçüm penceresini dikkate alarak karşılaştır. Görüntülenme, izleme süresi, izlenen yüzde, beğeni/yorum oranı ve abone dönüşümünü ayrı tut.
 3. Harici örnekleri, sahne mekanizmasını bildikleri için değil, daha yakından incelenmeye değer oldukları için seç.
-4. Konuyu herhangi bir belirli mekândan değil, insanın gerçek davranışından ve davranışın doğurduğu görünür sonuçtan ara. Önceden hazırlanmış mizah kataloğu, sabit konu aileleri veya keyfî birleşik puan yok.
+4. Konuyu herhangi bir belirli mekândan değil, insanın gerçek davranışından ve davranışın doğurduğu görünür sonuçtan ara. Davranışın altında net bir insani duygu olmalı (Duygu ilkesi). Önceden hazırlanmış mizah kataloğu, sabit konu aileleri veya keyfî birleşik puan yok.
 5. Rakiplerin gerçek sahne kareleri yoksa onların sahne mekanizmasını “bilinmiyor” olarak tut; ancak bu eksiklik özgün fikir aramayı otomatik durdurmaz. Kendi kanal metriklerinin desteklediği performans sinyallerini ve bağımsız gündelik davranış gözlemlerini kullanarak test edilebilir bir yaratıcı hipotez kur. Verinin hangi mekanizmayı desteklediği bilinmiyorsa bunu açıkça yaz; fikri rakip videosunun kanıtlanmış mekanizması gibi sunma.
-6. Fikirleri kendi içinde farklı bağlamlarda çeşitlendir; kullanıcıya seçenek listesi verme. Görsel kanca, neden-sonuç, fiziksel tutarlılık, diyalogsuz okunurluk ve tamamlanmış final kapılarından geçmeyen fikri ele.
+6. Fikirleri kendi içinde farklı bağlamlarda çeşitlendir; kullanıcıya seçenek listesi verme. Görsel kanca, neden-sonuç, fiziksel tutarlılık, diyalogsuz okunurluk, duygusal netlik ve tamamlanmış final kapılarından geçmeyen fikri ele.
 7. Yeterince güçlü fikir kalmazsa bunu söyle; sırf cevap üretmek için zayıf fikir sunma. Eksik rakip görüntüsü tek başına ret nedeni değildir; asıl ret nedeni, hiçbir özgün adayın yaratıcı kalite kapısını geçmemesidir. Başarı bir hipotezdir, garanti değildir.
 7. Yayın sonrası sonuçları kendi kanalının karşılaştırılabilir tabanıyla ölç; korelasyonu neden-sonuç diye sunma.
 
