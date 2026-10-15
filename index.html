@@ -47,11 +47,13 @@ tr:last-child td{border-bottom:0}
 a{color:var(--acc)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}.chip{background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:13px}
 @media (prefers-reduced-motion:no-preference){.bars i{transition:width .4s}}
+/* Rakip izleme ekranları kaldırıldı; trend ve kendi kanal analizi korunur. */
+.tab[data-p="kan"], .tab[data-p="frames"], #kan, #frames, #gen > details {display:none !important}
 </style>
 </head>
 <body>
 <h1>Boş Dükkân Analiz Paneli</h1>
-<p class="sub">Kendi kanalının gerçek performansı + rakip keşfi + davranış temelli konu motoru. Kanal adı bir marka; konu sınırı değil.</p>
+<p class="sub">Trend keşfi + kendi kanalının gerçek performansı + insani davranıştan konu motoru. Kanal adı bir marka; konu sınırı değil.</p>
 
 <div class="bar" role="group" aria-label="API anahtarı">
   <input id="key" type="password" placeholder="YouTube Data API v3 anahtarı" autocomplete="off">
@@ -60,15 +62,15 @@ a{color:var(--acc)}
 <p class="note">Anahtar yalnızca bu tarayıcıda saklanır. Google Cloud'da "YouTube Data API v3" etkinleştirip ücretsiz anahtar alabilirsin.</p>
 
 <div class="tabs" role="tablist">
-  <button class="tab on" role="tab" data-p="gen">1. Genel analiz</button>
-  <button class="tab" role="tab" data-p="kan">2. Kanal analizi</button>
-  <button class="tab" role="tab" data-p="own">3. Kendi performansım + konu motoru</button>
-  <button class="tab" role="tab" data-p="frames">4. Gerçek kareler</button>
+  <button class="tab on" role="tab" data-p="gen">1. Trend keşfi</button>
+  <button class="tab" role="tab" data-p="kan">Kanal analizi</button>
+  <button class="tab" role="tab" data-p="own">2. Kendi verim + Konu Motoru</button>
+  <button class="tab" role="tab" data-p="frames">Gerçek kareler</button>
 </div>
 
 <section id="gen" class="pane on">
   <div class="bar">
-    <input id="q" placeholder="Anahtar kelime (örn. auto repair funny)">
+    <input id="q" placeholder="Trend konusu / arama terimi (örn. visual comedy, everyday behavior)">
     <select id="days"><option value="7">Son 7 gün</option><option value="30" selected>Son 30 gün</option><option value="90">Son 90 gün</option></select>
     <select id="ord"><option value="viewCount">En çok izlenen</option><option value="date" selected>En yeni</option><option value="relevance">Alakalı</option></select>
     <select id="srt"><option value="brk" selected>Fırlamaya göre</option><option value="vpd">Günlük izlenmeye göre</option></select>
@@ -345,8 +347,8 @@ $('#goGen').onclick=async()=>{
     <h2>Videolar</h2><p><button class="ghost" id="copyGen">Tabloyu kopyala</button></p><div class="wrap"><table id="tg"><tr><th>Başlık</th><th>Kanal</th><th>Abone</th><th>İzlenme</th><th>Fırlama</th><th>İzl./gün</th><th>Beğeni %</th><th>Yorum</th><th>Süre</th><th>Gün-saat</th></tr>
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${esc(v.channel)}</td><td>${v.subs==null?'–':fmt(v.subs)}</td><td>${fmt(v.views)}</td><td class="${v.brk>=5?'y':''}">${v.brk==null?'–':v.brk.toFixed(1)+'x'}</td><td>${fmt(v.vpd)}</td><td>${v.views?(v.likes/v.views*100).toFixed(1):'–'}</td><td>${fmt(v.comments)}</td><td>${v.sec} sn</td><td>${GUN[v.date.getDay()]} ${String(v.date.getHours()).padStart(2,'0')}:00</td></tr>`).join('')}</table></div>
     <p class="note">İzlenme/abone = keşif sinyalidir; tek başına başarı veya neden-sonuç kanıtı değildir. Video yaşı, süre ve dağıtım farkları karşılaştırmayı etkiler. YouTube Data API bu aramada ortalama izleme süresi ve izlenen yüzde sağlamaz. Arama sonuçları, seçilen tarih aralığındaki ve YouTube'un döndürdüğü en fazla 50 videoyla sınırlıdır.</p>
-    <h2>Rakip keşfi — ön çalışma</h2>
-    <p class="note">Tek düğme, rakip videoları ve video ID’siyle eşleşen yorum örneklerini toplar; kanıt/hipotez ayrımını ve Boş Dükkân’ın sabit kurallarını içeren analiz talimatıyla birlikte tek bir paket hazırlar. Bu adım yalnızca harici rakip keşfidir; kendi kanal performansı ve doğrulanmış sahne analizi içermediği için nihai konu seçmez. Önce Genel Analiz’i çalıştır, sonra düğmeye bas ve kopyalanan paketi ChatGPT’ye buraya yapıştır. Bu sürüm paketi hazırlar; yapay zekâ analizini kendi kendine çalıştırmaz. Google/OAuth ile kendi kanalına bağlanman gerekmez.</p>
+    <div id="legacyResearchTools" hidden><h2>Trend keşfi — örneklem sinyalleri</h2>
+    <p class="note">Tek düğme, rakip videoları ve video ID’siyle eşleşen yorum örneklerini toplar; kanıt/hipotez ayrımını ve Boş Dükkân’ın sabit kurallarını içeren analiz talimatıyla birlikte tek bir paket hazırlar. Bu adım yalnızca trend keşfidir; kendi kanal performansı ve doğrulanmış sahne analizi içermediği için nihai konu seçmez. Önce Genel Analiz’i çalıştır, sonra düğmeye bas ve kopyalanan paketi ChatGPT’ye buraya yapıştır. Bu sürüm paketi hazırlar; yapay zekâ analizini kendi kendine çalıştırmaz. Google/OAuth ile kendi kanalına bağlanman gerekmez.</p>
     <p><button id="makeCompetitorPacket">Rakip keşif verisini kopyala (ön çalışma)</button></p>
     <div id="competitorDiag" class="note" aria-live="polite">Önce Genel Analiz’i çalıştır; ardından rakip verisi + analiz talimatı tek pakette hazırlanır.</div>
     <textarea id="competitorPacket" readonly rows="10" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
@@ -354,7 +356,7 @@ $('#goGen').onclick=async()=>{
     <p class="note">Daha önce üretilen fikirleri veya kaçınılacak mizah mekanizmalarını buraya yapıştır. Yeni istem bunların tekrar edilmemesini şart koşar.</p>
     <textarea id="avoidIdeas" rows="3" placeholder="Örn. gevşek somun, küçük hata→şaşkın tepki, aynı final tipi..." style="width:100%;max-width:100%;margin:4px 0 10px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
     <p><button id="ask">Rakip verisi için ön analiz istemi</button></p>
-    <textarea id="askTxt" readonly rows="10" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
+    <textarea id="askTxt" readonly rows="10" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea></div>`;
     $('#copyGen').onclick=()=>copyTable('#tg','#copyGen');
     $('#ask').onclick=()=>askClaude(vs,q);
     $('#makeCompetitorPacket').onclick=async()=>{
@@ -396,7 +398,7 @@ $('#goGen').onclick=async()=>{
             'currentState alanındaki izlenen ve izlenmeyen grupları yan yana raporla; arama “viewCount” sırasıyla yapıldıysa izlenmeyenlerin eksik temsil edildiğini belirt. Gruplar arasındaki farkı neden-sonuç diye sunma.',
             'Yorumları yalnızca aynı tam YouTube video ID’sinin commentSample alanıyla eşleştir. Yorumlar relevance sıralı küçük örneklemdir; tüm izleyicileri temsil etmez. Başlık veya yorumdan sahne uydurma. Görsel içerik gerçekten incelenmediyse bunu açıkça belirt.',
             'Önceden tanımlı mizah mekanizması kataloğu, konu ailesi, başarı formülü veya keyfî eşik kullanma. Veri desteklemiyorsa “bilinmiyor” de.',
-            'Bu paket yalnızca harici rakip keşfidir. Nihai konu, yeni video fikri veya çekim senaryosu seçme; kendi kanal verisi bu pakette yoktur.',
+            'Bu paket yalnızca trend keşfidir. Nihai konu, yeni video fikri veya çekim senaryosu seçme; kendi kanal verisi bu pakette yoktur.',
             'Başlık, thumbnail, görüntülenme veya yorumdan sahne uydurma. Gerçek kareler/gözle doğrulanmış sahne notları yoksa görsel mekanizmayı bilinmiyor olarak işaretle.',
             'Çıktı: gözlenen ölçümler; örneklem ve seçilim yanlılığı; video yaşı/süre/kanal büyüklüğü sınırlamaları; tam video ID ile eşleşen yorumların sınırlı anlamı; sahne analizi için eksik kanıt.'
           ]
@@ -575,8 +577,8 @@ $('#goOwn').onclick=async()=>{
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${v.hasAnalytics?fmt(v.views):'—'}</td><td>${v.publicViews==null?'—':fmt(v.publicViews)}</td><td>${v.avgSec==null?'—':v.avgSec.toFixed(1)+' sn'}</td><td class="${v.pct==null?'':pctCls(v.pct)}">${v.pct==null?'—':v.pct.toFixed(0)+'%'}</td><td>${v.sec} sn</td><td>${v.likes==null?'—':fmt(v.likes)}</td><td>${v.subs==null?'—':v.subs}</td></tr>`).join('')}</table></div>
     <details class="note"><summary>Teknik teşhis (istatistikler neden 0?)</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(analyticsDebug,null,2)}</pre></details>
     <p class="note">Hazır bir başarı eşiği kullanılmaz. Videoları kendi karşılaştırılabilir dönemleri içinde değerlendir; %100 üzeri izlenen kısım, tekrar izleme için olası bir sinyaldir, tek başına başarı nedeni değildir.</p>
-    <h2>Konu Motoru · kanal verisi + rakip keşfi</h2>
-    <p class="note">Sıra: önce <b>Genel Analiz</b> bölümünde aramayı çalıştır, sonra bu bölümde Google ile kanal verisini getir, en son aşağıdaki düğmeye bas. Paket kendi kanalının performansını, harici rakip keşfini, tam video ID'sine bağlı iki grup yorum örneğini, varsa doğrulanmış sahne notlarını ve fikir geçmişini birleştirir. Kanal adı/markası konu filtresi değildir: market, boşaltma veya araba zorunluluğu yoktur. Paket otomatik kopyalanır; istersen dosya olarak da indirebilirsin. Bu sayfa kendi başına yapay zekâ sonucu üretmez; paketi bu sohbete gönderdiğinde analizi ben yaparım. Yorumlar kapalıysa örnek alınamayabilir.</p>
+    <h2>Konu Motoru · trend sinyali + kendi kanalım</h2>
+    <p class="note">Sıra: önce <b>Trend keşfi</b> bölümünde güncel aramayı çalıştır, sonra burada Google ile kendi kanal verini getir, en son aşağıdaki düğmeye bas. Paket kendi kanalının gerçek performansını, trend aramasından gelen sınırlı dış sinyalleri ve fikir geçmişini birleştirir. Dış videoların sahne mekanizması çıkarılmaz; trend verisi yalnızca keşif sinyalidir. Kanal adı/markası konu filtresi değildir: market, boşaltma veya araba zorunluluğu yoktur. Paket otomatik kopyalanır; istersen dosya olarak da indirebilirsin. Bu sayfa kendi başına yapay zekâ sonucu üretmez; paketi bu sohbete gönderdiğinde analizi ben yaparım. Yorumlar kapalıysa örnek alınamayabilir.</p>
     <p><button id="copyCompare">Konu Motoru paketini oluştur ve kopyala</button> <button id="downloadCompare" class="ghost" disabled>Konu paketini indir (.txt)</button></p>
     <div id="commentDiag" class="note" aria-live="polite">Yorum teşhisi henüz çalıştırılmadı. Yukarıdaki düğmeye bastığında yorumların alınıp alınmadığı ve varsa API hatası burada gösterilecek.</div>
     <textarea id="compareTxt" readonly rows="8" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
@@ -681,7 +683,7 @@ $('#goOwn').onclick=async()=>{
           "A. KENDİ KANALIM — BİRİNCİL PERFORMANS KANITI:",
           JSON.stringify(ownDataForPrompt,null,2),
           "",
-          "B. HARİCİ RAKİP KEŞFİ — İKİNCİL BAĞLAM:",
+          "B. TREND KEŞFİ — SINIRLI DIŞ SİNYAL:",
           research?JSON.stringify({source:research.source||'YouTube Data API v3',query:research.query||null,requestedPublishedWindowDays:research.searchDays??null,requestedOrder:research.requestedOrder||null,windowStart:research.searchStartedAt||null,windowEnd:research.searchEndedAt||null,returnedVideoCount:research.videos?.length||0,visualAccess:'NOT VERIFIED by API metadata. Unless actual watched-frame notes are supplied below, competitor scene mechanics are unknown.',sampleBias:'YouTube search ranking and query terms limit this sample; it is not a census of all Shorts.',currentState:currentStateSnapshot(research.videos||[]),videos:(research.videos||[]).slice().sort((a,b)=>(Number(b.viewsPerDay??b.vpd)||0)-(Number(a.viewsPerDay??a.vpd)||0)).slice(0,18),commentSampleDesign:research.commentSampleDesign||null,comments:(research.commentSamples||[]).slice(0,8)},null,2):'Genel Analiz henüz çalıştırılmamış. Rakip verisi ve şu anki izlenen/izlenmeyen durumu yok; bunu açıkça belirt.',
           "",
           "C. GÖZLE DOĞRULANMIŞ SAHNE NOTLARI:",
@@ -694,7 +696,7 @@ $('#goOwn').onclick=async()=>{
           "1) Kaynağı, tarih aralığını, örneklem boyutunu ve eksik alanları bildir. Kendi kanalında averageViewSeconds/averageViewedPercent/likesInWindow/subscribersGainedInWindow seçili Analytics dönemine; publicLifetimeViews tüm ömre aittir. Bu zaman pencerelerini karıştırma. Rakiplerde ortalama izleme metrikleri yoksa tahmin etme.",
           "2) Kendi videolarını kendi aralarında kıyasla. İzlenme, ortalama izleme süresi, ortalama izlenen yüzde, beğeni oranı ve abone kazanımını ayrı sinyaller olarak incele. Küçük örneklemi, video yaşını ve seçili tarih penceresini not et; korelasyonu nedensellik diye sunma.",
           "3) Yorumları yalnızca tam video ID'sine bağlı kayıttan kullan. Bunlar küçük, relevance sıralı örneklemdir; tüm izleyicileri temsil etmez. Yorumlar sahne karesi veya görsel kanıt değildir.",
-          "4) Rakip izlenmeleri yalnızca hangi videoları daha fazla incelemeye değer bulacağımız için keşif sinyalidir. Başlık, thumbnail ve yorum gerçek sahne akışını kanıtlamaz. Görsel not yoksa mekanizmayı 'bilinmiyor' işaretle; uydurma sahne kurma.",
+          "4) Dış video metrikleri yalnızca trend keşif sinyalidir; insan davranışı veya sahne mekanizmasının kanıtı değildir. Başlık, thumbnail ve yorum gerçek sahne akışını kanıtlamaz. Görsel not yoksa mekanizmayı 'bilinmiyor' işaretle; uydurma sahne kurma.",
           "Şu anki durum: B bölümündeki currentState alanı aramanın örnekleminde şu an neyin hızlı izlendiğini (watched) ve neyin izlenmediğini (notWatched) yaşa göre düzeltilmiş izlenme/gün ile verir. Konu ararken her ikisini de dikkate al: izlenenlerde ve izlenmeyenlerde tekrar eden davranış/duygu/format örüntülerini yalnızca veri destekliyorsa belirt; fark neden-sonuç değildir. requestedOrder “viewCount” ise izlenmeyenler eksik temsil edilir; bunu söyle. Başlık veya küçük resimden sahne mekanizması uydurma. currentState available:false ise bunu açıkça yaz ve tahmin yürütme.",
           "Rakip sahne notlarının eksikliği özgün fikir üretimini otomatik durdurmaz. Kendi kanal verisinin gerçekten desteklediği performans bulgularını kullan; sahne mekanizması ölçülmediyse onu kanıt gibi sunma. Bağımsız gündelik insan davranışından yaratıcı bir hipotez üret ve hipotez diye etiketle. Yalnızca aday kalite kapısını geçmiyorsa fikir seçme.",
           "5) Konu ararken kanal adını, marketi veya belirli bir mekânı şart koşma. Gerçek insan davranışlarından ve altındaki insani duygudan başla ve farklı bağlamları kendi içinde keşfet. Önceden hazırlanmış mizah/konu kataloğu, sabit başarı formülü veya keyfî birleşik puan kullanma.",
