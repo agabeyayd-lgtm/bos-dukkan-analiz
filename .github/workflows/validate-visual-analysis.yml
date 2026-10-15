@@ -1,0 +1,45 @@
+name: Validate competitor visual analysis prototype
+on:
+  push:
+    branches: [feature/framefetch-visual-analysis]
+    paths:
+      - 'auto-competitor-discovery.html'
+      - '.github/workflows/validate-visual-analysis.yml'
+  workflow_dispatch:
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Extract inline JavaScript and check syntax
+        run: |
+          python - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          class Scripts(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.in_script = False
+                  self.parts = []
+                  self.current = []
+              def handle_starttag(self, tag, attrs):
+                  if tag.lower() == "script":
+                      self.in_script = True
+                      self.current = []
+              def handle_endtag(self, tag):
+                  if tag.lower() == "script" and self.in_script:
+                      self.parts.append("".join(self.current))
+                      self.in_script = False
+              def handle_data(self, data):
+                  if self.in_script:
+                      self.current.append(data)
+          p = Scripts()
+          p.feed(Path("auto-competitor-discovery.html").read_text(encoding="utf-8"))
+          Path("/tmp/prototype.js").write_text("\\n".join(p.parts), encoding="utf-8")
+          if not p.parts:
+              raise SystemExit("No inline script found")
+          PY
+          node --check /tmp/prototype.js
