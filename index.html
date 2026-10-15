@@ -70,7 +70,7 @@ a{color:var(--acc)}
   <div class="bar">
     <input id="q" placeholder="Anahtar kelime (örn. auto repair funny)">
     <select id="days"><option value="7">Son 7 gün</option><option value="30" selected>Son 30 gün</option><option value="90">Son 90 gün</option></select>
-    <select id="ord"><option value="viewCount">En çok izlenen</option><option value="date">En yeni</option><option value="relevance">Alakalı</option></select>
+    <select id="ord"><option value="viewCount">En çok izlenen</option><option value="date" selected>En yeni</option><option value="relevance">Alakalı</option></select>
     <select id="srt"><option value="brk" selected>Fırlamaya göre</option><option value="vpd">Günlük izlenmeye göre</option></select>
     <label style="display:flex;align-items:center;gap:6px"><input id="only60" type="checkbox" checked style="flex:none"> ≤60 sn</label>
     <button id="goGen">Analiz et</button>
@@ -237,6 +237,35 @@ function chooseResearchCommentVideos(videos,maxVideos=8){
   pick([...pool].filter(v=>Number(v.seconds)>=7&&Number(v.seconds)<=15).sort((a,b)=>(b.comments||0)/Math.max(1,b.views||0)-(a.comments||0)/Math.max(1,a.views||0)),'7–15 saniye aralığında yüksek yorum oranı');
   return chosen;
 }
+/* Şu anki durum: aramanın döndürdüğü örneklemde neyin izlendiği, neyin izlenmediği (yaşa göre düzeltilmiş günlük izlenme). */
+function currentStateSnapshot(videos){
+  const all=Array.isArray(videos)?videos:[];
+  const eligible=all.filter(v=>Number.isFinite(Number(v.viewsPerDay))&&Number(v.ageDays)>=2);
+  const tooNew=all.length-eligible.length;
+  if(eligible.length<8)return {available:false,reason:'Yaşı en az 2 gün olan video sayısı 8’in altında ('+eligible.length+'); izlenen/izlenmeyen ayrımı için örneklem çok küçük. Aramayı genişlet (daha uzun süre, daha fazla video).',eligibleCount:eligible.length,excludedTooNew:tooNew};
+  const sorted=[...eligible].sort((a,b)=>Number(b.viewsPerDay)-Number(a.viewsPerDay));
+  const q=Math.max(3,Math.floor(sorted.length/4));
+  const slim=v=>({id:v.id,title:v.title,channel:v.channel,subscribers:v.subscribers??null,views:v.views??null,viewsPerDay:Number(v.viewsPerDay),ageDays:v.ageDays,seconds:v.seconds??null,likeRate:v.likeRate??null});
+  return {
+    available:true,
+    definition:'Örneklem: aramanın döndürdüğü videolardan yaşı en az 2 gün olanlar (2 günden yeni olanlar günlük izlenme gürültülü olduğu için dışarıda). Sıralama izlenme/gün (video yaşına göre düzeltilmiş). watched = en yüksek çeyrek, notWatched = en düşük çeyrek.',
+    eligibleCount:eligible.length,
+    excludedTooNew:tooNew,
+    medianViewsPerDay:median(eligible.map(v=>Number(v.viewsPerDay))),
+    watched:sorted.slice(0,q).map(slim),
+    notWatched:sorted.slice(-q).reverse().map(slim),
+    limitations:'Yalnızca bu aramanın örneklemidir; tüm YouTube’u temsil etmez. Arama “En çok izlenen” sırasıyla yapıldıysa izlenmeyenler eksik temsil edilir. Görünen fark neden-sonuç göstermez; başlık veya küçük resimden sahne mekanizması uydurma.'
+  };
+}
+function renderCurrentState(research){
+  const st=currentStateSnapshot((research&&research.videos)||[]);
+  const warn=research&&research.requestedOrder==='viewCount'?'<p class="note"><b>Uyarı:</b> Arama “En çok izlenen” sırasıyla yapıldı; bu örnek zaten izlenenleri öne çıkarır, izlenmeyenleri eksik temsil eder. Güncel durumu görmek için sırayı “En yeni” yap.</p>':'';
+  const head='<h2>Şu anki durum: ne izleniyor, ne izlenmiyor</h2>'+warn;
+  if(!st.available)return head+'<p class="note">'+esc(st.reason)+'</p>';
+  const row=v=>'<tr><td class="t">'+link(v)+'</td><td>'+esc(v.channel)+'</td><td>'+fmt(v.viewsPerDay)+'</td><td>'+fmt(v.views)+'</td><td>'+v.ageDays+' gün</td><td>'+v.seconds+' sn</td></tr>';
+  const tbl=rows=>'<div class="wrap"><table><tr><th>Başlık</th><th>Kanal</th><th>İzl./gün</th><th>İzlenme</th><th>Yaş</th><th>Süre</th></tr>'+rows.map(row).join('')+'</table></div>';
+  return head+'<p class="note">Örneklem: yaşı en az 2 gün olan '+st.eligibleCount+' video ('+st.excludedTooNew+' video çok yeni olduğu için dışarıda). Medyan: '+fmt(st.medianViewsPerDay)+' izlenme/gün. Sıralama video yaşına göre düzeltilmiş günlük izlenmeye göredir. Bu yalnızca aramanın örneklemidir; neden-sonuç göstermez.</p><h3>İzlenenler (en yüksek çeyrek)</h3>'+tbl(st.watched)+'<h3>İzlenmeyenler (en düşük çeyrek)</h3>'+tbl(st.notWatched);
+}
 async function sampleComments(videos,maxVideos=5,perVideo=8){
   const chosen=[...videos].filter(v=>v&&v.id).slice(0,maxVideos),out=[];
   for(const v of chosen){
@@ -312,6 +341,7 @@ $('#goGen').onclick=async()=>{
     const md=median(vs.map(v=>v.views));
     el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(md),'medyan izlenme')}${stat(fmt(Math.max(...vs.map(v=>v.vpd))),'en yüksek günlük izlenme')}${stat(vs.filter(v=>v.brk!=null).length,'abone oranı hesaplanabilen video')}${stat(avg(vs.map(v=>v.sec)).toFixed(1)+' sn','ortalama süre')}${stat(Math.round(vs.filter(v=>v.sec>=7&&v.sec<=9).length/vs.length*100)+'%','8 sn civarı')}</div>
     <h2>Başlıklarda sık geçen kelimeler</h2><div class="chips">${top.map(([w,c])=>`<span class="chip">${esc(w)} · ${c}</span>`).join('')}</div>
+    ${renderCurrentState(window.bosResearchSnapshot)}
     <h2>Videolar</h2><p><button class="ghost" id="copyGen">Tabloyu kopyala</button></p><div class="wrap"><table id="tg"><tr><th>Başlık</th><th>Kanal</th><th>Abone</th><th>İzlenme</th><th>Fırlama</th><th>İzl./gün</th><th>Beğeni %</th><th>Yorum</th><th>Süre</th><th>Gün-saat</th></tr>
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${esc(v.channel)}</td><td>${v.subs==null?'–':fmt(v.subs)}</td><td>${fmt(v.views)}</td><td class="${v.brk>=5?'y':''}">${v.brk==null?'–':v.brk.toFixed(1)+'x'}</td><td>${fmt(v.vpd)}</td><td>${v.views?(v.likes/v.views*100).toFixed(1):'–'}</td><td>${fmt(v.comments)}</td><td>${v.sec} sn</td><td>${GUN[v.date.getDay()]} ${String(v.date.getHours()).padStart(2,'0')}:00</td></tr>`).join('')}</table></div>
     <p class="note">İzlenme/abone = keşif sinyalidir; tek başına başarı veya neden-sonuç kanıtı değildir. Video yaşı, süre ve dağıtım farkları karşılaştırmayı etkiler. YouTube Data API bu aramada ortalama izleme süresi ve izlenen yüzde sağlamaz. Arama sonuçları, seçilen tarih aralığındaki ve YouTube'un döndürdüğü en fazla 50 videoyla sınırlıdır.</p>
@@ -343,7 +373,7 @@ $('#goGen').onclick=async()=>{
         const payload={
           role:'Rakip keşif denetçisi; yalnızca ölçülen harici veriyi ve eksik kanıtı raporla, nihai konu seçme.',
           constraints:{durationSeconds:8,aspectRatio:'9:16',dialogue:false,audio:'natural ASMR',titleLanguage:'English',postingSchedule:'Wednesday and Sunday 19:00',humor:'realistic everyday human behavior, expectation, decision and consequence',mustHave:['strong visual hook in first 0.3 seconds','causal progression','concrete completed ending'],avoid:['forced contrast','random absurdity','impossible physics','only enlarging/changing an object','explanatory text','unfinished loop ending']},
-          sourceAndSample:{source:research.source||'YouTube Data API v3',query:research.query,requestedPublishedWindowDays:research.searchDays,windowStart:research.searchStartedAt,windowEnd:research.searchEndedAt,returnedVideoCount:research.videos.length,selection:'YouTube search results; no random or population-representative sample',selectionBias:'The search API returns a relevance/ranking-limited sample (max 50 here); videos are not a representative sample of all comedy Shorts.',ownChannelIncluded:false,ownChannelVideosIncluded:false,ownChannelCommentsIncluded:false},
+          sourceAndSample:{source:research.source||'YouTube Data API v3',query:research.query,requestedPublishedWindowDays:research.searchDays,requestedOrder:research.requestedOrder||null,windowStart:research.searchStartedAt,windowEnd:research.searchEndedAt,returnedVideoCount:research.videos.length,selection:'YouTube search results; no random or population-representative sample',selectionBias:'The search API returns a relevance/ranking-limited sample (max 50 here); videos are not a representative sample of all comedy Shorts.',ownChannelIncluded:false,ownChannelVideosIncluded:false,ownChannelCommentsIncluded:false},
           researchData:{
             videos:research.videos.slice().sort((a,b)=>(Number(b.views)||0)-(Number(a.views)||0)).slice(0,12).map(v=>({
               id:v.id,title:v.title,channel:v.channel,channelId:v.channelId,publishedAt:v.publishedAt||v.date||null,ageDays:v.ageDays??null,
@@ -352,16 +382,18 @@ $('#goGen').onclick=async()=>{
               viewsPerDay:v.viewsPerDay??v.vpd??null,likeRate:v.likeRate??null,commentRate:v.commentRate??null,
               averageViewSeconds:null,averageViewedPercent:null
             })),
+            currentState:currentStateSnapshot(research.videos),
             commentSamples:(research.videoCommentMatches||[]).filter(v=>v.commentSample&&v.commentSample.available).slice(0,6).map(v=>({
               videoId:v.id,title:v.title,channel:v.channel,selectionReason:v.commentSelectionReason||null,
               sampled:v.commentSample.sampled,comments:(v.commentSample.comments||[]).slice(0,4).map(c=>({text:c.text||c.textDisplay||c.comment||'',likes:c.likes??c.likeCount??null}))
             })),
-            note:'Kısaltılmış paket: en fazla 12 video ve en fazla 6 videoda 4 yorum. Ortalama izleme süresi/yüzdesi bu kaynakta yoktur.'
+            note:'Kısaltılmış paket: en fazla 12 video ve en fazla 6 videoda 4 yorum. currentState alanı aramanın örnekleminde yaşa göre düzeltilmiş günlük izlenmeye göre en çok ve en az izlenenleri verir. Ortalama izleme süresi/yüzdesi bu kaynakta yoktur.'
           },
           analysisInstructions:[
             'Önce gerçek ölçümleri raporla: kaynak, örneklem sayısı, arama sorgusu, tarih aralığı ve veri eksikleri.',
             'İzlenme/abone oranı, izlenme/gün, beğeni oranı, ortalama izleme süresi ve ortalama izlenen yüzdeyi ayrı metrikler olarak tut. averageViewSeconds ve averageViewedPercent null/eksik ise bunları tahmin etme; YouTube Data API bu aramada bunları sağlamaz.',
             'Videoları süre, video yaşı ve kanal büyüklüğü bakımından uygun gruplarda kıyasla. Video yaşı ve dağıtım farklılıklarını not et. Başarı ve zayıflık yalnızca gözlenen örneklem içinde söylenebilir; izlenme/abone oranı tek başına neden-sonuç değildir.',
+            'currentState alanındaki izlenen ve izlenmeyen grupları yan yana raporla; arama “viewCount” sırasıyla yapıldıysa izlenmeyenlerin eksik temsil edildiğini belirt. Gruplar arasındaki farkı neden-sonuç diye sunma.',
             'Yorumları yalnızca aynı tam YouTube video ID’sinin commentSample alanıyla eşleştir. Yorumlar relevance sıralı küçük örneklemdir; tüm izleyicileri temsil etmez. Başlık veya yorumdan sahne uydurma. Görsel içerik gerçekten incelenmediyse bunu açıkça belirt.',
             'Önceden tanımlı mizah mekanizması kataloğu, konu ailesi, başarı formülü veya keyfî eşik kullanma. Veri desteklemiyorsa “bilinmiyor” de.',
             'Bu paket yalnızca harici rakip keşfidir. Nihai konu, yeni video fikri veya çekim senaryosu seçme; kendi kanal verisi bu pakette yoktur.',
@@ -650,7 +682,7 @@ $('#goOwn').onclick=async()=>{
           JSON.stringify(ownDataForPrompt,null,2),
           "",
           "B. HARİCİ RAKİP KEŞFİ — İKİNCİL BAĞLAM:",
-          research?JSON.stringify({source:research.source||'YouTube Data API v3',query:research.query||null,requestedPublishedWindowDays:research.searchDays??null,windowStart:research.searchStartedAt||null,windowEnd:research.searchEndedAt||null,returnedVideoCount:research.videos?.length||0,visualAccess:'NOT VERIFIED by API metadata. Unless actual watched-frame notes are supplied below, competitor scene mechanics are unknown.',sampleBias:'YouTube search ranking and query terms limit this sample; it is not a census of all Shorts.',videos:(research.videos||[]).slice().sort((a,b)=>(Number(b.viewsPerDay??b.vpd)||0)-(Number(a.viewsPerDay??a.vpd)||0)).slice(0,18),commentSampleDesign:research.commentSampleDesign||null,comments:(research.commentSamples||[]).slice(0,8)},null,2):'Genel Analiz henüz çalıştırılmamış. Rakip verisi yok; bunu açıkça belirt.',
+          research?JSON.stringify({source:research.source||'YouTube Data API v3',query:research.query||null,requestedPublishedWindowDays:research.searchDays??null,requestedOrder:research.requestedOrder||null,windowStart:research.searchStartedAt||null,windowEnd:research.searchEndedAt||null,returnedVideoCount:research.videos?.length||0,visualAccess:'NOT VERIFIED by API metadata. Unless actual watched-frame notes are supplied below, competitor scene mechanics are unknown.',sampleBias:'YouTube search ranking and query terms limit this sample; it is not a census of all Shorts.',currentState:currentStateSnapshot(research.videos||[]),videos:(research.videos||[]).slice().sort((a,b)=>(Number(b.viewsPerDay??b.vpd)||0)-(Number(a.viewsPerDay??a.vpd)||0)).slice(0,18),commentSampleDesign:research.commentSampleDesign||null,comments:(research.commentSamples||[]).slice(0,8)},null,2):'Genel Analiz henüz çalıştırılmamış. Rakip verisi ve şu anki izlenen/izlenmeyen durumu yok; bunu açıkça belirt.',
           "",
           "C. GÖZLE DOĞRULANMIŞ SAHNE NOTLARI:",
           sceneNotes||'Sahne notu yok. Rakiplerin gerçek görsel mekanizması bilinmiyor; başlık, küçük resim, izlenme veya yorumlardan sahne uydurma.',
@@ -663,11 +695,12 @@ $('#goOwn').onclick=async()=>{
           "2) Kendi videolarını kendi aralarında kıyasla. İzlenme, ortalama izleme süresi, ortalama izlenen yüzde, beğeni oranı ve abone kazanımını ayrı sinyaller olarak incele. Küçük örneklemi, video yaşını ve seçili tarih penceresini not et; korelasyonu nedensellik diye sunma.",
           "3) Yorumları yalnızca tam video ID'sine bağlı kayıttan kullan. Bunlar küçük, relevance sıralı örneklemdir; tüm izleyicileri temsil etmez. Yorumlar sahne karesi veya görsel kanıt değildir.",
           "4) Rakip izlenmeleri yalnızca hangi videoları daha fazla incelemeye değer bulacağımız için keşif sinyalidir. Başlık, thumbnail ve yorum gerçek sahne akışını kanıtlamaz. Görsel not yoksa mekanizmayı 'bilinmiyor' işaretle; uydurma sahne kurma.",
+          "Şu anki durum: B bölümündeki currentState alanı aramanın örnekleminde şu an neyin hızlı izlendiğini (watched) ve neyin izlenmediğini (notWatched) yaşa göre düzeltilmiş izlenme/gün ile verir. Konu ararken her ikisini de dikkate al: izlenenlerde ve izlenmeyenlerde tekrar eden davranış/duygu/format örüntülerini yalnızca veri destekliyorsa belirt; fark neden-sonuç değildir. requestedOrder “viewCount” ise izlenmeyenler eksik temsil edilir; bunu söyle. Başlık veya küçük resimden sahne mekanizması uydurma. currentState available:false ise bunu açıkça yaz ve tahmin yürütme.",
           "Rakip sahne notlarının eksikliği özgün fikir üretimini otomatik durdurmaz. Kendi kanal verisinin gerçekten desteklediği performans bulgularını kullan; sahne mekanizması ölçülmediyse onu kanıt gibi sunma. Bağımsız gündelik insan davranışından yaratıcı bir hipotez üret ve hipotez diye etiketle. Yalnızca aday kalite kapısını geçmiyorsa fikir seçme.",
           "5) Konu ararken kanal adını, marketi veya belirli bir mekânı şart koşma. Gerçek insan davranışlarından ve altındaki insani duygudan başla ve farklı bağlamları kendi içinde keşfet. Önceden hazırlanmış mizah/konu kataloğu, sabit başarı formülü veya keyfî birleşik puan kullanma.",
           "6) İçeride genişçe alternatifler üret ve acımasızca ele; kullanıcıya fikir listesi sunma. Tek güçlü test kalırsa onu seç. Hiçbir fikir kalite kapısını geçmiyorsa bunu açıkça söyle; sırf cevap olsun diye zayıf fikir seçme.",
           "7) Kalite kapısı: ilk kare 0,3 saniyede anlaşılır ve merak uyandırıcı; insan davranışı inandırıcı; tek ve net bir insani duygu var ve karakterler onu ciddiye alıyor; her eylem öncekinden doğal biçimde doğuyor; diyalogsuz okunuyor; fizik tutarlı; final somut ve tamamlanmış; fikir geçmişteki reddedilenlerle aynı değil.",
-          "8) Nihai çıktı: ölçülen kanal bulgusu ve örnek sayısı; sahne kanıtının durumu; kanıt ile test edilmemiş hipotezin ayrımı; tek fikir; fikrin temel insani duygusu; İngilizce başlık; ilk kare tarifi; 0.0–0.3, 0.3–1.5, 1.5–4.5, 4.5–8.0 saniyelik eylem/kamera/doğal ses; final; üretim riski ve neden diğer yolların elendiği.",
+          "8) Nihai çıktı: ölçülen kanal bulgusu ve örnek sayısı; sahne kanıtının durumu; şu anki izlenen/izlenmeyen durumun kısa özeti; kanıt ile test edilmemiş hipotezin ayrımı; tek fikir; fikrin temel insani duygusu; İngilizce başlık; ilk kare tarifi; 0.0–0.3, 0.3–1.5, 1.5–4.5, 4.5–8.0 saniyelik eylem/kamera/doğal ses; final; üretim riski ve neden diğer yolların elendiği.",
           "9) Yayın sonrası görüntülenme, ortalama izleme süresi, izlenen yüzde, beğeni/yorum oranı ve abone kazanımını ayrı değerlendir. Başarı garantisi veya veride olmayan eşik verme.",
           "10) Kanıt düzeylerini etiketle: ölçülmüş bulgu / gözle doğrulanmış sahne / yorumdan destek alan yorum / test edilmemiş yaratıcı hipotez."
         ].join("\n");
