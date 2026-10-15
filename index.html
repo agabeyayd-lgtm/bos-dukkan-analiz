@@ -460,7 +460,7 @@ $('#goOwn').onclick=async()=>{
     const rows=j.rows||[];
     const analyticsDebug={satirSayisi:rows.length,ilkSatirlar:rows.slice(0,3)};
     if(!rows.length){
-      throw new Error('Video listesi alınabiliyor ama YouTube Analytics bu tarih aralığı için hiçbir istatistik satırı döndürmedi. Bu yüzden önceki sürüm videoların istatistiklerini yanlış biçimde 0 gösteriyordu. Son 90 günü seçip tekrar dene; yine aynıysa Google hesabının Boş Dükkan kanalının sahibi/yöneticisi olduğundan ve YouTube Analytics API erişiminin açık olduğundan emin olmamız gerekiyor.');
+      throw new Error('Video listesi alınabiliyor ama YouTube Analytics bu tarih aralığı için hiçbir istatistik satırı döndürmedi. Bu yüzden önceki sürüm videoların istatistiklerini yanlış biçimde 0 gösteriyordu. Son 90 günü seçip tekrar dene; yine aynıysa Google hesabının Boş Dukkan kanalının sahibi/yöneticisi olduğundan ve YouTube Analytics API erişiminin açık olduğundan emin olmamız gerekiyor.');
     }
     // Analytics raporu yalnızca seçili dönemde ölçümü olan videoları döndürebilir.
     // Son yüklenen videoları ayrıca alıp raporla birleştir; böylece yeni video listede kaybolmaz.
@@ -643,6 +643,7 @@ $('#goOwn').onclick=async()=>{
           "",
           "MARKA KURALI: “Boş Dükkân” yalnızca kanal adı/markasıdır; konu filtresi değildir. Market, dükkânın boşalması, alışveriş arabası, çalışan veya ürün toplama ZORUNLU DEĞİL. Bunları yalnızca seçilen fikrin doğal parçasıysa kullan; sırf kanal adı yüzünden konuya zorlama.",
           "ASIL HEDEF: Diyalogsuz, dünya çapında anlaşılabilir görsel mizah. Mizah insan davranışından, beklenti/karar/hareket ile gerçek sonucunun ilişkisinden doğsun. Doğal ASMR/foley yalnızca ses katmanıdır; içerik hedefi görsel mizah ve komik sonuçtur.",
+          "DUYGU KURALI (kanalın sabit kuralı): Her fikir önce tek, adı konabilen bir insani duygudan doğar (örn. yas, gurur, pişmanlık, utanç, şefkat, hayal kırıklığı, nostalji — bunlar örnektir, kapalı bir liste veya konu ailesi değildir). Karakterler duyguyu tamamen ciddiye alır; göz kırpma ve “komik olduğunu bilme” yoktur. Mizah, bu duygunun beklenmedik ama inandırıcı bir nesneye ya da duruma yönelmesinden çıkar. Duygu tek bir jest, bakış veya sessizlikle taşınır; izleyicinin kendini yerleştirebileceği bir insan bağı ara. Duygusu net olmayan fikri seçme. Bu kural kanalın kararıdır; kendi verilerindeki ilişkileri korelasyon olarak raporla, neden-sonuç diye sunma.",
           "SABİT ÇEKİM SINIRLARI: 8 saniye, dikey 9:16, diyalog yok, İngilizce başlık; ilk 0,3 saniyede net görsel kanca; doğal neden-sonuç; gerçekçi fizik; tamamlanmış ve tek bakışta anlaşılan final. Zorlama tezat, rastgele absürtlük, imkânsız fizik, yalnızca nesneyi büyütüp/değiştirme, açıklama yazısı ve yarım bırakılmış loop yok.",
           "",
           "A. KENDİ KANALIM — BİRİNCİL PERFORMANS KANITI:",
@@ -663,10 +664,10 @@ $('#goOwn').onclick=async()=>{
           "3) Yorumları yalnızca tam video ID'sine bağlı kayıttan kullan. Bunlar küçük, relevance sıralı örneklemdir; tüm izleyicileri temsil etmez. Yorumlar sahne karesi veya görsel kanıt değildir.",
           "4) Rakip izlenmeleri yalnızca hangi videoları daha fazla incelemeye değer bulacağımız için keşif sinyalidir. Başlık, thumbnail ve yorum gerçek sahne akışını kanıtlamaz. Görsel not yoksa mekanizmayı 'bilinmiyor' işaretle; uydurma sahne kurma.",
           "Rakip sahne notlarının eksikliği özgün fikir üretimini otomatik durdurmaz. Kendi kanal verisinin gerçekten desteklediği performans bulgularını kullan; sahne mekanizması ölçülmediyse onu kanıt gibi sunma. Bağımsız gündelik insan davranışından yaratıcı bir hipotez üret ve hipotez diye etiketle. Yalnızca aday kalite kapısını geçmiyorsa fikir seçme.",
-          "5) Konu ararken kanal adını, marketi veya belirli bir mekânı şart koşma. Gerçek insan davranışlarından başla ve farklı bağlamları kendi içinde keşfet. Önceden hazırlanmış mizah/konu kataloğu, sabit başarı formülü veya keyfî birleşik puan kullanma.",
+          "5) Konu ararken kanal adını, marketi veya belirli bir mekânı şart koşma. Gerçek insan davranışlarından ve altındaki insani duygudan başla ve farklı bağlamları kendi içinde keşfet. Önceden hazırlanmış mizah/konu kataloğu, sabit başarı formülü veya keyfî birleşik puan kullanma.",
           "6) İçeride genişçe alternatifler üret ve acımasızca ele; kullanıcıya fikir listesi sunma. Tek güçlü test kalırsa onu seç. Hiçbir fikir kalite kapısını geçmiyorsa bunu açıkça söyle; sırf cevap olsun diye zayıf fikir seçme.",
-          "7) Kalite kapısı: ilk kare 0,3 saniyede anlaşılır ve merak uyandırıcı; insan davranışı inandırıcı; her eylem öncekinden doğal biçimde doğuyor; diyalogsuz okunuyor; fizik tutarlı; final somut ve tamamlanmış; fikir geçmişteki reddedilenlerle aynı değil.",
-          "8) Nihai çıktı: ölçülen kanal bulgusu ve örnek sayısı; sahne kanıtının durumu; kanıt ile test edilmemiş hipotezin ayrımı; tek fikir; İngilizce başlık; ilk kare tarifi; 0.0–0.3, 0.3–1.5, 1.5–4.5, 4.5–8.0 saniyelik eylem/kamera/doğal ses; final; üretim riski ve neden diğer yolların elendiği.",
+          "7) Kalite kapısı: ilk kare 0,3 saniyede anlaşılır ve merak uyandırıcı; insan davranışı inandırıcı; tek ve net bir insani duygu var ve karakterler onu ciddiye alıyor; her eylem öncekinden doğal biçimde doğuyor; diyalogsuz okunuyor; fizik tutarlı; final somut ve tamamlanmış; fikir geçmişteki reddedilenlerle aynı değil.",
+          "8) Nihai çıktı: ölçülen kanal bulgusu ve örnek sayısı; sahne kanıtının durumu; kanıt ile test edilmemiş hipotezin ayrımı; tek fikir; fikrin temel insani duygusu; İngilizce başlık; ilk kare tarifi; 0.0–0.3, 0.3–1.5, 1.5–4.5, 4.5–8.0 saniyelik eylem/kamera/doğal ses; final; üretim riski ve neden diğer yolların elendiği.",
           "9) Yayın sonrası görüntülenme, ortalama izleme süresi, izlenen yüzde, beğeni/yorum oranı ve abone kazanımını ayrı değerlendir. Başarı garantisi veya veride olmayan eşik verme.",
           "10) Kanıt düzeylerini etiketle: ölçülmüş bulgu / gözle doğrulanmış sahne / yorumdan destek alan yorum / test edilmemiş yaratıcı hipotez."
         ].join("\n");
