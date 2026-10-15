@@ -1,0 +1,1 @@
+Free-only diagnostic for public Shorts storyboard access. The current test tries yt-dlp default, tv_embedded, mweb, and ios player clients. Success requires actual storyboard/frame data; thumbnails alone do not count. This branch is experimental and is not deployed to the live site.
