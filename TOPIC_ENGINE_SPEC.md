@@ -1,54 +1,36 @@
-# Boş Dükkân — Konu Motoru yöntemi
+# Boş Dükkân — Trend ve Konu Motoru yöntemi
 
-## Temel karar
+## Ana öncelik: trend keşfi
+Trend keşfi panelin ilk ve en önemli özelliğidir. YouTube Data API aramasıyla seçilen zaman aralığındaki kısa videoların yayın tarihi, izlenmesi, günlük izlenme hızı, beğeni/yorum sayaçları ve kanal büyüklüğü gibi erişilebilir sinyaller incelenir. Sonuçlar yalnızca arama örneklemidir; tüm YouTube'u temsil etmez. Video yaşı dikkate alınır; günlük izlenme hızı ve farklı sıralama biçimleri karşılaştırılır. API'nin sağlamadığı ortalama izleme süresi ve izlenen yüzde tahmin edilmez.
 
-**“Boş Dükkân” bir marka adıdır; hikâye mekânı veya konu filtresi değildir.** Fikir markette geçmek, dükkânın boşalması, alışveriş arabası ya da çalışan içermek zorunda değildir. Bu unsurlar ancak fikrin doğal parçasıysa kullanılabilir.
+## Kendi kanal verisi — birincil performans kanıtı
+Kanal sahibinin YouTube Analytics verileri konu kararında birincildir: görüntülenme, ortalama izleme süresi, ortalama izlenen yüzde, beğeni ve kazanılan abone ayrı ayrı değerlendirilir. Seçili Analytics dönemi ile videonun tüm ömrü boyunca biriken kamusal sayaçlar karıştırılmaz. Küçük örneklem, video yaşı ve dağıtım farkları açıkça belirtilir; korelasyon neden-sonuç diye sunulmaz.
 
-Birincil amaç, diyalogsuz ve dünya çapında anlaşılabilen görsel mizah üretmektir. Doğal ASMR/foley ses tasarımıdır; içerik hedefi değildir.
-
-## Duygu ilkesi (kanalın sabit kuralı)
-
-Her fikir önce net bir **insani duygudan** doğar; gag bu duygunun üzerine kurulur. Duygu gag’in süsü değil, motorudur. Duygusu olmayan fikir üretilmez.
-
-- Her fikrin tek, adı konabilen bir duygusu olur (örn. yas, gurur, pişmanlık, utanç, şefkat, hayal kırıklığı, nostalji). Bunlar örnektir; sabit duygu kataloğu veya konu ailesi yoktur.
-- Karakterler duyguyu tamamen ciddiye alır; göz kırpma, kendini ele verme veya “komik olduğunu bilme” yoktur.
-- Mizah, duygunun beklenmedik ama inandırıcı bir nesneye ya da duruma yönelmesinden çıkar. Duygu olmadan yalnızca tuhaf/görsel ilginç sahne üretilmez.
-- Duygu tek bir jest, bakış veya sessizlikle taşınır; diyalog ve açıklama yazısı yoktur.
-- İzleyicinin kendini yerleştirebileceği bir insan bağı (dokunuş, bakış, ortak sessizlik) her fikirde aranır.
-
-**Dayanak:** “ASMR Sanayi Ustası” taziye videosu (motora başsağlığı) ilk saatlerde çorap/dev kedi banyo videosundan belirgin biçimde daha hızlı izlendi; dükkân, dondurma ve dedeler videolarında da benzer etkileşim gözlendi. Bu kural bu gözlemlere dayanan kanal kararıdır.
-
-**Ölçüm:** Yayın sonrası duygu odaklı videolar kendi kanal tabanıyla; ortalama izlenen yüzde, kaydırmadan izleyenlerin oranı, izlenme/gün ve abone dönüşümü olarak ayrı ayrı karşılaştırılır. Bu karşılaştırmalar korelasyon olarak raporlanır, neden-sonuç diye sunulmaz.
+## Yaratıcı çekirdek: insan davranışı + insani duygu
+Her fikir gerçekçi bir insan davranışından ve o davranışın doğurduğu görünür sonuçtan doğar. Fikrin altında tek ve net bir insani duygu bulunmalıdır; örnekler sabit konu kataloğu değildir. Karakterler duyguyu ciddiye alır. Mizah rastgele tuhaflıktan değil, insanın duygu ve davranışının beklenmedik ama inandırıcı bir nesneye veya duruma yönelmesinden çıkar.
 
 ## Kanıt katmanları
-
-1. **Kendi kanal verisi — birincil performans kanıtı.** Seçili YouTube Analytics dönemindeki görüntülenme, ortalama izleme süresi, ortalama izlenen yüzde, beğeni ve kazanılan abone ayrı alanlarda tutulur. Video ömrü boyunca biriken kamusal sayaçlar ayrı tutulur; farklı zaman pencereleri tek toplam/medyan içine karıştırılmaz.
-2. **Harici videolar — keşif örneklemi.** YouTube Data API araması video, süre, tarih, kanal ve kamusal sayaçları bulur. Arama örneklemi evrenin tamamı değildir. Rakiplerin ortalama izleme süresi/yüzdesi bu kaynakta yoksa tahmin edilmez.
-3. **Yorumlar — sınırlı izleyici sinyali.** Yorum örnekleri tam video ID ile eşleşir. Az sayıda ve relevance sıralı yorum bütün izleyicileri temsil etmez; yorumlar sahnenin görsel kanıtı sayılmaz.
-4. **Sahne kanıtı — yalnızca gerçekten görülen eylem.** Kullanıcının doğruladığı sahne notları video URL/ID ile ilişkilendirilebilir. Not girilmediyse başlık, küçük resim veya yüksek izlenmeden sahne uydurulmaz; mekanizma “bilinmiyor” kalır.
-5. **Fikir geçmişi.** Yayımlanmış, denenmiş ve reddedilmiş fikirler yerel tarayıcıda tutulur ve tekrar üretimini engellemek için pakete eklenir.
+1. Kendi kanal verisi: performans hakkında birincil kanıt.
+2. Trend araması: dışarıda hangi videoların hız kazandığına dair sınırlı keşif sinyali; evrenin tamamı değil.
+3. Fikir geçmişi: yayımlanmış, denenmiş ve reddedilmiş fikirler tekrar filtresinde kullanılır.
+4. Rakip videosu izleme, ekran kaydı veya kare çıkarma şart değildir. Dış videonun gerçek sahnesi gözle doğrulanmadıysa sahne mekanizması hakkında iddia kurulmaz. Trend verisi tek başına sahne analizi yapmaz.
 
 ## Karar sırası
-
-1. Veri penceresini, örneklem sayısını ve eksik alanları raporla.
-2. Kendi videolarını kendi aralarında; süre, yaş ve ölçüm penceresini dikkate alarak karşılaştır. Görüntülenme, izleme süresi, izlenen yüzde, beğeni/yorum oranı ve abone dönüşümünü ayrı tut.
-3. Harici örnekleri, sahne mekanizmasını bildikleri için değil, daha yakından incelenmeye değer oldukları için seç.
-4. Konuyu herhangi bir belirli mekândan değil, insanın gerçek davranışından ve davranışın doğurduğu görünür sonuçtan ara. Davranışın altında net bir insani duygu olmalı (Duygu ilkesi). Önceden hazırlanmış mizah kataloğu, sabit konu aileleri veya keyfî birleşik puan yok.
-5. Rakiplerin gerçek sahne kareleri yoksa onların sahne mekanizmasını “bilinmiyor” olarak tut; ancak bu eksiklik özgün fikir aramayı otomatik durdurmaz. Kendi kanal metriklerinin desteklediği performans sinyallerini ve bağımsız gündelik davranış gözlemlerini kullanarak test edilebilir bir yaratıcı hipotez kur. Verinin hangi mekanizmayı desteklediği bilinmiyorsa bunu açıkça yaz; fikri rakip videosunun kanıtlanmış mekanizması gibi sunma.
-6. Fikirleri kendi içinde farklı bağlamlarda çeşitlendir; kullanıcıya seçenek listesi verme. Görsel kanca, neden-sonuç, fiziksel tutarlılık, diyalogsuz okunurluk, duygusal netlik ve tamamlanmış final kapılarından geçmeyen fikri ele.
-7. Yeterince güçlü fikir kalmazsa bunu söyle; sırf cevap üretmek için zayıf fikir sunma. Eksik rakip görüntüsü tek başına ret nedeni değildir; asıl ret nedeni, hiçbir özgün adayın yaratıcı kalite kapısını geçmemesidir. Başarı garantisi yoktur.
-8. Yayın sonrası sonuçları kendi kanalının karşılaştırılabilir tabanıyla ölç; korelasyonu neden-sonuç diye sunma.
+1. Önce trend aramasının sorgusunu, zaman penceresini, örneklem sayısını ve eksik alanlarını raporla.
+2. Dış örneklerde video yaşı ve kanal büyüklüğünü hesaba kat; görüntülenme/gün, izlenme/abone ve beğeni/yorum oranlarını ayrı tut. Sıralama yanlılığını belirt.
+3. Kendi kanalının ölçümlerini kendi içinde karşılaştır ve trend sinyalleriyle yalnızca test edilebilir hipotezler kur.
+4. İnsan davranışından ve insani duygudan hareketle farklı bağlamlarda özgün adaylar geliştir. Sabit mizah kataloğu, keyfî puan formülü veya otomatik başarı eşiği kullanma.
+5. Kullanıcıya zayıf fikir listesi verme. Kalite kapılarını geçmeyen adayları ele; güçlü aday yoksa bunu söyle.
+6. Yayın sonrası sonuçları kendi kanalının karşılaştırılabilir tabanıyla ölç. Başarı garantisi verme.
 
 ## Sabit yaratıcı sınırlar
-
-- 8 saniye, dikey 9:16, diyalogsuz, İngilizce başlık.
-- İlk 0,3 saniyede anlaşılır ve dikkat çekici bir görüntü.
-- Her fikirde net bir insani duygu (Duygu ilkesi).
-- İnsan davranışından doğan, gerçekçi fizik ve doğal sebep-sonuç.
-- Tamamlanmış, görsel olarak okunur final.
+- 8 saniye, dikey 9:16, diyalogsuz, doğal ASMR/foley; İngilizce başlık.
+- İlk 0,3 saniyede net ve dikkat çekici görsel kanca.
+- İnsan davranışı ve tek, anlaşılır insani duygu.
+- Gerçekçi fizik ve doğal sebep-sonuç.
+- Görsel olarak anlaşılır, somut ve tamamlanmış final.
 - Zorlama tezat, rastgele absürtlük, imkânsız fizik, yalnızca nesne büyütme/değiştirme, açıklama yazısı ve yarım bırakılmış loop yok.
-- ASMR/foley ses katmanıdır; mizahın yerine geçmez.
+- Rakip izleme, ekran kaydı veya gerçek kare çıkarma konu üretmenin ön şartı değildir.
 
-## Kodun görevi ve sınırı
-
-Panel; kendi kanal metriklerini, rakip keşfini, video kimliğine bağlı yorumları, isteğe bağlı gözle doğrulanmış sahne notlarını ve tekrar geçmişini birleştiren bir analiz paketi oluşturur. **Panelin kendisi bir yapay zekâ modeli çağırmaz**; hazırlanan paket kullanıcı tarafından sohbete yapıştırılır. Video karelerine erişim doğrulanmadıysa otomatik görsel analiz varmış gibi davranılmaz.
+## Panelin sınırı
+Panel veri toplar, karşılaştırır ve kullanıcı tarafından sohbete yapıştırılacak analiz paketini hazırlar. Panel kendi başına yapay zekâ modeli çağırmaz. Trend sinyalleri ve kendi kanal verileri birlikte kullanılır; yaratıcı karar, kanıt ve hipotez ayrımı açık tutularak verilir.
