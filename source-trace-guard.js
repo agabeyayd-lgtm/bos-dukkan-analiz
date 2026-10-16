@@ -50,9 +50,19 @@
     };
   }
   function numberTokenMatches(text, expectedValue) {
-    const expected = String(Math.round(Number(expectedValue)));
-    const tokens = String(text).match(/\d[\d.,\s]*\d|\d/g) || [];
-    return tokens.some(token => token.replace(/\D/g, "") === expected);
+    const raw = String(text == null ? "" : text);
+    const match = raw.match(/^\s*(?:[:=]\s*)?([-+]?\d[\d.,\s]*)/);
+    if (!match) return false;
+    const token = match[1].trim().replace(/\s+/g, "");
+    const expected = Number(expectedValue);
+    const candidates = [
+      Number(token),
+      Number(token.replace(/\./g, "").replace(",", ".")),
+      Number(token.replace(/,/g, "")),
+      Number(token.replace(/,/g, "."))
+    ].filter(Number.isFinite);
+    const tolerance = Number.isInteger(expected) ? 0.000001 : 0.011;
+    return candidates.some(value => Math.abs(value - expected) <= tolerance);
   }
   function validate(output, anchor) {
     const raw = String(output == null ? "" : output), normalized = normalizeText(raw);
@@ -78,8 +88,10 @@
     const rawMeasuredLine = measuredLineIndex >= 0 ? rawLines[measuredLineIndex] : "";
     const normalizedMetricLabel = normalizeText(anchor.metricLabel);
     const metricLabelIndex = measuredLine.indexOf(normalizedMetricLabel);
-    const valueField = metricLabelIndex >= 0
-      ? measuredLine.slice(metricLabelIndex + normalizedMetricLabel.length, metricLabelIndex + normalizedMetricLabel.length + 40)
+    const rawMetricLabel = String(anchor.metricLabel).toLocaleLowerCase("tr-TR");
+    const rawMetricLabelIndex = rawMeasuredLine.toLocaleLowerCase("tr-TR").indexOf(rawMetricLabel);
+    const valueField = rawMetricLabelIndex >= 0
+      ? rawMeasuredLine.slice(rawMetricLabelIndex + rawMetricLabel.length, rawMetricLabelIndex + rawMetricLabel.length + 40)
       : "";
     test("measured-finding-line", Boolean(measuredLine),
       "“ÖLÇÜLMÜŞ BULGU:” başlıklı ayrı kaynak satırı eksik veya sabit kaynakla uyuşmuyor.");
