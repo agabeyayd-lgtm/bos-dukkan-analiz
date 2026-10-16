@@ -1,118 +1,92 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const SourceTraceGuard = require("../source-trace-guard.js");
-const evidence = { metricLeaders: { highestWindowViews: {
-  videoId: "wEA-VZhxq6Y", title: "Not Every Ice Cream Container Has Ice Cream",
-  metric: "viewsInWindow", value: 27569
-}, highestObservedDailyViewPace: null } };
-const anchor = SourceTraceGuard.chooseAnchor(evidence, [], 28, "YouTube Analytics API v2");
+
+const research = {
+  source: "YouTube Data API v3 global search snapshot",
+  query: "global visual comedy",
+  searchEndedAt: "2026-10-16T15:00:00.000Z",
+  videos: [
+    {
+      id: "globalAB12345", title: "A Big Everyday Surprise", channel: "World Laughs",
+      channelId: "UCglobalchannel", publishedAt: "2026-10-14T10:00:00.000Z",
+      ageDays: 2.2, views: 125000, viewsPerDay: 56818, seconds: 12
+    },
+    {
+      id: "globalCD67890", title: "A Smaller Example", channel: "Tiny Comedy",
+      publishedAt: "2026-10-15T10:00:00.000Z", ageDays: 1.2, views: 50000, viewsPerDay: 41666, seconds: 15
+    }
+  ]
+};
+const anchor = SourceTraceGuard.chooseGlobalAnchor(research, research.searchEndedAt);
 const validOutput = [
-  "## BU FİKİR NEREDEN ÇIKTI?",
-  "Ölçülmüş bulgu: Not Every Ice Cream Container Has Ice Cream (video ID wEA-VZhxq6Y).",
-  "Seçili dönem izlenmesi: 27,569. Son 28 günlük YouTube Analytics ölçüm dönemi.",
-  "ÖLÇÜLMÜŞ BULGU: Not Every Ice Cream Container Has Ice Cream (video ID wEA-VZhxq6Y); seçili dönem izlenmesi 27,569; son 28 günlük YouTube Analytics ölçüm dönemi.",
-  "VERİDEN FİKRE GEÇİŞ: Bu ölçüm başlığın genel öncülünü fikir seçimine yönlendirdi; bu bağlantıyı sınırlı tutuyorum.",
-  "BAĞIN GÜCÜ: dolaylı/zayıf bağ; izlenme sayısı sahnenin neden tuttuğunu kanıtlamaz.",
-  "YARATICI SIÇRAMA: Bu mekanizma veriden çıkmadı; yaratıcı deney olarak eklendi.",
-  "VERİNİN KANITLAMADIĞI: Ölçüm, önerilen görsel sahnenin başarılı olacağını veya izlenme nedenini kanıtlamaz.",
+  "## BU FİKİR NEREDEN ÇIKTI? — GLOBAL KAYNAK İZİ",
+  "GLOBAL KAYNAK: \"A Big Everyday Surprise\" | Video ID: globalAB12345 | Kanal: World Laughs | Yayın: 2026-10-14 | Kamusal toplam izlenme: 125.000 | Ölçüm zamanı 2026-10-16; ömür boyu birikimli sayaç, seçili Analytics dönemi değildir | https://www.youtube.com/watch?v=globalAB12345",
+  "GLOBAL WEB KONTROLÜ: Başlık/kimlik YouTube kaydıyla eşleşti; bağımsız yazılı açıklama aynı geniş öncülü destekliyor: https://example.org/clip-context",
+  "GÖRSEL SAHNE DURUMU: Video izlenmedi; tam görsel sahne doğrulanmadı, bu yüzden eylem gözlenmiş gibi anlatılmıyor.",
+  "KAYNAKTAN ALINAN İLKE: Geniş öncül beklenmedik bir gündelik durumdan geliyor; kesin sahne mekanizması kaynak metaverisinden çıkmıyor.",
+  "GLOBAL İŞARETTEN FİKRE GEÇİŞ: Global kaynak yalnızca öncül yönü sağlıyor; yeni fikrin karakter ve görsel mekanizması ayrıca geliştirildi.",
+  "ÖZGÜN YARATICI SIÇRAMA: Kaynaktan farklı, yeni bir görsel komedi mekanizması kuruldu.",
+  "KOPYALANMAYAN UNSURLAR: Kaynağın aynı eylemi, karakterleri, nesne dizilimi ve finali kopyalanmadı.",
+  "KANIT SINIRI: Toplam izlenme ve metaveri gerçek sahneyi, izleyicinin neden izlediğini veya yeni fikrin başarısını kanıtlamaz.",
   "TEST DURUMU: test edilmemiş yaratıcı hipotez."
 ].join("\n");
 
-test("selects measured period reach leader as locked source", () => {
-  assert.equal(anchor.videoId, "wEA-VZhxq6Y");
-  assert.equal(anchor.value, 27569);
-  assert.equal(anchor.metricLabel, "Seçili dönem izlenmesi");
-  assert.equal(anchor.measurementWindow, "Son 28 günlük YouTube Analytics ölçüm dönemi");
+test("selects a global YouTube source, never the user's own analytics", () => {
+  assert.equal(anchor.videoId, "globalAB12345");
+  assert.equal(anchor.value, 125000);
+  assert.equal(anchor.metricLabel, "Kamusal toplam izlenme");
+  assert.equal(anchor.publishedAt, "2026-10-14");
+  assert.match(anchor.measurementWindow, /ömür boyu birikimli sayaç/i);
+  assert.equal(anchor.videoUrl, "https://www.youtube.com/watch?v=globalAB12345");
 });
-test("accepts a response only when source ID, title, metric, value, window and caveats are present", () => {
+
+test("validates global source identity and the no-watching verification alternative", () => {
   const result = SourceTraceGuard.validate(validOutput, anchor);
   assert.equal(result.ok, true, JSON.stringify(result.errors));
+  assert.equal(result.label, "GLOBAL KAYNAK İZİ TAM; SAHNE DOĞRULAMASI AYRI");
 });
-test("rejects metric values copied elsewhere when the measured-finding source line is incomplete", () => {
-  const incomplete = validOutput
-    .replace("seçili dönem izlenmesi 27,569; son 28 günlük YouTube Analytics ölçüm dönemi", "seçili dönem izlenmesi yok; dönem belirsiz")
-    .replace("27,569", "0");
-  const result = SourceTraceGuard.validate(incomplete, anchor);
+
+test("rejects an output tied to a different source ID", () => {
+  const result = SourceTraceGuard.validate(validOutput.replace(/globalAB12345/g, "wrongsource12"), anchor);
   assert.equal(result.ok, false);
-  assert.ok(result.errors.some(e => e.includes("ÖLÇÜLMÜŞ BULGU satırında")));
+  assert.ok(result.errors.some(e => /video ID|ID'si|YouTube URL/i.test(e)));
 });
-test("rejects responses that omit the locked source ID", () => {
-  const result = SourceTraceGuard.validate(validOutput.replace(/wEA-VZhxq6Y/g, "another-video-id"), anchor);
+
+test("rejects a false view count in the locked global source line", () => {
+  const result = SourceTraceGuard.validate(validOutput.replace("125.000", "9.999"), anchor);
   assert.equal(result.ok, false);
-  assert.ok(result.errors.some(e => e.includes("ID")));
+  assert.ok(result.errors.some(e => /izlenme değeri/i.test(e)));
 });
-test("rejects a case-changed source video ID", () => {
-  const incomplete = validOutput.replace(/wEA-VZhxq6Y/g, "wea-VZhxq6Y");
-  const result = SourceTraceGuard.validate(incomplete, anchor);
+
+test("requires a direct global YouTube source URL", () => {
+  const result = SourceTraceGuard.validate(validOutput.replace("https://www.youtube.com/watch?v=globalAB12345", "kaynak bağlantısı yok"), anchor);
   assert.equal(result.ok, false);
-  assert.ok(result.errors.some(e => e.includes("birebir")));
+  assert.ok(result.errors.some(e => /resmi YouTube URL/i.test(e)));
 });
-test("rejects the right metric value when it appears after unrelated text", () => {
-  const incomplete = validOutput.replace(
-    "seçili dönem izlenmesi 27,569;",
-    "seçili dönem izlenmesi bilinmiyor; 27,569;"
+
+test("allows an honest disclosure when no independent written source exists", () => {
+  const output = validOutput.replace(
+    "Başlık/kimlik YouTube kaydıyla eşleşti; bağımsız yazılı açıklama aynı geniş öncülü destekliyor: https://example.org/clip-context",
+    "Başlık/kimlik YouTube kaydıyla eşleşti; bağımsız metinsel kaynak bulunamadı, yalnızca YouTube metaverisi doğrulandı."
   );
-  const result = SourceTraceGuard.validate(incomplete, anchor);
-  assert.equal(result.ok, false);
-  assert.ok(result.errors.some(e => e.includes("hemen yanında")));
-});
-test("accepts a dot-grouped count format as the same measured value", () => {
-  const localized = validOutput.replace(/27,569/g, "27.569");
-  const result = SourceTraceGuard.validate(localized, anchor);
+  const result = SourceTraceGuard.validate(output, anchor);
   assert.equal(result.ok, true, JSON.stringify(result.errors));
 });
-test("rejects a source citation without a clear data-to-idea bridge", () => {
-  const incomplete = validOutput.replace(/VERİDEN FİKRE GEÇİŞ:.*/, "");
-  const result = SourceTraceGuard.validate(incomplete, anchor);
+
+test("rejects a source trace that hides the viewing limitation", () => {
+  const result = SourceTraceGuard.validate(validOutput.replace(/GÖRSEL SAHNE DURUMU:.*/, ""), anchor);
   assert.equal(result.ok, false);
-  assert.ok(result.errors.some(e => e.includes("GEÇİŞ")));
+  assert.ok(result.errors.some(e => /GÖRSEL SAHNE DURUMU/i.test(e)));
 });
-test("rejects a response that does not label the data-idea link as indirect or weak", () => {
-  const incomplete = validOutput.replace(/BAĞIN GÜCÜ:.*/, "");
-  const result = SourceTraceGuard.validate(incomplete, anchor);
+
+test("rejects a generic or copied idea without a source-to-idea bridge", () => {
+  const result = SourceTraceGuard.validate(validOutput.replace(/GLOBAL İŞARETTEN FİKRE GEÇİŞ:.*/, ""), anchor);
   assert.equal(result.ok, false);
-  assert.ok(result.errors.some(e => e.includes("BAĞIN GÜCÜ")));
+  assert.ok(result.errors.some(e => /GLOBAL İŞARETTEN FİKRE GEÇİŞ/i.test(e)));
 });
-test("rejects missing creative leap, limitation, or hypothesis labels", () => {
-  const incomplete = validOutput.replace(/YARATICI SIÇRAMA:.*/, "")
-    .replace(/VERİNİN KANITLAMADIĞI:.*/, "")
-    .replace(/TEST DURUMU:.*/, "");
-  const result = SourceTraceGuard.validate(incomplete, anchor);
-  assert.equal(result.ok, false);
-  assert.ok(result.errors.length >= 3);
-});
-test("accepts a fractional observed-daily-pace metric in Turkish number format", () => {
-  const dailyAnchor = SourceTraceGuard.chooseAnchor({
-    metricLeaders: {
-      highestWindowViews: null,
-      highestObservedDailyViewPace: {
-        videoId: "abcDE123xyz",
-        title: "Daily pace example",
-        metric: "viewsPerObservedDay",
-        value: 1732.1
-      }
-    }
-  }, [], 28, "YouTube Analytics API v2");
-  const output = [
-    "BU FİKİR NEREDEN ÇIKTI?",
-    "ÖLÇÜLMÜŞ BULGU: Daily pace example (video ID abcDE123xyz); Gözlenen gün başına izlenme hızı: 1.732,1; Son 28 günlük YouTube Analytics ölçüm dönemi; günlük hız, dönem izlenmesinin gözlenen gün sayısına bölünmesidir.",
-    "VERİDEN FİKRE GEÇİŞ: Bu ölçüm genel erişim öncülünü seçmeme yönlendirdi.",
-    "BAĞIN GÜCÜ: dolaylı/zayıf bağ.",
-    "YARATICI SIÇRAMA: Bu mekanizma veriden çıkmadı; yaratıcı deney olarak eklendi.",
-    "VERİNİN KANITLAMADIĞI: Ölçüm sahnenin neden başarılı olacağını kanıtlamaz.",
-    "TEST DURUMU: test edilmemiş yaratıcı hipotez."
-  ].join("\n");
-  const result = SourceTraceGuard.validate(output, dailyAnchor);
-  assert.equal(result.ok, true, JSON.stringify(result.errors));
-});
-test("uses public lifetime counters only as a labelled fallback", () => {
-  const fallback = SourceTraceGuard.chooseAnchor({ metricLeaders: {} },
-    [{ id: "public123", title: "Public counter example", publicLifetimeViews: 1234 }], 28, "YouTube Data API v3");
-  assert.equal(fallback.sourceType, "public-lifetime-counter-fallback");
-  assert.equal(fallback.value, 1234);
-  assert.match(fallback.measurementWindow, /seçili Analytics dönemi değildir/i);
-});
-test("does not fabricate a source anchor when no usable metrics exist", () => {
-  assert.equal(SourceTraceGuard.chooseAnchor({ metricLeaders: {} }, [], 28, "test"), null);
+
+test("does not create a fake global anchor when no trend results exist", () => {
+  assert.equal(SourceTraceGuard.chooseGlobalAnchor({ videos: [] }, "2026-10-16"), null);
   assert.equal(SourceTraceGuard.validate(validOutput, null).ok, false);
 });
