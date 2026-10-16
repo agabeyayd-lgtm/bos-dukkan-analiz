@@ -284,30 +284,30 @@ async function sampleComments(videos,maxVideos=5,perVideo=8){
   return out;
 }
 function askClaude(vs,q){
-  const pool=vs.filter(v=>v.brk!=null).sort((a,b)=>b.brk-a.brk).slice(0,10);
-  const lines=pool.map((v,i)=>(i+1)+'. "'+v.title+'" | '+v.channel+' | '+fmt(v.subs)+' abone | '+fmt(v.views)+' izlenme | '+v.sec+' sn | '+v.brk.toFixed(1)+'x').join('\n');
+  const pool=vs.filter(v=>v&&v.id&&v.title&&Number.isFinite(Number(v.views))).sort((a,b)=>(Number(b.vpd)||0)-(Number(a.vpd)||0)).slice(0,10);
+  const lines=pool.map((v,i)=>(i+1)+'. VIDEO ID: '+v.id+' | "'+v.title+'" | Kanal: '+v.channel+' | Yayın: '+(v.date?new Date(v.date).toISOString().slice(0,10):'bilinmiyor')+' | Kamusal toplam izlenme: '+fmt(v.views)+' | Yaklaşık izlenme/gün: '+fmt(v.vpd)+' (ömür boyu toplam ÷ video yaşı, kaba proxy) | Abone: '+fmt(v.subs)+' | Süre: '+v.sec+' sn | https://www.youtube.com/watch?v='+v.id).join('\n');
   const avoid=$('#avoidIdeas')?.value.trim()||'Belirtilmedi.';
   const txt=[
-    "ROLÜN: Trend verisini yardımcı bağlam olarak analiz et, sonra mutlaka tek komedi fikri ve tam 10 saniyelik üretim promptu ver.",
+    "ROLÜN: Global Shorts keşifçisi + web kaynak doğrulayıcısı + komedi yaratıcısı. Fikir kaynağını kendi kanaldan değil global YouTube içeriklerinden seç. Kendi kanal metriklerini konu/nesne/sahne seçmek için kullanma.",
     "",
     "TEK ZORUNLU VİDEO KOŞULLARI: Tam 10 saniye; dikey 9:16 YouTube Shorts; diyalog yok ve ASMR odaklı ses. Bunların dışında komediyi güçlendirecek her yaratıcı seçim serbesttir.",
     "YARATICI ÖZGÜRLÜK: Deadpan da doğal oyunculuk da abartılı tepki de kullanılabilir. Absürt, gerçeküstü, fiziksel, gündelik, nesne odaklı, imkânsız fizik içeren veya beklenmedik kurgulu komediyi önceden yasaklama. Tek duygu, tek absürtlük, insan davranışı, gerçekçi fizik, belirli bir kanca süresi veya belirli final biçimi zorunluluğu yoktur.",
     "Her tür mizah, oyunculuk ve görsel yaklaşım serbesttir; insan davranışı veya doğal tepki şartı yoktur.",
     "Kanca, tempo, final veya loop hakkında katı şart koyma; komediyi güçlendiren biçimi seç.",
     "",
-    'ARAŞTIRMA VERİSİ — arama: "'+q+'". Yüksek izlenme/abone oranıyla seçilen videolar; bu oran tek başına neden-sonuç kanıtı değildir:',
+    'GLOBAL ARAŞTIRMA VERİSİ — arama: "'+q+'". Liste, YouTube Data API üzerinden alınmış global arama örneklemidir. Sayaçlar kaynak kimliğini ve erişim sinyalini gösterir; sahneyi veya başarı nedenini kanıtlamaz:',
     lines,
     "",
     "ÖNCEKİ FİKİRLER / YALNIZCA BAĞLAM:",
     avoid,
     "",
-    "BU ÖN ANALİZ PAKETİ YALNIZCA TREND VERİSİ TAŞIR: Kendi kanal ölçümleri bu pakette bulunmayabilir. Elindeki trend verisini yardımcı sinyal olarak kullan ama buna rağmen mutlaka tek komedi fikri ve tam prompt üret.",
+    "İZLEME YERİNE ALTERNATİF DOĞRULAMA: Video oynatmak, ekran kaydı almak veya kare çıkarmak zorunlu değil. Aynı video ID'sini ve tam başlığı global web aramasında ara; YouTube kaydındaki kimlik/sayaç/tarihi eşleştir; ardından mümkünse YouTube dışı bağımsız yazılı açıklama, haber veya paylaşım ile geniş öncülü çapraz kontrol et. İkinci kaynak bulunamazsa açıkça yaz. Başlık/yorum/izlenme sayısından videoda gerçekte olan eylemi uydurma; sahne doğrulanmadıysa belirt ve yine de özgün fikir üret.",
     "GÖREV — veriyi yardım için kullan; komedi üretimini hiçbir formül, teori veya eleme kapısıyla sınırlandırma:",
     "1) Veriyi kısaca tara; yalnızca fikri seçmeye gerçekten yardımcı olan ölçümleri belirt. Eksik metriği tahmin etme ve uzun veri raporuyla komediyi geciktirme.",
     "2) Mümkün olduğunda videoları yaş, süre ve kanal büyüklüğü bakımından karşılaştır. Tek örnekten kesin başarı kuralı çıkarma; ama veri az diye fikir üretimini durdurma.",
-    "3) Yorumları yalnızca doğru video ID'sine bağlı olduklarında kullan. Yorum örneklerini tüm izleyicilerin temsili sayma; sahne ayrıntılarını başlık veya yorumdan uydurma.",
+    "3) Yorumlar yalnızca aynı video ID'sine aitse metinsel bağlamdır; sahne kanıtı değildir. Kaynağın bağımsız yazılı doğrulamasını webde ara; bulunamazsa açıkça yaz.",
     "4) Sabit bir mizah mekanizması listesi, önceden seçilmiş konu ailesi, elle yazılmış başarı formülü veya keyfî puan eşiği dayatma. Verilerde görülen örüntüleri kanıt gücüyle birlikte çıkar; veri desteklemiyorsa 'bilinmiyor' de.",
-    "5) ANA TESLİMAT: Her zaman önce tek en iyi komedi fikrini, 10 saniyelik sahne akışını ve doğrudan kopyalanabilir video promptunu ver. Veriler/sınırlamalar yalnızca gerekiyorsa kısa not olarak eklensin.",
+    "5) KAYNAK İZİ: Tek fikirden önce GLOBAL KAYNAK (video ID, tam başlık, kanal, yayın tarihi, kamusal toplam izlenme, ölçüm tarihi ve resmi YouTube URL); GLOBAL WEB KONTROLÜ (bağımsız metinsel URL veya bulunamadığına dair açık ifade); GÖRSEL SAHNE DURUMU (izlenmediyse doğrulanmadı); KAYNAKTAN ALINAN İLKE; GLOBAL İŞARETTEN FİKRE GEÇİŞ; ÖZGÜN YARATICI SIÇRAMA; KOPYALANMAYAN UNSURLAR; KANIT SINIRI; TEST DURUMU alanlarını ayrı satırlarda ver. Ardından tek fikir, 10 saniyelik akış ve tam promptu yaz.",
     "6) Tek güçlü komedi fikri seçip tam 10 saniyelik video promptuyla teslim et; sahne verisi eksikliği buna engel değildir.",
     "7) Başarı tahmini garanti değildir. İstenirse, yayın sonrası gerçek verinin nasıl değerlendirileceğini tek cümleyle belirt; asıl çıktı komedi fikri ve prompttur."
   ].join('\n');
