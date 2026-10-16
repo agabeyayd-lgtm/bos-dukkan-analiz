@@ -28,6 +28,14 @@ test("accepts a response only when source ID, title, metric, value, window and c
   const result = SourceTraceGuard.validate(validOutput, anchor);
   assert.equal(result.ok, true, JSON.stringify(result.errors));
 });
+test("rejects metric values copied elsewhere when the measured-finding source line is incomplete", () => {
+  const incomplete = validOutput
+    .replace("seçili dönem izlenmesi 27,569; son 28 günlük YouTube Analytics ölçüm dönemi", "seçili dönem izlenmesi yok; dönem belirsiz")
+    .replace("27,569", "0");
+  const result = SourceTraceGuard.validate(incomplete, anchor);
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some(e => e.includes("ÖLÇÜLMÜŞ BULGU satırında")));
+});
 test("rejects responses that omit the locked source ID", () => {
   const result = SourceTraceGuard.validate(validOutput.replace("wEA-VZhxq6Y", "another-video-id"), anchor);
   assert.equal(result.ok, false);
