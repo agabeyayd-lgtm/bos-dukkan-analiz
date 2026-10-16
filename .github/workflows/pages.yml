@@ -36,6 +36,10 @@ jobs:
           const fs = require('fs');
           const required = [
             ['computed performance summary', 'creativeEvidenceForPrompt'],
+            ['program-locked source anchor', 'SourceTraceGuard.chooseAnchor'],
+            ['source-trace output validation', 'SourceTraceGuard.validate'],
+            ['validator panel', 'ideaOutputForValidation'],
+            ['locked source payload label', 'A3A. KOD TARAFINDAN FİKİR ÜRETİLMEDEN ÖNCE SABİTLENEN KAYNAK KAYDI'],
             ['A2 summary label', 'A2. KOD TARAFINDAN HESAPLANAN PERFORMANS SİNYALLERİ'],
             ['full-row metric calculation', 'const creativeMetricRows=own.filter(v=>v&&v.analyticsAvailable);'],
             ['reach and metric separation', 'VERİDEN FİKRE GEÇİŞ'],
@@ -59,11 +63,16 @@ jobs:
             console.log('PASS ' + file + ': ' + required.length + ' topic-engine contracts present');
           }
           NODE
+      - name: Test source-trace validator
+        run: |
+          node --check source-trace-guard.js
+          node --test tests/source-trace-guard.test.cjs
       - name: Prepare static panel
         run: |
           mkdir -p _site
           cp index.html _site/index.html
           cp bos-dukkan-analiz.html _site/bos-dukkan-analiz.html
+          cp source-trace-guard.js _site/source-trace-guard.js
           cp README.md _site/README.md
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
