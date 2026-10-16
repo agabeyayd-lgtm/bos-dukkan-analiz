@@ -3,6 +3,7 @@ name: Deploy Boş Dükkân panel to GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -41,6 +42,9 @@ jobs:
             ['clean-run context reset', 'HER ÇALIŞTIRMADA SIFIRLAMA'],
             ['title is not scene evidence', 'KONU İPUCU İLE SAHNE KANITINI AYIR'],
             ['evidence labels', 'KANIT ETİKETİ'],
+            ['explicit idea provenance', 'FİKRİN KAYNAK İZİ ZORUNLU'],
+            ['no fabricated data linkage', 'SAHTE VERİ BAĞI YASAK'],
+            ['computed evidence map', 'A3. FİKİR SEÇİMİNDE KULLANILABİLECEK GERÇEK KANIT HARİTASI'],
             ['observed daily view pace', 'viewsPerObservedDay'],
             ['current trend sample state', 'currentState:']
           ];
@@ -67,6 +71,7 @@ jobs:
           path: _site
 
   deploy:
+    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

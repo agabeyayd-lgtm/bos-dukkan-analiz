@@ -719,6 +719,19 @@ $('#goOwn').onclick=async()=>{
             "Bu özet gözlenen ölçümleri düzenler; hangi unsurun başarıya neden olduğunu kanıtlamaz."
           ]
         };
+        const ideaEvidenceTrace = {
+          objective: "Ana hedef görüntülenme hacmi; günlük izlenme hızı ayrı erişim sinyalidir. İzleme kalitesi ve abone kazanımı destek sinyalleridir.",
+          measuredSignalsUsed: {
+            highestWindowViews: creativeEvidenceForPrompt.metricLeaders.highestWindowViews,
+            highestObservedDailyViewPace: creativeEvidenceForPrompt.metricLeaders.highestObservedDailyViewPace,
+            highestAverageWatchSeconds: creativeEvidenceForPrompt.metricLeaders.highestAverageWatchSeconds,
+            highestViewedPercent: creativeEvidenceForPrompt.metricLeaders.highestViewedPercent,
+            highestSubscriberGain: creativeEvidenceForPrompt.metricLeaders.highestSubscriberGain,
+            highestSubscriberGainPer1000Views: creativeEvidenceForPrompt.metricLeaders.highestSubscriberGainPer1000Views
+          },
+          interpretationBoundary: "Bu ölçümler performansı gösterir; videoların hangi sahne mekanizması sayesinde başarılı olduğunu kanıtlamaz. Başlıklar yalnızca konu ipucudur. Görsel sahne notu yoksa sahne mekanizması bilinmiyor.",
+          requiredHonesty: "Önerilen fikrin veriyle bağlantısı zayıfsa bunu açıkça söyle; veri fikri doğrudan üretmiş gibi gösterme."
+        };
         const txt=[
           "ROL: Komedi yaratıcısı + veri analisti. Öncelik komedi üretmek; her çalıştırmada bir güçlü fikir ve doğrudan kullanılabilir tam video promptu ver. Veri eksikliği, puanlama veya katı bir yaratıcı formül yüzünden çıktıyı durdurma.",
           "",
@@ -732,6 +745,9 @@ $('#goOwn').onclick=async()=>{
           "",
           "A2. KOD TARAFINDAN HESAPLANAN PERFORMANS SİNYALLERİ — metrik liderleri birbirine karıştırılmayacak:",
           JSON.stringify(creativeEvidenceForPrompt,null,2),
+          "",
+          "A3. FİKİR SEÇİMİNDE KULLANILABİLECEK GERÇEK KANIT HARİTASI:",
+          JSON.stringify(ideaEvidenceTrace,null,2),
           "",
           "B. TREND KEŞFİ — SINIRLI DIŞ SİNYAL:",
           research?JSON.stringify({source:research.source||'YouTube Data API v3',query:research.query||null,requestedPublishedWindowDays:research.searchDays??null,requestedOrder:research.requestedOrder||null,windowStart:research.searchStartedAt||null,windowEnd:research.searchEndedAt||null,returnedVideoCount:research.videos?.length||0,visualAccess:'NOT VERIFIED by API metadata. Unless actual watched-frame notes are supplied below, competitor scene mechanics are unknown.',sampleBias:'YouTube search ranking and query terms limit this sample; it is not a census of all Shorts.',currentState:currentStateSnapshot(research.videos||[]),videos:(research.videos||[]).slice().sort((a,b)=>(Number(b.viewsPerDay??b.vpd)||0)-(Number(a.viewsPerDay??a.vpd)||0)).slice(0,18),commentSampleDesign:research.commentSampleDesign||null,comments:(research.commentSamples||[]).slice(0,8)},null,2):'Genel Analiz henüz çalıştırılmamış. Rakip verisi ve şu anki izlenen/izlenmeyen durumu yok; bunu açıkça belirt.',
@@ -759,7 +775,10 @@ $('#goOwn').onclick=async()=>{
           "7) Üç zorunlu koşul dışında yaratıcı kalite kapısı yok. Kanca, duygu, oyunculuk, gerçekçilik, fizik, tekrar veya final biçimi yüzünden fikri veto etme; bunları yalnızca komediyi geliştirmek için kullan.",
           "8) Nihai çıktı: veri bulgularını gerekiyorsa kısaca bildir; ardından tek komedi fikri, neden komik olduğu, 10 saniyenin tamamını kapsayan sahne akışı ve tam video üretim promptu ver. Başlık dili, belirli zaman aralıkları ve yaratıcı stil zorunlu değil.",
           "9) Yayın sonrası görüntülenme, ortalama izleme süresi, izlenen yüzde, beğeni/yorum oranı ve abone kazanımını ayrı değerlendir. Başarı garantisi veya veride olmayan eşik verme.",
-          "10) Kanıt düzeylerini etiketle: ölçülmüş bulgu / gözle doğrulanmış sahne / yorumdan destek alan yorum / test edilmemiş yaratıcı hipotez."
+          "10) Kanıt düzeylerini etiketle: ölçülmüş bulgu / gözle doğrulanmış sahne / yorumdan destek alan yorum / test edilmemiş yaratıcı hipotez.",
+          "11) FİKRİN KAYNAK İZİ ZORUNLU: Fikirden önce kısa bir 'BU FİKİR NEREDEN ÇIKTI?' bölümü ver. (a) Seçimi etkileyen gerçek ölçümü ve video başlığını/ID'sini, değerini ve ölçüm penceresini belirt; ölçüm yoksa 'yok' de. (b) Ölçümün gerçekten desteklediği sınırlı çıkarımı yaz. (c) Veriden yeni görsel fikre geçişi açıkça anlat: hangi kısmı veri yönlendirdi, hangi kısmı yaratıcı sıçrama olarak sen ekledin. (d) Verinin kanıtlamadığı noktayı belirt. (e) Bu nedenle fikri 'test edilmemiş yaratıcı hipotez' olarak işaretle. (f) Gerçek sahne notu yoksa sahne mekanizmasını kanıt diye kullanma.",
+          "12) SAHTE VERİ BAĞI YASAK: Sırf fikri haklı göstermek için sonradan veri uydurma, ilgisiz metriği gerekçe diye gösterme veya 'veri bu fikri kanıtlıyor' deme. Veri yalnızca geniş bir yön veriyorsa bunu 'dolaylı/zayıf bağ' diye açıkla. Fikrin belirli mekanizması veriden çıkmıyorsa dürüstçe 'bu mekanizma veriden çıkmadı; yaratıcı deney olarak seçildi' yaz.",
+          "13) NİHAİ ÇIKTI SIRASI: 1. Bu fikir nereden çıktı? (kanıt izi) 2. Tek fikir 3. Neden komik 4. 10 saniyelik sahne akışı 5. Tam video promptu 6. Test sonrası hangi gerçek ölçümlerle değerlendirileceği. Kanıt izi kısa ama somut olmalı; yalnızca 'veriye dayanıyor' demek yeterli değil."
         ].join("\n");
         const ta=$('#compareTxt');ta.value=txt;ta.style.display='block';ta.select();
         const downloadBtn=$('#downloadCompare');downloadBtn.disabled=false;downloadBtn.onclick=()=>{const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='bos-dukkan-analiz-paketi.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);};
