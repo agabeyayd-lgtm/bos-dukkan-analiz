@@ -16,18 +16,18 @@ Bunların dışında sabit yaratıcı kural yoktur.
 
 **Fikir seçiminin kaynağı global olmalıdır.** YouTube'da global arama sonuçları ve web'deki bağımsız kaynaklar kullanılır. Kullanıcının kendi kanal istatistikleri yeni fikri, konuyu, sahneyi veya komedi mekanizmasını seçmek için kullanılmaz. Kanal istatistikleri sadece video yayınlandıktan sonra sonuçları kıyaslamak için kullanılabilir.
 
-## Video izlemeye alternatif doğrulama
+## Video oynatmaya alternatif doğrulama
 
-Video oynatma, ekran kaydı veya kare çıkarma iş akışında zorunlu değildir.
+Kullanıcının videoyu açması, izlemesi, ekran kaydı alması veya manuel kare çıkarması **zorunlu değildir**. Global kaynak paketi oluşturulurken panel, bulunan adaylardan en fazla üçü için herkese açık storyboard/kare sayfasını otomatik arar.
 
-1. Global YouTube arama sonuçlarından bir video seç; tam video ID'si ve resmi URL'sini kaydet.
-2. YouTube Data API metaverisini kullanarak video ID, tam başlık, kanal, yayın tarihi, süre ve kamusal sayaçları eşleştir.
-3. Aynı tam başlık ve video ID'si ile global web araması yap. Mümkünse YouTube dışı bağımsız bir yazılı kaynak URL'si bul.
-4. Bağımsız metinsel kaynak bulunmazsa açıkça **“bağımsız metinsel kaynak bulunamadı; yalnızca YouTube metaverisi eşleşti”** diye yaz.
-5. Video gerçek görüntüleri incelenmemişse **görsel sahne doğrulanmadı** diye etiketle. Başlık, kapak, yorum ve izlenme sayısı gerçek sahne akışını kanıtlamaz. Hayali görsel ayrıntı ekleme.
-6. Bu eksiklikler özgün fikir ve tam prompt üretimini engelleyemez.
+1. Global YouTube arama sonuçlarından gerçek video ID'si ve resmi URL'si olan bir kayıt sabitlenir.
+2. Panel aynı video ID'si için herkese açık storyboard kare sayfasını otomatik dener. Bulursa kare sayfası URL'lerini kopyalanan prompt paketine ve panel önizlemesine ekler; web erişimli görsel asistan kareleri doğrudan açmayı dener.
+3. Storyboard yoksa ya da görsel asistan görüntü URL'lerini açamıyorsa kullanıcıya video oynatma/ekran kaydı yaptırılmaz. Sistem global YouTube metaverisini aynı ID/tam başlıkla eşleştirir ve global webde bağımsız yazılı çapraz kontrol ister.
+4. Bağımsız yazılı kaynak yoksa **“bağımsız metinsel kaynak bulunamadı; yalnızca YouTube metaverisi eşleşti”** yazılır.
+5. Görsel kareler gerçekten açılıp incelenmediyse **“görsel sahne doğrulanmadı”** etiketi korunur. Storyboard eksik/tekrarlı olabilir ve tam video kronolojisini garanti etmez. Başlık, kapak, yorum veya izlenme sayısından görünmeyen eylem uydurulmaz.
+6. Hiçbir kaynak yolu fikir ve tam prompt üretimini durduramaz.
 
-Global webdeki yazılı doğrulama videonun kimliğini, başlık bağlamını veya iddialarını destekleyebilir; tek başına görünmeyen sahne dizisini kanıtlamış sayılmaz.
+Storyboard kareleri görsel kontrol için bir alternatiftir; bağımsız web kaynağı ise kimlik/bağlam çapraz kontrolüdür. Hiçbiri mevcut değilse sahnenin doğrulandığı iddia edilmez; üretim dürüst bir belirsizlik etiketiyle devam eder.
 
 ## Metrikleri doğru kullanma
 
