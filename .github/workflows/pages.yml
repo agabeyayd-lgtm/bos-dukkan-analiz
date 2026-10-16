@@ -32,6 +32,7 @@ jobs:
           const fs = require('fs');
           const required = [
             ['computed performance summary', 'creativeEvidenceForPrompt'],
+            ['full-row metric calculation', 'const creativeMetricRows=own.filter(v=>v&&v.analyticsAvailable);'],
             ['reach and metric separation', 'VERİDEN FİKRE GEÇİŞ'],
             ['clean-run context reset', 'HER ÇALIŞTIRMADA SIFIRLAMA'],
             ['title is not scene evidence', 'KONU İPUCU İLE SAHNE KANITINI AYIR'],
