@@ -53,7 +53,7 @@ a{color:var(--acc)}
 </head>
 <body>
 <h1>Boş Dükkân Analiz Paneli</h1>
-<p class="sub">Trend keşfi + kendi kanalının gerçek performansı + insani davranıştan konu motoru. Kanal adı bir marka; konu sınırı değil.</p>
+<p class="sub">Global YouTube trend keşfi + global kaynak doğrulaması. Kendi kanal verisi yalnızca yayın sonrası karşılaştırma içindir. Video izleme/ekran kaydı fikir üretmek için zorunlu değildir.</p>
 
 <div class="bar" role="group" aria-label="API anahtarı">
   <input id="key" type="password" placeholder="YouTube Data API v3 anahtarı" autocomplete="off">
@@ -70,7 +70,7 @@ a{color:var(--acc)}
   <div class="bar">
     <input id="q" placeholder="Trend konusu / arama terimi (örn. visual comedy, everyday behavior)">
     <select id="days"><option value="7">Son 7 gün</option><option value="30" selected>Son 30 gün</option><option value="90">Son 90 gün</option></select>
-    <select id="ord"><option value="viewCount">En çok izlenen</option><option value="date">En yeni</option><option value="relevance">Alakalı</option></select>
+    <select id="ord"><option value="viewCount">En çok izlenen</option><option value="date" selected>En yeni</option><option value="relevance">Alakalı</option></select>
     <select id="srt"><option value="brk" selected>Fırlamaya göre</option><option value="vpd">Günlük izlenmeye göre</option></select>
     <label style="display:flex;align-items:center;gap:6px"><input id="only60" type="checkbox" checked style="flex:none"> ≤60 sn</label>
     <button id="goGen">Analiz et</button>
@@ -238,6 +238,35 @@ function chooseResearchCommentVideos(videos,maxVideos=8){
   pick([...pool].filter(v=>Number(v.seconds)>=7&&Number(v.seconds)<=15).sort((a,b)=>(b.comments||0)/Math.max(1,b.views||0)-(a.comments||0)/Math.max(1,a.views||0)),'7–15 saniye aralığında yüksek yorum oranı');
   return chosen;
 }
+/* Şu anki durum: aramanın döndürdüğü örneklemde neyin izlendiği, neyin izlenmediği (yaşa göre düzeltilmiş günlük izlenme). */
+function currentStateSnapshot(videos){
+  const all=Array.isArray(videos)?videos:[];
+  const eligible=all.filter(v=>Number.isFinite(Number(v.viewsPerDay))&&Number(v.ageDays)>=2);
+  const tooNew=all.length-eligible.length;
+  if(eligible.length<8)return {available:false,reason:'Yaşı en az 2 gün olan video sayısı 8’in altında ('+eligible.length+'); izlenen/izlenmeyen ayrımı için örneklem çok küçük. Aramayı genişlet (daha uzun süre, daha fazla video).',eligibleCount:eligible.length,excludedTooNew:tooNew};
+  const sorted=[...eligible].sort((a,b)=>Number(b.viewsPerDay)-Number(a.viewsPerDay));
+  const q=Math.max(3,Math.floor(sorted.length/4));
+  const slim=v=>({id:v.id,title:v.title,channel:v.channel,subscribers:v.subscribers??null,views:v.views??null,viewsPerDay:Number(v.viewsPerDay),ageDays:v.ageDays,seconds:v.seconds??v.sec??null,likeRate:v.likeRate??null});
+  return {
+    available:true,
+    definition:'Örneklem: aramanın döndürdüğü videolardan yaşı en az 2 gün olanlar (2 günden yeni olanlar günlük izlenme gürültülü olduğu için dışarıda). Sıralama izlenme/gün (video yaşına göre düzeltilmiş). watched = en yüksek çeyrek, notWatched = en düşük çeyrek.',
+    eligibleCount:eligible.length,
+    excludedTooNew:tooNew,
+    medianViewsPerDay:median(eligible.map(v=>Number(v.viewsPerDay))),
+    watched:sorted.slice(0,q).map(slim),
+    notWatched:sorted.slice(-q).reverse().map(slim),
+    limitations:'Yalnızca bu aramanın örneklemidir; tüm YouTube’u temsil etmez. Arama “En çok izlenen” sırasıyla yapıldıysa izlenmeyenler eksik temsil edilir. Görünen fark neden-sonuç göstermez; başlık veya küçük resimden sahne mekanizması uydurma.'
+  };
+}
+function renderCurrentState(research){
+  const st=currentStateSnapshot((research&&research.videos)||[]);
+  const warn=research&&research.requestedOrder==='viewCount'?'<p class="note"><b>Uyarı:</b> Arama “En çok izlenen” sırasıyla yapıldı; bu örnek zaten izlenenleri öne çıkarır, izlenmeyenleri eksik temsil eder. Güncel durumu görmek için sırayı “En yeni” yap.</p>':'';
+  const head='<h2>Şu anki durum: ne izleniyor, ne izlenmiyor</h2>'+warn;
+  if(!st.available)return head+'<p class="note">'+esc(st.reason)+'</p>';
+  const row=v=>'<tr><td class="t">'+link(v)+'</td><td>'+esc(v.channel)+'</td><td>'+fmt(v.viewsPerDay)+'</td><td>'+fmt(v.views)+'</td><td>'+v.ageDays+' gün</td><td>'+v.seconds+' sn</td></tr>';
+  const tbl=rows=>'<div class="wrap"><table><tr><th>Başlık</th><th>Kanal</th><th>İzl./gün</th><th>İzlenme</th><th>Yaş</th><th>Süre</th></tr>'+rows.map(row).join('')+'</table></div>';
+  return head+'<p class="note">Örneklem: yaşı en az 2 gün olan '+st.eligibleCount+' video ('+st.excludedTooNew+' video çok yeni olduğu için dışarıda). Medyan: '+fmt(st.medianViewsPerDay)+' izlenme/gün. Sıralama video yaşına göre düzeltilmiş günlük izlenmeye göredir. Bu yalnızca aramanın örneklemidir; neden-sonuç göstermez.</p><h3>İzlenenler (en yüksek çeyrek)</h3>'+tbl(st.watched)+'<h3>İzlenmeyenler (en düşük çeyrek)</h3>'+tbl(st.notWatched);
+}
 async function sampleComments(videos,maxVideos=5,perVideo=8){
   const chosen=[...videos].filter(v=>v&&v.id).slice(0,maxVideos),out=[];
   for(const v of chosen){
@@ -313,6 +342,7 @@ $('#goGen').onclick=async()=>{
     const md=median(vs.map(v=>v.views));
     el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(md),'medyan izlenme')}${stat(fmt(Math.max(...vs.map(v=>v.vpd))),'en yüksek günlük izlenme')}${stat(vs.filter(v=>v.brk!=null).length,'abone oranı hesaplanabilen video')}${stat(avg(vs.map(v=>v.sec)).toFixed(1)+' sn','ortalama süre')}${stat(Math.round(vs.filter(v=>v.sec>=9&&v.sec<=11).length/vs.length*100)+'%','10 sn civarı')}</div>
     <h2>Başlıklarda sık geçen kelimeler</h2><div class="chips">${top.map(([w,c])=>`<span class="chip">${esc(w)} · ${c}</span>`).join('')}</div>
+    ${renderCurrentState(window.bosResearchSnapshot)}
     <h2>Videolar</h2><p><button class="ghost" id="copyGen">Tabloyu kopyala</button></p><div class="wrap"><table id="tg"><tr><th>Başlık</th><th>Kanal</th><th>Abone</th><th>İzlenme</th><th>Fırlama</th><th>İzl./gün</th><th>Beğeni %</th><th>Yorum</th><th>Süre</th><th>Gün-saat</th></tr>
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${esc(v.channel)}</td><td>${v.subs==null?'–':fmt(v.subs)}</td><td>${fmt(v.views)}</td><td class="${v.brk>=5?'y':''}">${v.brk==null?'–':v.brk.toFixed(1)+'x'}</td><td>${fmt(v.vpd)}</td><td>${v.views?(v.likes/v.views*100).toFixed(1):'–'}</td><td>${fmt(v.comments)}</td><td>${v.sec} sn</td><td>${GUN[v.date.getDay()]} ${String(v.date.getHours()).padStart(2,'0')}:00</td></tr>`).join('')}</table></div>
     <p class="note">İzlenme/abone = keşif sinyalidir; tek başına başarı veya neden-sonuç kanıtı değildir. Video yaşı, süre ve dağıtım farkları karşılaştırmayı etkiler. YouTube Data API bu aramada ortalama izleme süresi ve izlenen yüzde sağlamaz. Arama sonuçları, seçilen tarih aralığındaki ve YouTube'un döndürdüğü en fazla 50 videoyla sınırlıdır.</p>
@@ -344,7 +374,7 @@ $('#goGen').onclick=async()=>{
         const payload={
           role:'Komedi yaratıcısı ve trend analisti; veriyi destekleyici bağlam kullan ve mutlaka bir komedi fikri ile tam video promptu üret.',
           constraints:{durationSeconds:10,aspectRatio:'9:16',dialogue:false,audio:'ASMR-focused sound',creativeFreedom:'No other mandatory style or content restrictions. Do not use a scoring gate or automatic rejection.'},
-          sourceAndSample:{source:research.source||'YouTube Data API v3',query:research.query,requestedPublishedWindowDays:research.searchDays,windowStart:research.searchStartedAt,windowEnd:research.searchEndedAt,returnedVideoCount:research.videos.length,selection:'YouTube search results; no random or population-representative sample',selectionBias:'The search API returns a relevance/ranking-limited sample (max 50 here); videos are not a representative sample of all comedy Shorts.',ownChannelIncluded:false,ownChannelVideosIncluded:false,ownChannelCommentsIncluded:false},
+          sourceAndSample:{source:research.source||'YouTube Data API v3',query:research.query,requestedPublishedWindowDays:research.searchDays,requestedOrder:research.requestedOrder||null,windowStart:research.searchStartedAt,windowEnd:research.searchEndedAt,returnedVideoCount:research.videos.length,selection:'YouTube search results; no random or population-representative sample',selectionBias:'The search API returns a relevance/ranking-limited sample (max 50 here); videos are not a representative sample of all comedy Shorts.',ownChannelIncluded:false,ownChannelVideosIncluded:false,ownChannelCommentsIncluded:false},
           researchData:{
             videos:research.videos.slice().sort((a,b)=>(Number(b.views)||0)-(Number(a.views)||0)).slice(0,12).map(v=>({
               id:v.id,title:v.title,channel:v.channel,channelId:v.channelId,publishedAt:v.publishedAt||v.date||null,ageDays:v.ageDays??null,
@@ -353,16 +383,18 @@ $('#goGen').onclick=async()=>{
               viewsPerDay:v.viewsPerDay??v.vpd??null,likeRate:v.likeRate??null,commentRate:v.commentRate??null,
               averageViewSeconds:null,averageViewedPercent:null
             })),
+            currentState:currentStateSnapshot(research.videos),
             commentSamples:(research.videoCommentMatches||[]).filter(v=>v.commentSample&&v.commentSample.available).slice(0,6).map(v=>({
               videoId:v.id,title:v.title,channel:v.channel,selectionReason:v.commentSelectionReason||null,
               sampled:v.commentSample.sampled,comments:(v.commentSample.comments||[]).slice(0,4).map(c=>({text:c.text||c.textDisplay||c.comment||'',likes:c.likes??c.likeCount??null}))
             })),
-            note:'Kısaltılmış paket: en fazla 12 video ve en fazla 6 videoda 4 yorum. Ortalama izleme süresi/yüzdesi bu kaynakta yoktur.'
+            note:'Kısaltılmış paket: en fazla 12 video ve en fazla 6 videoda 4 yorum. currentState alanı aramanın örnekleminde yaşa göre düzeltilmiş günlük izlenmeye göre en çok ve en az izlenenleri verir. Ortalama izleme süresi/yüzdesi bu kaynakta yoktur.'
           },
           analysisInstructions:[
             'Verileri yardımcı bağlam olarak kısaca tara; yalnızca aday seçimini gerçekten etkileyen ölçümü belirt. Öncelik komedi fikri ve tam prompttur; uzun veri raporu zorunlu değildir.',
             'İzlenme/abone oranı, izlenme/gün, beğeni oranı, ortalama izleme süresi ve ortalama izlenen yüzdeyi ayrı metrikler olarak tut. averageViewSeconds ve averageViewedPercent null/eksik ise bunları tahmin etme; YouTube Data API bu aramada bunları sağlamaz.',
             'Videoları süre, video yaşı ve kanal büyüklüğü bakımından uygun gruplarda kıyasla. Video yaşı ve dağıtım farklılıklarını not et. Başarı ve zayıflık yalnızca gözlenen örneklem içinde söylenebilir; izlenme/abone oranı tek başına neden-sonuç değildir.',
+            'currentState alanındaki izlenen ve izlenmeyen grupları yan yana raporla; arama “viewCount” sırasıyla yapıldıysa izlenmeyenlerin eksik temsil edildiğini belirt. Gruplar arasındaki farkı neden-sonuç diye sunma.',
             'Yorumları yalnızca aynı tam YouTube video ID’sinin commentSample alanıyla eşleştir. Yorumlar relevance sıralı küçük örneklemdir; tüm izleyicileri temsil etmez. Başlık veya yorumdan sahne uydurma. Görsel içerik gerçekten incelenmediyse bunu açıkça belirt.',
             'Önceden tanımlı mizah mekanizması kataloğu, konu ailesi, başarı formülü veya keyfî eşik kullanma. Veri desteklemiyorsa “bilinmiyor” de.',
             'Bu pakette kendi kanal verisi olmasa da mutlaka tek özgün komedi fikri ve tam 10 saniyelik video promptu üret. Trend ölçümlerini destekleyici sinyal olarak ayır; veri eksikliği yaratıcı çıktıyı engellemez.',
@@ -461,7 +493,7 @@ $('#goOwn').onclick=async()=>{
     const rows=j.rows||[];
     const analyticsDebug={satirSayisi:rows.length,ilkSatirlar:rows.slice(0,3)};
     if(!rows.length){
-      throw new Error('Video listesi alınabiliyor ama YouTube Analytics bu tarih aralığı için hiçbir istatistik satırı döndürmedi. Bu yüzden önceki sürüm videoların istatistiklerini yanlış biçimde 0 gösteriyordu. Son 90 günü seçip tekrar dene; yine aynıysa Google hesabının Boş Dükkan kanalının sahibi/yöneticisi olduğundan ve YouTube Analytics API erişiminin açık olduğundan emin olmamız gerekiyor.');
+      throw new Error('Video listesi alınabiliyor ama YouTube Analytics bu tarih aralığı için hiçbir istatistik satırı döndürmedi. Bu yüzden önceki sürüm videoların istatistiklerini yanlış biçimde 0 gösteriyordu. Son 90 günü seçip tekrar dene; yine aynıysa Google hesabının Boş Dukkan kanalının sahibi/yöneticisi olduğundan ve YouTube Analytics API erişiminin açık olduğundan emin olmamız gerekiyor.');
     }
     // Analytics raporu yalnızca seçili dönemde ölçümü olan videoları döndürebilir.
     // Son yüklenen videoları ayrıca alıp raporla birleştir; böylece yeni video listede kaybolmaz.
@@ -544,15 +576,15 @@ $('#goOwn').onclick=async()=>{
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${v.hasAnalytics?fmt(v.views):'—'}</td><td>${v.publicViews==null?'—':fmt(v.publicViews)}</td><td>${v.avgSec==null?'—':v.avgSec.toFixed(1)+' sn'}</td><td class="${v.pct==null?'':pctCls(v.pct)}">${v.pct==null?'—':v.pct.toFixed(0)+'%'}</td><td>${v.sec} sn</td><td>${v.likes==null?'—':fmt(v.likes)}</td><td>${v.subs==null?'—':v.subs}</td></tr>`).join('')}</table></div>
     <details class="note"><summary>Teknik teşhis (istatistikler neden 0?)</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(analyticsDebug,null,2)}</pre></details>
     <p class="note">Hazır bir başarı eşiği kullanılmaz. Videoları kendi karşılaştırılabilir dönemleri içinde değerlendir; %100 üzeri izlenen kısım, tekrar izleme için olası bir sinyaldir, tek başına başarı nedeni değildir.</p>
-    <h2>Konu Motoru · trend sinyali + kendi kanalım</h2>
-    <p class="note">Sıra: trend aramasını ve kendi kanal verini getir, sonra paket oluştur. Paket gerçek verileri komedi üretimine yardımcı bağlam olarak iletir. Motor her durumda tek güçlü komedi fikri ve tam video promptu üretmelidir; sabit mizah kalıbı, puan kapısı veya otomatik ret kullanmaz. Zorunlu video koşulları yalnızca 10 saniye, dikey 9:16 Shorts ve diyalogsuz ASMR odaklı sestir. Bu sayfa kendi başına yapay zekâ modeli çalıştırmaz; paketi sohbet içinde kullan.</p>
+    <h2>Konu Motoru · global kaynak + özgün fikir</h2>
+    <p class="note">Önce global trend aramasını yap, ardından paketi oluştur. Fikir kaynağı global YouTube içerikleri olacak; kendi kanal ölçümleri fikri seçmez ve yalnızca yayın sonrası kıyaslama içindir. Video oynatma/ekran kaydı/kare çıkarma zorunlu değil: resmi video kimliği ve sayaçları API kaydıyla eşleştir, global web üzerinde bağımsız yazılı doğrulama ara; sahne doğrulanamıyorsa bunu belirt ama üretimi durdurma. Bu sayfa kendi başına yapay zekâ modeli çalıştırmaz; paketi sohbet içinde kullan.</p>
     <p><button id="copyCompare">Konu Motoru paketini oluştur ve kopyala</button> <button id="downloadCompare" class="ghost" disabled>Konu paketini indir (.txt)</button></p>
     <div id="commentDiag" class="note" aria-live="polite">Yorum teşhisi henüz çalıştırılmadı. Yukarıdaki düğmeye bastığında yorumların alınıp alınmadığı ve varsa API hatası burada gösterilecek.</div>
-    <textarea id="compareTxt" readonly rows="8" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea><div class="msg" id="ideaTraceGate"><h3 style="margin:0 0 6px">Fikir Kaynak İzi Kontrolü</h3><p class="note">Kopyaladığın yapay zekâ yanıtını buraya yapıştır. Panel video ID’sini, başlığı, gerçek ölçümü, ölçüm penceresini ve zorunlu dürüstlük açıklamalarını denetler. Kontrollerin geçmesi kaynak kaydının doğru aktarıldığını doğrular; modelin iç muhakemesini veya fikrin başarısını matematiksel olarak kanıtlamaz.</p><p id="ideaTraceAnchorSummary" class="note">Kaynak kaydı, paket oluşturulurken kod tarafından sabitlenecek.</p><textarea id="ideaOutputForValidation" rows="8" placeholder="Modelin ürettiği kaynak izi bölümünü ve fikir çıktısının tamamını buraya yapıştır..." style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea><p><button id="validateIdeaTrace" type="button">Kaynak izini kontrol et</button></p><div id="ideaTraceValidationResult" aria-live="polite"></div></div>`;
+    <textarea id="compareTxt" readonly rows="8" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea><div class="msg" id="ideaTraceGate"><h3 style="margin:0 0 6px">Global Kaynak İzi Kontrolü (izleme gerektirmez)</h3><p class="note">Kopyaladığın yanıtı buraya yapıştır. Panel global YouTube video ID’sini, başlığı, kanalını, yayın tarihini, kamusal izlenme sayısını, resmi kaynak URL’sini ve global web çapraz kontrolünün dürüstçe bildirildiğini denetler. Video oynatma, ekran kaydı ve sahne izleme zorunlu değildir. Kontrolün geçmesi görsel sahnenin izlenerek doğrulandığı veya fikrin başarılı olacağı anlamına gelmez.</p><p id="ideaTraceAnchorSummary" class="note">Kaynak kaydı, paket oluşturulurken kod tarafından sabitlenecek.</p><textarea id="ideaOutputForValidation" rows="8" placeholder="Modelin ürettiği kaynak izi bölümünü ve fikir çıktısının tamamını buraya yapıştır..." style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea><p><button id="validateIdeaTrace" type="button">Kaynak izini kontrol et</button></p><div id="ideaTraceValidationResult" aria-live="polite"></div></div>`;
     $('#validateIdeaTrace').onclick=()=>{
       const result=window.SourceTraceGuard.validate($('#ideaOutputForValidation').value,window.bosIdeaSourceAnchor);
       const target=$('#ideaTraceValidationResult');
-      if(result.ok){target.innerHTML='<p class="y"><strong>✓ KAYNAK İZİ KONTROLLERİ GEÇTİ</strong></p><p class="note">Çıktıda programın sabitlediği video ID’si, başlık, gerçek metrik/değer, ölçüm penceresi, yaratıcı sıçrama ve kanıt sınırı var. Bu, kaynak kaydının doğru aktarıldığını doğrular; fikrin kesin başarılı olacağını veya metrikle nedensel ilişkisinin kanıtlandığını göstermez.</p>';}else{target.innerHTML='<p class="n"><strong>✗ KAYNAK İZİ EKSİK — BU ÇIKTI DOĞRULANMIŞ SAYILMAZ</strong></p><ul>'+result.errors.map(e=>'<li>'+esc(e)+'</li>').join('')+'</ul><p class="note">Eksikleri yapay zekâya düzelttir; sonra düzeltilmiş yanıtı yeniden denetle. Kontrol fikir üretimini durdurmaz, yalnızca kaynak iddiasını doğrulanmış olarak işaretlemez.</p>';}
+      if(result.ok){target.innerHTML='<p class="y"><strong>✓ KAYNAK İZİ KONTROLLERİ GEÇTİ</strong></p><p class="note">Çıktıda programın sabitlediği global video ID’si, başlık, kanal, yayın tarihi, kamusal izlenme sayısı ve resmi URL eşleşiyor; web çapraz kontrolünün durumu ve görsel sahne sınırı da açıkça yazılmış. Bu, kaynak izinin eksiksiz olduğunu gösterir; görsel sahnenin izlenerek doğrulandığını veya fikrin başarılı olacağını kanıtlamaz.</p>';}else{target.innerHTML='<p class="n"><strong>✗ KAYNAK İZİ EKSİK — BU ÇIKTI DOĞRULANMIŞ SAYILMAZ</strong></p><ul>'+result.errors.map(e=>'<li>'+esc(e)+'</li>').join('')+'</ul><p class="note">Eksikleri yapay zekâya düzelttir; sonra düzeltilmiş yanıtı yeniden denetle. Kontrol fikir üretimini durdurmaz, yalnızca kaynak iddiasını doğrulanmış olarak işaretlemez.</p>';}
     };
     $('#copyOwn').onclick=()=>copyTable('#to','#copyOwn');
     $('#copyOwnShort').onclick=async()=>{
@@ -655,7 +687,7 @@ $('#goOwn').onclick=async()=>{
           const v=valid[0];
           if(!v)return null;
           return {
-            videoId:v.id,title:v.title,publishedAt:v.publishedAt||null,seconds:v.seconds??v.sec??null,
+            videoId:v.id,title:v.title,publishedAt:v.publishedAt||null,seconds:v.seconds??null,
             metric:field,value:Number(v[field]),
             viewsInWindow:v.viewsInWindow??null,
             averageViewSeconds:v.averageViewSeconds??null,
@@ -706,61 +738,58 @@ $('#goOwn').onclick=async()=>{
           interpretationBoundary: "Bu ölçümler performansı gösterir; videoların hangi sahne mekanizması sayesinde başarılı olduğunu kanıtlamaz. Başlıklar yalnızca konu ipucudur. Görsel sahne notu yoksa sahne mekanizması bilinmiyor.",
           requiredHonesty: "Önerilen fikrin veriyle bağlantısı zayıfsa bunu açıkça söyle; veri fikri doğrudan üretmiş gibi gösterme."
         };
-        const ideaSourceAnchor = window.SourceTraceGuard.chooseAnchor(creativeEvidenceForPrompt, own, periodDays, window.bosOwnAnalyticsSnapshot.source);
-        window.bosIdeaSourceAnchor = ideaSourceAnchor;
+        const globalSourceAnchor = window.SourceTraceGuard.chooseGlobalAnchor(research, research?.searchEndedAt || new Date().toISOString());
+        window.bosIdeaSourceAnchor = globalSourceAnchor;
         const anchorSummary = $("#ideaTraceAnchorSummary");
-        if (anchorSummary) anchorSummary.textContent = ideaSourceAnchor ? "PROGRAMIN SABİTLEDİĞİ KAYNAK: " + ideaSourceAnchor.title + " | ID: " + ideaSourceAnchor.videoId + " | " + ideaSourceAnchor.metricLabel + ": " + ideaSourceAnchor.formattedValue + " | " + ideaSourceAnchor.measurementWindow : "Bu çalıştırmada kullanılabilir ölçüm kaydı bulunamadı. Fikir yine üretilebilir; ancak kaynak izi doğrulanmış sayılamaz.";
+        if (anchorSummary) anchorSummary.textContent = globalSourceAnchor
+          ? "GLOBAL KAYNAK KİLİTLENDİ: " + globalSourceAnchor.title + " | ID: " + globalSourceAnchor.videoId + " | Kanal: " + (globalSourceAnchor.channel || "bilinmiyor") + " | Kamusal toplam izlenme: " + globalSourceAnchor.formattedValue + " | Yayın: " + (globalSourceAnchor.publishedAt || "bilinmiyor") + " | Video izleme zorunlu değil."
+          : "Global trend kaydı yok. Önce Trend keşfi bölümünde arama yap. Fikir yine üretilebilir; global kaynak izi sabitlenemez.";
+
         const txt=[
           "ROL: Komedi yaratıcısı + veri analisti. Öncelik komedi üretmek; her çalıştırmada bir güçlü fikir ve doğrudan kullanılabilir tam video promptu ver. Veri eksikliği, puanlama veya katı bir yaratıcı formül yüzünden çıktıyı durdurma.",
           "",
           "MARKA KURALI: “Boş Dükkân” yalnızca kanal adı/markasıdır; konu filtresi değildir. Market, dükkânın boşalması, alışveriş arabası, çalışan veya ürün toplama ZORUNLU DEĞİL. Bunları yalnızca seçilen fikrin doğal parçasıysa kullan; sırf kanal adı yüzünden konuya zorlama.",
           "ASIL HEDEF: En komik görsel fikri üret. İnsan davranışı, belirli bir duygu, gerçekçilik veya absürtlük düzeyi seçeneklerdir; hiçbiri zorunlu değildir. Karakter, nesne, mekân, oyunculuk, kurgu ve komedi türünü serbestçe seç. Otomatik ret filtresi kullanma.",
+          "YARATICI ÖZGÜRLÜK: Deadpan da doğal oyunculuk da abartılı tepki de kullanılabilir. Absürt, gerçeküstü, fiziksel, gündelik, nesne odaklı, imkânsız fizik içeren veya beklenmedik kurgulu komediyi önceden yasaklama. Tek duygu, tek absürtlük, insan davranışı, gerçekçi fizik, belirli bir kanca süresi veya belirli final biçimi zorunluluğu yoktur.",
           "TEK ZORUNLU VİDEO KOŞULLARI: Tam 10 saniye; dikey 9:16 YouTube Shorts; diyalog yok ve ASMR odaklı ses. Bunların dışında komediyi güçlendirecek her yaratıcı seçim serbesttir.",
           "",
-          "A. KENDİ KANALIM — BİRİNCİL PERFORMANS KANITI:",
-          JSON.stringify(ownDataForPrompt,null,2),
-          "",
-          "A2. KOD TARAFINDAN HESAPLANAN PERFORMANS SİNYALLERİ — metrik liderleri birbirine karıştırılmayacak:",
-          JSON.stringify(creativeEvidenceForPrompt,null,2),
-          "",
-          "A3. FİKİR SEÇİMİNDE KULLANILABİLECEK GERÇEK KANIT HARİTASI:",
-          JSON.stringify(ideaEvidenceTrace,null,2),
-          "",
-          "A3A. KOD TARAFINDAN FİKİR ÜRETİLMEDEN ÖNCE SABİTLENEN KAYNAK KAYDI (MÜMKÜNSE KULLAN; DEĞİŞTİRME):",
-          ideaSourceAnchor ? JSON.stringify(ideaSourceAnchor,null,2) : "KULLANILABİLİR GERÇEK METRİK YOK. Bunu açıkça söyle; yine de fikri ve tam promptu üret, fakat kaynak izini doğrulanmış gibi sunma.",
+          "A. KANAL VERİSİ SINIRI: Kendi kanalına ait performans metrikleri konu, nesne, sahne, komedi mekanizması veya kaynak seçmek için KULLANILMAYACAK. Bunlar yalnızca yayın sonrası ayrı ölçüm/kıyaslama içindir.",
+          "A1. GLOBAL KAYNAK ANKRAJI — FİKİR SEÇİMİNDE KULLANILACAK KİLİTLİ KAYIT:",
+          globalSourceAnchor ? JSON.stringify(globalSourceAnchor,null,2) : "Global arama kaydı yok. Kaynak uydurma; web araştırması yap, bulunamazsa bunu söyle ve yine de özgün fikir ile tam prompt üret.",
           "",
           "B. TREND KEŞFİ — SINIRLI DIŞ SİNYAL:",
-          research?JSON.stringify({source:research.source||'YouTube Data API v3',query:research.query||null,requestedPublishedWindowDays:research.searchDays??null,windowStart:research.searchStartedAt||null,windowEnd:research.searchEndedAt||null,returnedVideoCount:research.videos?.length||0,visualAccess:'NOT VERIFIED by API metadata. Unless actual watched-frame notes are supplied below, competitor scene mechanics are unknown.',sampleBias:'YouTube search ranking and query terms limit this sample; it is not a census of all Shorts.',currentState:research.currentState||null,videos:(research.videos||[]).slice().sort((a,b)=>(Number(b.viewsPerDay??b.vpd)||0)-(Number(a.viewsPerDay??a.vpd)||0)).slice(0,18),commentSampleDesign:research.commentSampleDesign||null,comments:(research.commentSamples||[]).slice(0,8)},null,2):'Genel Analiz henüz çalıştırılmamış. Rakip verisi yok; bunu açıkça belirt.',
+          research?JSON.stringify({source:research.source||'YouTube Data API v3',query:research.query||null,requestedPublishedWindowDays:research.searchDays??null,requestedOrder:research.requestedOrder||null,windowStart:research.searchStartedAt||null,windowEnd:research.searchEndedAt||null,returnedVideoCount:research.videos?.length||0,visualAccess:'Video izlemek zorunlu değil. API metaverisi kaynak kimliğini ve sayaçları doğrular; kesin görsel sahneyi doğrulamaz.',verificationProtocol:'Aynı video ID + tam başlık global webde aranır; resmi YouTube kaydıyla eşleştirilir; mümkünse YouTube dışı bağımsız yazılı kaynak aranır. Bulunamazsa açıkça belirtilir. Başlık, thumbnail veya yorumdan sahne uydurulmaz ve fikir üretimi durdurulmaz.',sampleBias:'YouTube search ranking and query terms limit this sample; it is not a census of all Shorts.',currentState:currentStateSnapshot(research.videos||[]),videos:(research.videos||[]).slice().sort((a,b)=>(Number(b.viewsPerDay??b.vpd)||0)-(Number(a.viewsPerDay??a.vpd)||0)).slice(0,18),commentSampleDesign:research.commentSampleDesign||null,comments:(research.commentSamples||[]).slice(0,8)},null,2):'Genel Analiz henüz çalıştırılmamış. Rakip verisi ve şu anki izlenen/izlenmeyen durumu yok; bunu açıkça belirt.',
           "",
-          "C. GÖZLE DOĞRULANMIŞ SAHNE NOTLARI:",
-          sceneNotes||'Sahne notu yok. Rakiplerin gerçek görsel mekanizması bilinmiyor; başlık, küçük resim, izlenme veya yorumlardan sahne uydurma.',
+          "C. İZLEME YERİNE ALTERNATİF DOĞRULAMA (ZORUNLU İZLEME YOK):",
+          "Video oynatma, ekran kaydı ve kare çıkarma gerekmiyor. Aynı ID ve tam başlığı global webde ara; metadata eşleşmesini doğrula; mümkünse bağımsız yazılı kaynağın geniş öncülü destekleyip desteklemediğini kontrol et. Kaynak bulunamazsa “bağımsız metinsel kaynak bulunamadı” de. Görsel eylemler gözlenmiş gibi anlatılmasın; fikir yine üretilsin. İsteğe bağlı not: "+(sceneNotes||"yok")+".",
           "",
           "D. ÖNCEKİ FİKİRLER — BAĞLAM:",
           ideaHistory||'Fikir geçmişi girilmedi. Varsa yalnızca bağlam olarak kullan; yeni fikri yasaklama veya üretimi durdurma.',
           "",
-          "KOMEDİ ÜRETİM GÖREVİ — aşağıdaki veri ilkeleri yaratıcı üretimi durduramaz:",
+          "KOMEDİ ÜRETİM GÖREVİ — veri notları komedi üretimini engelleyemez:",
           "0) HER ÇALIŞTIRMADA SIFIRLAMA: Bu paketi bağımsız bir görev olarak ele al. Sohbetin paket DIŞINDAKİ önceki mesajlarından veya önceki asistan önerilerinden konu, nesne, karakter, sahne ya da mekanizma taşıma. Yalnızca bu paketteki A/B/C/D verilerini ve kullanıcının açıkça verdiği yeni talimatı kullan. D alanı boşsa geçmiş fikir verilmemiştir. Önceki konuşmadaki öneriyi yeniden adlandırıp yeni fikir diye sunma.",
-          "0A) VERİDEN FİKRE GEÇİŞ: Önce A2'deki kodla hesaplanan ölçüm özetini oku, sonra A bölümündeki tam video kayıtlarıyla doğrula. Görüntülenme hacmi ve gözlenen günlük izlenme hızı erişim için ana sinyallerdir; izleme süresi, izlenen yüzde, beğeni ve abone kazanımı ayrı ayrı yardımcı sinyallerdir. Tek bir metrikten evrensel kural çıkarma; hedef izlenme hacmi olduğundan erişim sinyalini seçimi yönlendirmek için kullan.",
-          "0B) KONU İPUCU İLE SAHNE KANITINI AYIR: Yüksek performanslı videonun başlığından yalnızca açıkça görülen konu/öncül ipucunu çıkar. Başlıktan görülmemiş sahne, tepki, fiziksel eylem veya komedi mekanizması uydurma. Yeni fikri başlığın veya başarılı videonun birebir kopyası yapma; verinin işaret ettiği geniş izleyici ilgisini farklı ve özgün bir görsel olayla dene.",
+          "0A) GLOBALDEN FİKRE GEÇİŞ: Yalnız global YouTube arama örneklemini ve globalSourceAnchor kaydını kullan. Kendi kanal metrikleri konu seçimini etkilemez. views/ageDays yalnız kaba hız göstergesidir; tarihsel günlük API ölçümü veya neden-sonuç kanıtı değildir.",",
+          "0B) VİDEO İZLEME YERİNE KAYNAK ÇAPRAZ KONTROLÜ: Video izlemek veya ekran kaydı şart değil. Resmî video URL/ID, tam başlık, kanal, yayın tarihi ve kamusal sayaçları API kaydıyla eşleştir. Aynı video başlığı/ID için global web araması yap; mümkünse YouTube dışı bağımsız yazılı kaynak bul. Kaynak yoksa bunu açıkça söyle. Bu işlem metinsel öncülü kontrol eder; görsel sahneyi doğruladığını iddia etme.",",
           "0C) ÖZGÜNLÜK KONTROLÜ: Fikri yazmadan önce kendi içinde birkaç belirgin biçimde farklı yaklaşım üret ve tek kazananı seç. Son kazananı A bölümündeki mevcut videoların konu öncülleriyle ve D alanında açıkça verilen fikirlerle karşılaştır. Aynı fikri, yalnızca nesnesini/karakterini değiştirerek sunma. Benzerlik fark edilirse temel görsel mekanizmayı değiştir; fakat yaratıcı bir veto veya puan eşiği oluşturma.",
-          "0D) KANIT ETİKETİ: Kısa veri notlarında 'ölçülmüş bulgu', başlıktan çıkarımda 'başlık/metadata ipucu', C'deki gerçekten izlenmiş sahnelerde 'gözle doğrulanmış sahne', yeni fikir ve başarı beklentisinde 'test edilmemiş yaratıcı hipotez' ayrımını açık tut.",
+          "0D) KANIT ETİKETİ: Global API sayaçları “ölçülmüş global metadata”; webde bulunan bağımsız yazılı açıklama “metinsel çapraz kontrol”; izlenmeyen sahne “görsel olarak doğrulanmadı”; yeni fikir “test edilmemiş yaratıcı hipotez” diye etiketlenir.",
           "1) VERİYİ KISA TUT: Kanal/trend verisini hızlıca tara; yalnızca fikri seçmeye gerçekten yardımcı olan bulguyu kısaca belirt. Eksik metriği uydurma ve farklı ölçüm dönemlerini karıştırma. Uzun analiz raporu komedi fikrinin önüne geçmesin.",
-          "2) KANAL SİNYALİ: Gerçek ölçümlerden komediye yararlı olabilecek örüntüleri seç. İzlenme, ortalama izleme süresi, izlenen yüzde, beğeni ve abone metriklerini birbirine karıştırma; ama hepsini uzun uzun raporlamak zorunda değilsin. Yorumları yalnızca aynı video ID'sine aitse bağlam olarak kullan; yorumları tüm izleyicilerin sesi sayma.",
-          "3) İSTEĞE BAĞLI MEKANİZMA DÜŞÜNCESİ: Fikri geliştirmeye yardımcı oluyorsa davranış, beklenti, duygu, absürtlük veya ters köşe gibi öğeleri düşün. Sabit şablona doldurmak zorunda değilsin; tek bir duygu veya mekanizma aramak zorunlu değil.",
-          "4) KOMEDİ ADAYLARI: İçeride farklı, cesur ve yaratıcı komedi yaklaşımlarını dene. Kanal adı, nesne, mekân, insan davranışı veya tek bir mizah türünü konu şartı yapma. Önceki fikirleri yalnızca bağlam olarak kullan. Veri eğilimleri ilham olabilir; özgün fikrin sınırı değildir.",
-          "5) KALIP VE PUAN KAPISI YOK: Mizah Kapısı, evet/hayır elemesi, 50 puanlık rubrik veya 40/50 eşiği kullanma. Bir fikri yalnızca gerçekçilik, absürtlük, duygu, oyunculuk, karmaşıklık, yenilik ya da bir teoriye uymama gerekçesiyle eleme.",
-          "6) MUTLAKA BİR FİKİR VER: Birkaç adayı kendi içinde karşılaştırıp en komik bulduğun tek adayı seç. Hiçbir aday kusursuz görünmese bile en iyi seçeneği geliştir ve teslim et; 'geçerli aday yok' diyerek komedi üretimini bırakma.",
-          "7) TEK FORMAT SINIRI: Tam 10 saniye, dikey 9:16 Shorts, diyalogsuz ve ASMR odaklı ses. İlk kare, tempo, karakter tepkisi, fizik, stil, ses ayrıntıları, kesmeler ve final için başka zorunlu kural yok; komediyi güçlendiren çözümü serbestçe seç.",
-          "8) NİHAİ ÇIKTI: Önce gerekiyorsa gerçek veri bulgularını ve sınırlamalarını çok kısa belirt; ardından tek komedi fikri, neden komik olduğu, 10 saniyenin tamamını kapsayan sahne akışı ve doğrudan kopyalanabilir tam video üretim promptu ver. Promptta yalnızca üç zorunlu koşulu açıkça koru. İngilizce başlık, ilk 0,3 saniyede kanca, belirli zaman bölümleri, tek duygu, gerçekçi fizik, bitmiş final veya puanlama şart değil.",
-          "9) YAYIN SONRASI ÖĞRENME: Gerçek görüntülenme, ortalama izleme süresi, izlenen yüzde, beğeni/yorum ve abone kazanımı verilerini ayrı değerlendir. Bunlar bir sonraki komedi fikrine yardımcı olur; evrensel kural, başarı garantisi veya yaratıcı veto üretmez.",
-          "10) KANIT DÜRÜSTLÜĞÜ: Ölçülmüş veri, gerçekten gözlemlenmiş sahne ve yeni kurmaca fikirleri birbirinden ayır. Bir rakip videonun sahnesini izlemediysen izlenmiş gibi anlatma; bu durum yeni komedi fikri üretmeye engel değildir.",
-          "11) FİKRİN KAYNAK İZİ ZORUNLU: Fikirden önce kısa bir 'BU FİKİR NEREDEN ÇIKTI?' bölümü ver. (a) Seçimi etkileyen gerçek ölçümü ve video başlığını/ID'sini, değerini ve ölçüm penceresini belirt; ölçüm yoksa 'yok' de. (b) Ölçümün gerçekten desteklediği sınırlı çıkarımı yaz. (c) Veriden yeni görsel fikre geçişi açıkça anlat: hangi kısmı veri yönlendirdi, hangi kısmı yaratıcı sıçrama olarak sen ekledin. (d) Verinin kanıtlamadığı noktayı belirt. (e) Fikri 'test edilmemiş yaratıcı hipotez' olarak işaretle. (f) Gerçek sahne notu yoksa sahne mekanizmasını kanıt diye kullanma.",
-          "11A) KANITTAN FİKRE GİDEN YOLU GERÇEKTEN KUR: Fikri seçmeden ÖNCE A2/A3'teki ölçülmüş erişim sinyallerinden hangisinin seçimi yönlendireceğini belirle; sonra ilgili video ID'si, tam başlığı, metriği, sayısal değeri ve ölçüm penceresini kaynak izine koy. Önce rastgele fikri üretip ardından onu haklı gösterecek veri arama. Ölçüm yalnızca geniş bir konu yönü veriyorsa bunu 'dolaylı/zayıf bağ' diye yaz. Yeni fikrin somut görsel mekanizması ölçümden çıkmıyorsa aynen 'Bu mekanizma veriden çıkmadı; yaratıcı sıçrama olarak eklendi' de. Kaynak izi fikrin seçimini açıklamalı; veriyle bağlantı uydurmamalı.",
-          "11B) SABİTLENMİŞ KAYNAK KAYDI: A3A içindeki kaydı fikirden ÖNCE oku; rastgele fikir üretip kayda sonradan bağlama. Kaydın video ID’sini, tam başlığını, metricLabel alanını, sayısal değerini ve measurementWindow alanını “BU FİKİR NEREDEN ÇIKTI?” bölümünde aynen kullan. Başlık yalnızca konu/öncül ipucudur, sahne kanıtı değildir. Kaydın sınırlı biçimde işaret ettiği genel öncülden farklı ve özgün bir görsel fikir geliştir; başarılı videonun sahnesini kopyalama. Ölçüm bir görsel mekanizmayı kanıtlamaz. Yaratıcı sıçramayı ve kanıt sınırını açıkça söyle. Kaynak izi içinde ayrıca “VERİDEN FİKRE GEÇİŞ:” başlıklı ayrı satır oluştur; bu satır hangi sınırlı çıkarımın aday fikrin seçimini yönlendirdiğini somut şekilde anlatsın; yalnızca kaydı tekrarlamak yeterli değildir. A3A kaydı yoksa uydurma kaynak oluşturma; yine de komedi fikrini üret ama “kaynak izi doğrulanamıyor” diye belirt.",
-          "11C) BAĞ GÜCÜ: Kaynak ile yeni sahne arasındaki bağ dolaylı/zayıf bağ olarak açıkça etiketlenmeli; performans ölçümü bu sahnenin neden başarılı olacağını kanıtlamaz.",
-          "11D) KAYNAK İZİ SABİT ŞABLONU: “BU FİKİR NEREDEN ÇIKTI?” bölümünde ayrı satırlarda şu alanları açıkça yaz: “ÖLÇÜLMÜŞ BULGU:”, “VERİDEN FİKRE GEÇİŞ:”, “BAĞIN GÜCÜ: dolaylı/zayıf bağ”, “YARATICI SIÇRAMA: Bu mekanizma veriden çıkmadı; yaratıcı deney olarak eklendi.”, “VERİNİN KANITLAMADIĞI:”, “TEST DURUMU: test edilmemiş yaratıcı hipotez.” “ÖLÇÜLMÜŞ BULGU:” satırının TEK SATIRINDA sabitlenen video ID’sini, tam başlığı, metricLabel alanını, sayısal değeri ve measurementWindow alanını birlikte yaz; bunları başka satırlara dağıtma. Kaynak veya ölçüm yoksa uydurma; kaynak izi doğrulanamadı de ama fikri yine üret.",
+          "2) KANAL VERİSİNİ KONU SEÇİMİNE KARIŞTIRMA: Bu paketteki kendi-kanal metriklerini fikir kaynağı, kaynak doğrulaması veya seçim gerekçesi yapma. Global içerikten bağımsız ve özgün bir fikir çıkar. Kendi kanal verileri bu pakette konu kaynağı olarak sunulmaz.",
+          "3) Yorumları yalnızca tam video ID'sine bağlı kayıttan kullan. Bunlar küçük, relevance sıralı örneklemdir; tüm izleyicileri temsil etmez. Yorumlar sahne karesi veya görsel kanıt değildir.",
+          "4) Global video metrikleri geniş erişim/ilgi sinyalidir; sahnenin veya başarının nedenini kanıtlamaz. Başlık, thumbnail ve yorumlar tam olay akışını kanıtlamaz. Bağımsız metinsel kaynak bulamazsan bunu yaz; sahne ayrıntılarını uydurma. Veri yetersizliği fikir üretimini durdurmaz.",
+          "B bölümündeki currentState alanı varsa yalnızca yardımcı ipucu olarak kullan. Bu alanın eksikliği veya yanlılığı komedi üretimini durdurmaz; sahne ayrıntılarını metadata'dan gözlemlenmiş gibi çıkarma.",
+          "Eksik rakip sahne notları veya yetersiz veri komedi üretimini durdurmaz; gözlem olmayan şeyi gerçek diye anlatma, ama özgün bir sahne üret.",
+          "KONU VE STİL ÖZGÜRLÜĞÜ: Her konuyu ve komedi biçimini deneyebilirsin. İnsan davranışı, duygu, gerçekçilik, belirli mekân veya belirli nesne şart değil.",
+          "6) Tek güçlü fikri seçip geliştir ve teslim et. Adayları iç değerlendirme için karşılaştırabilirsin ama hiçbir puan/kapı yüzünden fikir vermekten vazgeçme.",
+          "7) Üç zorunlu koşul dışında yaratıcı kalite kapısı yok. Kanca, duygu, oyunculuk, gerçekçilik, fizik, tekrar veya final biçimi yüzünden fikri veto etme; bunları yalnızca komediyi geliştirmek için kullan.",
+          "8) Nihai çıktı: veri bulgularını gerekiyorsa kısaca bildir; ardından tek komedi fikri, neden komik olduğu, 10 saniyenin tamamını kapsayan sahne akışı ve tam video üretim promptu ver. Başlık dili, belirli zaman aralıkları ve yaratıcı stil zorunlu değil.",
+          "9) Yayın sonrası görüntülenme, ortalama izleme süresi, izlenen yüzde, beğeni/yorum oranı ve abone kazanımını ayrı değerlendir. Başarı garantisi veya veride olmayan eşik verme.",
+          "10) Kanıt düzeylerini ayır: global API metadata / bağımsız metinsel çapraz kontrol / görsel sahne doğrulanmadı (izleme yok) / test edilmemiş yaratıcı hipotez.",
+          "11) FİKRİN KAYNAK İZİ ZORUNLU: Fikirden önce kısa bir 'BU FİKİR NEREDEN ÇIKTI?' bölümü ver. (a) Seçimi etkileyen gerçek ölçümü ve video başlığını/ID'sini, değerini ve ölçüm penceresini belirt; ölçüm yoksa 'yok' de. (b) Ölçümün gerçekten desteklediği sınırlı çıkarımı yaz. (c) Veriden yeni görsel fikre geçişi açıkça anlat: hangi kısmı veri yönlendirdi, hangi kısmı yaratıcı sıçrama olarak sen ekledin. (d) Verinin kanıtlamadığı noktayı belirt. (e) Bu nedenle fikri 'test edilmemiş yaratıcı hipotez' olarak işaretle. (f) Gerçek sahne notu yoksa sahne mekanizmasını kanıt diye kullanma.",
+          "11A) GLOBAL KAYNAK İZİ: Fikir seçmeden önce globalSourceAnchor içindeki YouTube videosunu kaynak olarak sabitle. Başlık/metadata yalnızca geniş öncülü verir. Aynı ID ve başlığı global web üzerinde çapraz kontrol et; en az bir bağımsız yazılı kaynak bulabilirsen URL ekle, bulamazsan “bağımsız metinsel kaynak bulunamadı” diye açıkça yaz. Video izlemek şart değil.",
+          "11B) GLOBAL KAYNAK SATIRI: “GLOBAL KAYNAK:” satırında globalSourceAnchor içindeki video ID, tam başlık, kanal, yayın tarihi, kamusal toplam izlenme değeri, ölçüm tarihi ve resmi URL'yi eşleştir. İzlenme sayısını dönem metriği gibi gösterme. “GLOBAL WEB KONTROLÜ:” satırında bağımsız yazılı URL veya kaynak bulunamadığı bilgisini yaz. “GÖRSEL SAHNE DURUMU:” satırı videonun izlenmediğini/doğrulanmadığını ve sahne eylemlerinin gözlenmiş gibi anlatılmadığını açıkça söylesin.",
+          "11D) KAYNAK İZİ SABİT ŞABLONU: Ayrı satırlarda “GLOBAL KAYNAK:”, “GLOBAL WEB KONTROLÜ:”, “GÖRSEL SAHNE DURUMU:”, “KAYNAKTAN ALINAN İLKE:”, “GLOBAL İŞARETTEN FİKRE GEÇİŞ:”, “ÖZGÜN YARATICI SIÇRAMA:”, “KOPYALANMAYAN UNSURLAR:”, “KANIT SINIRI:” ve “TEST DURUMU: test edilmemiş yaratıcı hipotez.” etiketlerini kullan. Kaynak veya ek web doğrulaması yoksa uydurma; sınırı açıkla ama fikri ve promptu yine üret.",
           "12) SAHTE VERİ BAĞI YASAK: Sırf fikri haklı göstermek için sonradan veri uydurma, ilgisiz metriği gerekçe diye gösterme veya 'veri bu fikri kanıtlıyor' deme. Veri yalnızca geniş bir yön veriyorsa bunu 'dolaylı/zayıf bağ' diye açıkla. Fikrin belirli mekanizması veriden çıkmıyorsa dürüstçe 'bu mekanizma veriden çıkmadı; yaratıcı deney olarak seçildi' yaz.",
-          "13) NİHAİ ÇIKTI SIRASI: 1. Bu fikir nereden çıktı? (kanıt izi) 2. Tek fikir 3. Neden komik 4. 10 saniyelik sahne akışı 5. Tam video promptu 6. Test sonrası hangi gerçek ölçümlerle değerlendirileceği. Kanıt izi kısa ama somut olmalı; yalnızca 'veriye dayanıyor' demek yeterli.",
+          "13) NİHAİ ÇIKTI SIRASI: 1. Bu fikir nereden çıktı? (kanıt izi) 2. Tek fikir 3. Neden komik 4. 10 saniyelik sahne akışı 5. Tam video promptu 6. Test sonrası hangi gerçek ölçümlerle değerlendirileceği. Kanıt izi kısa ama somut olmalı; yalnızca 'veriye dayanıyor' demek yeterli değil."
         ].join("\n");
         const ta=$('#compareTxt');ta.value=txt;ta.style.display='block';ta.select();
         const downloadBtn=$('#downloadCompare');downloadBtn.disabled=false;downloadBtn.onclick=()=>{const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='bos-dukkan-analiz-paketi.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);};
