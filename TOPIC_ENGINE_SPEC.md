@@ -25,7 +25,7 @@ Bunların dışında sabit yaratıcı kural yoktur.
    - **Başlık/metadata ipucu:** Başlıktan veya metadatadan görülebilen dar kapsamlı konu sinyali.
    - **Gözle doğrulanmış sahne:** Yalnızca gerçekten izlenmiş ve C bölümüne yazılmış görüntüler.
    - **Test edilmemiş yaratıcı hipotez:** Yeni fikrin izlenme potansiyeli ve henüz denenmemiş komedi etkisi.
-8. **Teslim et:** Kısacık veri notu; tek fikir; neden komik olduğu; 10 saniyenin tamamını kapsayan sahne akışı; doğrudan kopyalanabilir tam video promptu.
+8. **Fikrin kaynak izini açıkla:** Her fikirden önce “Bu fikir nereden çıktı?” bölümünü ver. En az bir gerçek ölçümü, ilgili video başlığını/ID'sini, sayısal değeri ve ölçüm penceresini belirt; veri yoksa bunu açıkça yaz. Sonra ölçümün desteklediği dar çıkarımı, bu çıkarımdan yeni fikre geçişi ve senin eklediğin yaratıcı sıçramayı ayır.\n9. **Kanıtı abartma:** Performans metriği komedi mekanizmasını kanıtlamaz. Başlık sahne değildir; görsel not yoksa mekanizma bilinmiyor. Veri ile fikir arasındaki bağ zayıfsa “dolaylı/zayıf bağ” de; mekanizma veriden çıkmadıysa bunu yaratıcı deney olarak açıkça belirt. Yeni fikri “test edilmemiş yaratıcı hipotez” diye etiketle.\n10. **Teslim et:** Fikrin kaynak izi; tek fikir; neden komik olduğu; 10 saniyenin tamamını kapsayan sahne akışı; doğrudan kopyalanabilir tam video promptu; yayın sonrası hangi gerçek metriklerle test edileceği.
 
 ## Yaratıcı özgürlük
 
