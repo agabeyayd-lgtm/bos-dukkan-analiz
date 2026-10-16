@@ -41,6 +41,7 @@ jobs:
             ['validator panel', 'ideaOutputForValidation'],
             ['locked source payload label', 'A3A. KOD TARAFINDAN FİKİR ÜRETİLMEDEN ÖNCE SABİTLENEN KAYNAK KAYDI'],
             ['explicit data-to-idea bridge', 'VERİDEN FİKRE GEÇİŞ:'],
+            ['explicit weak-link classification', 'dolaylı/zayıf bağ'],
             ['A2 summary label', 'A2. KOD TARAFINDAN HESAPLANAN PERFORMANS SİNYALLERİ'],
             ['full-row metric calculation', 'const creativeMetricRows=own.filter(v=>v&&v.analyticsAvailable);'],
             ['reach and metric separation', 'VERİDEN FİKRE GEÇİŞ'],
