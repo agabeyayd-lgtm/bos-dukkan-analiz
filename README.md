@@ -1,42 +1,57 @@
-# Boş Dükkân Komedi Motoru ve Veri Analizi
+# Boş Dükkân Global Komedi Motoru ve Veri Analizi
 
 **Canlı panel:** https://agabeyayd-lgtm.github.io/bos-dukkan-analiz/
 
 ## Amaç
-Her çalıştırmada tek, yeni komedi fikri ve doğrudan kullanılabilir tam video üretim promptu üretmek. Veri, fikrin seçiminde gerçek bir rol oynar; ama veri eksikliği üretimi durdurmaz.
+Her çalıştırmada global içerik ve global kaynak araştırmasından yararlanarak tek, yeni komedi fikri ve doğrudan kullanılabilir tam video promptu üretmek. Video izleme veya ekran kaydı mümkün olmadığında fikir üretimi durmamalı.
 
-## Yalnızca üç zorunlu video koşulu
+## Tek zorunlu video koşulları
 - Tam 10 saniye.
-- Dikey 9:16, YouTube Shorts.
-- Diyalogsuz, ASMR odaklı ses.
+- Dikey 9:16 YouTube Shorts.
+- Diyalogsuz, ASMR odaklı doğal ses.
 
-Bunun dışında sabit mizah türü, fizik/gerçekçilik şartı, tek duygu veya davranış şartı, oyunculuk stili, puan eşiği ya da otomatik ret listesi yoktur.
+Bunun dışında sabit mizah türü, fizik/gerçekçilik şartı, oyunculuk stili, puan eşiği veya otomatik ret listesi yoktur.
 
-## Konu seçiminin kalıcı çalışma sırası
-1. **Paket dışı sohbeti sıfırla.** Önceki konuşmalardaki asistan fikirlerini yeni fikir diye yeniden kullanma. Yalnızca yeni paketteki kanal verisi, trend sinyali, gözle doğrulanmış notlar ve açıkça girilmiş fikir geçmişini kullan.
-2. **Ölçümleri ayır.** Panel her pakette kodla farklı metrik liderlerini hesaplar: dönem görüntülenmesi, gözlenen gün başına görüntülenme hızı, ortalama izleme saniyesi, ortalama izlenen yüzde, mutlak abone kazanımı, 1000 görüntülenme başına abone kazanımı ve beğeni oranı. Bunlar tek bir puana karıştırılmaz.
-3. **Veriyi konu seçimine bağla.** Görüntülenme hacmi ana hedeftir; diğer metrikler farklı performans yönlerini gösteren ayrı yardımcı sinyallerdir. Video başlığı yalnızca konu/öncül ipucudur, gerçek sahne kanıtı değildir. Başlıktan görülmemiş sahne uydurma.
-4. **Özgün fikir seç.** Birkaç farklı yaklaşımı kendi içinde değerlendir, tek fikri sun. Yüksek performanslı videonun aynısını ya da yalnızca nesnesi değiştirilmiş kopyasını üretme. Veriden ilham al, fakat ölçümlerin kanıtlamadığı bir başarı nedeni iddia etme.
-5. **Kanıt türünü etiketle.** Ölçülmüş bulgu; başlık/metadata ipucu; gerçekten izlenmiş sahne notu; test edilmemiş yaratıcı hipotez birbirinden ayrı tutulur.\n6. **Her fikrin kaynağını açıkla.** Paket, kodla hesaplanan metrik liderlerini ayrıca `A3. Fikir Seçiminde Kullanılabilecek Gerçek Kanıt Haritası` bölümüne koyar. Çıktı, fikri seçmeden önce ilgili video başlığını/ID'sini, ölçüm değerini ve dönemini; ölçümün desteklediği sınırlı çıkarımı; yaratıcı sıçramayı; verinin kanıtlamadığı kısmı yazmalıdır. Veri fikrin mekanizmasını göstermiyorsa “bu mekanizma veriden çıkmadı; yaratıcı deney olarak seçildi” demelidir.
+## Kaynak kuralı: global, kendi kanalın değil
+- Yeni fikir için kaynaklar global YouTube araması ve global web araştırmasıdır.
+- Kendi kanalının ölçümleri yeni konuyu, sahneyi veya komedi mekanizmasını seçmez; yalnızca yayın sonrası kıyaslama içindir.
+- Global YouTube arama örneklemi en fazla 50 video gibi arama/sıralama sınırlamalarına sahiptir; tüm Shorts evrenini temsil etmez.
+- Her kaynak tam video ID'si ve resmi YouTube URL'si ile sabitlenir.
 
-## Fikir kaynağı izi
-Fikir seçimi önce ölçülmüş kanal sinyali, sonra yaratıcı geliştirme sırasıyla yapılır. Her çıktıda ilgili video ID'si/başlığı, metrik değeri ve ölçüm penceresi gösterilir; ölçümün desteklediği sınırlı çıkarım, yaratıcı sıçrama ve verinin kanıtlamadığı noktalar ayrı yazılır. Somut komedi mekanizması ölçümden çıkmadıysa açıkça “Bu mekanizma veriden çıkmadı; yaratıcı sıçrama olarak eklendi” denir. Rastgele fikri sonradan metrikle haklı gösterme yasaktır.
+## Video izlemeye alternatif doğrulama
+1. YouTube Data API kaydından video ID'si, tam başlığı, kanal, yayın tarihi, süre ve kamusal sayaçları kontrol et.
+2. Aynı video ID'si ve tam başlığı global webde ara.
+3. Mümkünse YouTube dışı bağımsız yazılı kaynak URL'si ekle. Kaynak bulunamazsa bunu açıkça yaz.
+4. Video gerçek görüntüleri incelenmediyse “görsel sahne doğrulanmadı” diye belirt. Başlık, kapak görseli, yorum veya sayaçtan görülmeyen eylem uydurma.
+5. Bu sınırlama komedi fikrinin ve tam promptun üretilmesini durdurmaz.
 
-## Veri kaynağı ve sınırlar
-- Trend keşfi: YouTube Data API v3 aramasından gelen sınırlı bir örneklemdir; YouTube'un tamamını temsil etmez.
-- Kendi kanalın: Google OAuth ve YouTube Analytics API ile seçili dönem performansı.
-- Yorumlar, tam video ID'sine göre eşleştirilen küçük örneklerdir; tüm izleyicileri temsil etmez ve sahne kanıtı değildir.
-- Eksik metrikler sıfır sayılmaz. Farklı ölçüm dönemleri ve ömür boyu sayaçlar birbirine karıştırılmaz.
-- Dış video görsel olarak izlenmediyse gerçek sahne mekanizması bilinmiyor olarak kalır.
+Global webde yazılı kaynak bulmak, videonun kimliğini veya geniş öncülünü çapraz kontrol etmeye yarar; görülmeyen görsel sahne dizisini kanıtlamış sayılmaz.
 
-## Kaynak izi için programatik kontrol
-Konu Motoru, fikirden önce gerçek YouTube Analytics ölçümleri arasından bir kaynak kaydını kodla sabitler (öncelik: seçili dönemde en çok izlenen video; gerekirse günlük hız; son çare olarak ayrı etiketlenmiş kamusal ömür boyu izlenme). Bu kayıt pakete açık video ID'si, başlık, metrik, değer ve ölçüm penceresiyle eklenir.
+## Sayaç ve örneklem sınırları
+- Kamusal toplam izlenme, yayımdan ölçüm zamanına kadar birikmiş sayıdır; seçili dönem Analytics metriği değildir.
+- Toplam izlenme/video yaşı hesabı kaba hız vekilidir; geçmişteki günlük görüntülenme grafiği değildir.
+- Başlık ve metaveri konu ipucudur; sahnenin ne olduğunu veya neden izlendiğini kanıtlamaz.
+- Eksik veri sıfır değildir; metrikler ve ölçüm dönemleri birbirine karıştırılmaz.
 
-Model yanıtı geri yapıştırıldığında **Kaynak izini kontrol et** düğmesi kaynak ID'si/başlığını/metriğini/değerini/penceresini ve şu ayrı satırları denetler: **“ÖLÇÜLMÜŞ BULGU:”**, **“VERİDEN FİKRE GEÇİŞ:”**, **“BAĞIN GÜCÜ: dolaylı/zayıf bağ”**, **“YARATICI SIÇRAMA:”**, **“VERİNİN KANITLAMADIĞI:”**, **“TEST DURUMU: test edilmemiş yaratıcı hipotez”**. “ÖLÇÜLMÜŞ BULGU:” satırında video ID'si, tam başlık, metrik adı, gerçek değer ve ölçüm penceresi aynı satırda bulunmalıdır. Zorunlu alanlardan biri eksikse sonuç geçmez ve doğrulanmış sayılmaz. Kontrol sabit kaynak kaydına doğru atıf yapıldığını ve zorunlu açıklama alanlarının bulunduğunu garanti eder; modelin iç düşünce sırasını, semantik bağın gerçekten doğru olup olmadığını veya videonun başarıya ulaşacağını garanti edemez. Panel kendi başına yapay zekâ modeli çalıştırmaz.
+## Global kaynak izi kontrolü
+Konu Motoru paketi, global YouTube aramasından seçilmiş kaydı sabitler. Yanıt geri yapıştırıldığında **Global Kaynak İzi Kontrolü** video ID'si, tam başlık, kanal, yayın tarihi, kamusal toplam izlenme, ölçüm zamanı ve resmi URL'nin aynı kaynakla eşleşmesini; global web çapraz kontrolünün URL'sini veya bulunamadığı bilgisini; görsel sahnenin doğrulanmadığı sınırını ve özgün yaratıcı geçiş alanlarını denetler.
+
+Kontrol, kaynak atfının yapısını doğrular; videonun sahnesinin gerçekten izlenmiş olduğunu veya fikrin başarılı olacağını kanıtlamaz.
+
+## Kullanım akışı
+1. Panelde **Trend keşfi** bölümüne YouTube Data API anahtarını gir.
+2. Global odaklı bir arama yap ve sonuçları getir.
+3. **Global konu paketini oluştur ve kopyala** düğmesine bas. Kendi kanalına OAuth ile bağlanmak gerekmez.
+4. Kopyalanan istemi web erişimi olan sohbet asistanına yapıştır. Asistanın aynı global kaydı aramasını, bağımsız yazılı kaynak bulamazsa bunu söylemesini ve tek tam prompt üretmesini iste.
+5. Dönen yanıtı paneldeki global kaynak izi kontrolüne yapıştırıp alanları denetle.
+6. Video yayınlandıktan sonra ayrı kanal analiziyle gerçek performansı değerlendir; bu performansı yeni fikrin global kaynağıymış gibi kullanma.
+
+Panelin kendisi bir yapay zekâ modeli çalıştırmaz; global paket üretir ve kaynak izi denetler. İçerik üretimi/bağımsız web araştırması, paketi yapıştırdığın web erişimli sohbet asistanında gerçekleşir.
 
 ## Dosyalar
 - `index.html`: GitHub Pages ana paneli.
 - `bos-dukkan-analiz.html`: panelin ikinci kopyası.
-- `TOPIC_ENGINE_SPEC.md`: motorun veri-karar ve yaratıcılık sözleşmesi.
-- `HUMOR_RUBRIC.md`: zorunlu biçim şartları ve kanıt rehberi; puanlama kapısı içermez.
-- `.github/workflows/pages.yml`: JavaScript sözdizimi ve motor talimatları için regresyon kontrolü ile dağıtım.
+- `TOPIC_ENGINE_SPEC.md`: global kaynak izinin ve komedi üretim akışının sözleşmesi.
+- `source-trace-guard.js`: kaynak izi doğrulaması.
+- `tests/source-trace-guard.test.cjs`: global kaynak şeması testleri.
+- `.github/workflows/pages.yml`: dağıtım iş akışı.
