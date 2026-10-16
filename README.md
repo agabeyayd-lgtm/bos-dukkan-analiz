@@ -32,7 +32,7 @@ Fikir seçimi önce ölçülmüş kanal sinyali, sonra yaratıcı geliştirme s�
 ## Kaynak izi için programatik kontrol
 Konu Motoru, fikirden önce gerçek YouTube Analytics ölçümleri arasından bir kaynak kaydını kodla sabitler (öncelik: seçili dönemde en çok izlenen video; gerekirse günlük hız; son çare olarak ayrı etiketlenmiş kamusal ömür boyu izlenme). Bu kayıt pakete açık video ID'si, başlık, metrik, değer ve ölçüm penceresiyle eklenir.
 
-Model yanıtı geri yapıştırıldığında **Kaynak izini kontrol et** düğmesi bu alanların tümünü ve yaratıcı sıçrama/kanıt sınırı etiketlerini denetler. Zorunlu alanlar eksikse sonuç geçmez ve doğrulanmış sayılmaz. Kontrol kaynak kaydına doğru atıf yapıldığını garanti eder; modelin iç düşünce sırasını, semantik bağın kusursuzluğunu veya videonun başarıya ulaşacağını garanti edemez. Panel kendi başına yapay zekâ modeli çalıştırmaz.
+Model yanıtı geri yapıştırıldığında **Kaynak izini kontrol et** düğmesi bu alanların tümünü, ayrı bir **“VERİDEN FİKRE GEÇİŞ”** açıklamasını, yaratıcı sıçramayı ve kanıt sınırı etiketlerini denetler. Zorunlu alanlardan biri eksikse sonuç geçmez ve doğrulanmış sayılmaz. Kontrol kaynak kaydına doğru atıf yapıldığını ve açıklamanın gerekli alanlarını içerdiğini garanti eder; modelin iç düşünce sırasını, semantik bağın kusursuzluğunu veya videonun başarıya ulaşacağını garanti edemez. Panel kendi başına yapay zekâ modeli çalıştırmaz.
 
 ## Dosyalar
 - `index.html`: GitHub Pages ana paneli.
