@@ -41,6 +41,26 @@ test("rejects responses that omit the locked source ID", () => {
   assert.equal(result.ok, false);
   assert.ok(result.errors.some(e => e.includes("ID")));
 });
+test("rejects a case-changed source video ID", () => {
+  const incomplete = validOutput.replace(/wEA-VZhxq6Y/g, "wea-VZhxq6Y");
+  const result = SourceTraceGuard.validate(incomplete, anchor);
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some(e => e.includes("birebir")));
+});
+test("rejects the right metric value when it appears after unrelated text", () => {
+  const incomplete = validOutput.replace(
+    "seçili dönem izlenmesi 27,569;",
+    "seçili dönem izlenmesi bilinmiyor; 27,569;"
+  );
+  const result = SourceTraceGuard.validate(incomplete, anchor);
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some(e => e.includes("hemen yanında")));
+});
+test("accepts a dot-grouped count format as the same measured value", () => {
+  const localized = validOutput.replace(/27,569/g, "27.569");
+  const result = SourceTraceGuard.validate(localized, anchor);
+  assert.equal(result.ok, true, JSON.stringify(result.errors));
+});
 test("rejects a source citation without a clear data-to-idea bridge", () => {
   const incomplete = validOutput.replace(/VERİDEN FİKRE GEÇİŞ:.*/, "");
   const result = SourceTraceGuard.validate(incomplete, anchor);
