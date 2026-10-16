@@ -33,6 +33,11 @@ Storyboard otomatik görsel kontrol için bir alternatiftir; bağımsız web ara
 - Başlık ve metaveri konu ipucudur; sahnenin ne olduğunu veya neden izlendiğini kanıtlamaz.
 - Eksik veri sıfır değildir; metrikler ve ölçüm dönemleri birbirine karıştırılmaz.
 
+## Ayrı iş akışları: global fikir / yayın sonrası ölçüm
+- **Global fikir paketi** yalnızca `Trend keşfi` bölümündeki global YouTube araştırma kaydını ve otomatik storyboard/Web doğrulama alternatifini taşır.
+- **Yayın sonrası ölçüm raporu** yalnızca kendi kanalının yayımlanmış videolarının ölçümlerini dışa aktarır; komedi fikri, global kaynak veya video promptu oluşturmaz.
+- Eski birleştirilmiş “Konu Motoru” paket yolu kaldırıldı; kanal metrikleri artık fikir üretimi paketine bağlanmaz.
+
 ## Global kaynak izi kontrolü
 Konu Motoru paketi, global YouTube aramasından seçilmiş kaydı sabitler. Yanıt geri yapıştırıldığında **Global Kaynak İzi Kontrolü** video ID'si, tam başlık, kanal, yayın tarihi, kamusal toplam izlenme, ölçüm zamanı ve resmi URL'nin aynı kaynakla eşleşmesini; global web çapraz kontrolünün URL'sini veya bulunamadığı bilgisini; görsel sahnenin doğrulanmadığı sınırını ve özgün yaratıcı geçiş alanlarını denetler.
 
