@@ -43,6 +43,7 @@ jobs:
             ['tries several global sources for storyboard', 'findGlobalStoryboardSource'],
             ['storyboard preview output', 'globalStoryboardPreview'],
             ['storyboard failure never blocks idea production', 'Görsel kaynağa erişilememesi fikir üretimini durduramaz'],
+            ['post-publication report is clearly separate', 'Yayın sonrası ölçüm raporu — fikir üretmez'],
             ['no channel OAuth in the global idea flow', 'Global konu paketini oluştur ve kopyala'],
             ['global source trace validator', 'SourceTraceGuard.validate'],
             ['global validator input', 'globalIdeaOutputForValidation'],
@@ -64,6 +65,9 @@ jobs:
             }
             if (!html.includes('Tam 10 saniye') && !html.includes('TEK ZORUNLU VİDEO KOŞULLARI')) {
               throw new Error(file + ': required 10-second video format contract missing');
+            }
+            for (const stale of ['ownDataForPrompt', 'creativeEvidenceForPrompt', 'ideaEvidenceTrace', 'validateIdeaTrace']) {
+              if (html.includes(stale)) throw new Error(file + ': legacy mixed channel-data idea path remains: ' + stale);
             }
             if (html.includes('SourceTraceGuard.chooseAnchor(')) {
               throw new Error(file + ': stale own-channel source anchor still wired into idea engine');
