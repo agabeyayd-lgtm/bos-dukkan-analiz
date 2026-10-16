@@ -640,14 +640,14 @@ $('#goOwn').onclick=async()=>{
           note:'Analytics-period metrics and public lifetime counters are separate. Missing retention is unknown, not zero.'
         };
         // Performans sinyallerini kod tarafında ayrı ayrı hesapla; modelin ham JSON'dan tek bir belirsiz "kazanan" çıkarmasına bırakma.
-        const creativeMetricRows=(ownDataForPrompt.videos||[]).filter(v=>v&&v.analyticsAvailable);
+        const creativeMetricRows=own.filter(v=>v&&v.analyticsAvailable);
         const bestCreativeMetric=(field,descending=true)=>{
           const valid=creativeMetricRows.filter(v=>v[field]!==null&&v[field]!==undefined&&Number.isFinite(Number(v[field])));
           valid.sort((a,b)=>(Number(a[field])-Number(b[field]))*(descending?-1:1));
           const v=valid[0];
           if(!v)return null;
           return {
-            videoId:v.id,title:v.title,publishedAt:v.publishedAt||null,seconds:v.seconds??null,
+            videoId:v.id,title:v.title,publishedAt:v.publishedAt||null,seconds:v.seconds??v.sec??null,
             metric:field,value:Number(v[field]),
             viewsInWindow:v.viewsInWindow??null,
             averageViewSeconds:v.averageViewSeconds??null,
