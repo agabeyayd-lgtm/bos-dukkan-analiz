@@ -2,49 +2,35 @@
 
 ## Ana amaç
 
-Panelin hazırladığı veri paketi, sohbet içindeki modelin komediyi bizzat oluşturup kullanıcıya vermesini sağlamalıdır. Rol yalnızca analiz raporu çıkarmak değildir: **her çalıştırmada bir güçlü komedi fikri ve tam video üretim promptu teslim et.**
+Her çalıştırmada **tek güçlü, yeni komedi fikri ve tam video üretim promptu** teslim et. Yalnızca analiz raporu yazma, fikir listesi dökme, veri eksik diye durma.
 
-## Tek zorunlu koşullar
+## Tek zorunlu video koşulları
 
 - Tam 10 saniye.
 - Dikey 9:16, YouTube Shorts.
-- Diyalog yok; ASMR odaklı ses yaklaşımı.
+- Diyalog yok; ASMR odaklı ses.
 
-Bunların dışında katı yaratıcı kural yoktur.
+Bunların dışında sabit yaratıcı kural yoktur.
 
-## Komedi için sınırsız yaklaşım
+## Her çalıştırmanın karar protokolü
 
-Önceden bir mizah formülü, kuram, konu kataloğu veya referans mekanizması dayatma. Tek bir insani duygu ya da insan davranışı şart koşma. Deadpan, doğal oyunculuk, abartılı tepki, saçmalık, gerçeküstülük, imkânsız fizik, fiziksel komedi, görsel kelime oyunu, nesne değişimi/büyütmesi, beklenmedik kesme ve döngü gibi seçenekleri otomatik olarak yasaklama. Hiçbir fikri bu etiketlerden biri yüzünden eleme. Komediyi en iyi çalıştıran oyunculuk, gerçekçilik seviyesi, görsel mantık, tempo ve final biçimini serbestçe seç.
+1. **Bağlam sıfırlama:** Paketi bağımsız girdi olarak ele al. Paket dışındaki eski sohbetlerden veya önceki asistan önerilerinden konu, nesne, karakter, sahne ya da komedi mekanizması taşıma. Yalnızca güncel pakette açıkça bulunan veri ve notları kullan. Fikir geçmişi alanı boşsa önceki fikir yok kabul edilir.
+2. **Önce kodla hesaplanmış özet:** Paketteki A2 sinyallerini oku. Dönem görüntülenmesi ve gözlenen gün başına görüntülenme hızı erişimi; ortalama izleme saniyesi ve izlenen yüzde izleyiciyi tutmayı; mutlak abone kazanımı ve 1000 görüntülenme başına kazanım dönüşümü gösterir. Beğeni oranı ayrı sinyaldir. Bunları tek puanda birleştirme.
+3. **Ölçülmüş bulguyu ham satırla doğrula:** Başlık, yayın tarihi, video yaşı ve ölçüm dönemiyle birlikte ilgili video kaydını kontrol et. Yetersiz veya eksik metrikleri uydurma. Ömür boyu sayaçlarla dönem ölçümlerini karıştırma.
+4. **Veriden fikre geç:** Kanalın önceliği görüntülenme hacmidir; erişim liderlerini konu seçimine yön veren bir sinyal olarak kullan. İzleme ve abone verileri ayrı yardımcı sinyaller olarak yoruma katılır. Tek videodan evrensel başarı formülü veya nedensellik çıkarma.
+5. **Başlık, sahne değildir:** Başlıktan yalnızca açıkça anlaşılan konu/öncül ipucunu çıkarabilirsin. Gerçek kare notu yoksa hareket, tepki, olay akışı veya komedi mekanizmasını gözlemlenmiş gibi anlatma. Dış trend araması sınırlı örneklemdir; uygun yaşta örnek azsa bu sınırlamayı kısa biçimde belirt ama üretimi durdurma.
+6. **Yeni fikri koru:** Birkaç belirgin biçimde farklı yaklaşımı kendi içinde düşün, kullanıcıya yalnızca kazananı sun. Kazananı kanal videolarının bilinen konu öncülleriyle ve D alanında açıkça verilmiş fikirlerle karşılaştır. Aynı fikri yalnızca nesnesini/karakterini değiştirerek tekrar sunma. Benzerlik varsa temel mekanizmayı değiştir; sabit konu kataloğu veya ret eşiği oluşturma.
+7. **Kanıt dilini doğru kullan:** 
+   - **Ölçülmüş bulgu:** API'nin verdiği sayısal performans.
+   - **Başlık/metadata ipucu:** Başlıktan veya metadatadan görülebilen dar kapsamlı konu sinyali.
+   - **Gözle doğrulanmış sahne:** Yalnızca gerçekten izlenmiş ve C bölümüne yazılmış görüntüler.
+   - **Test edilmemiş yaratıcı hipotez:** Yeni fikrin izlenme potansiyeli ve henüz denenmemiş komedi etkisi.
+8. **Teslim et:** Kısacık veri notu; tek fikir; neden komik olduğu; 10 saniyenin tamamını kapsayan sahne akışı; doğrudan kopyalanabilir tam video promptu.
 
-Bir yaklaşım üretim modelinin zorlanmasına yol açabilecekse bu yalnızca risk notudur; tek başına ret sebebi değildir. Kullanıcıdan ek bilgi istemek, veri gelmesini beklemek veya fikir “kapıdan geçmedi” diyerek çıktıyı boş bırakmak yerine mevcut bilgilerle en iyi komedi fikrini üret.
+## Yaratıcı özgürlük
 
-## Verinin görevi
-
-1. Kanalın gerçek Analytics metriklerini, trend arama sinyallerini ve sağlanmış yorumları komediye ilham vermek veya adaylar arasında seçim yapmak için kullan.
-2. Görüntülenme, ortalama izleme süresi, ortalama izlenen yüzde, beğeni ve abone kazanımı farklı metriklerdir; veri varsa ayrı göster. Dönemleri/örneklemleri karıştırma, eksik metriği uydurma.
-3. Korelasyonu nedensellik diye sunma. Trend araması tüm YouTube'u temsil etmez. Rakip videonun sahnesi gözle doğrulanmadıysa onu izlemiş gibi anlatma.
-4. **Bu doğruluk kuralları yaratıcı üretimi durdurmaz.** Eksik sahne verisi, küçük örneklem veya araştırma yapılamaması yalnızca veri çıkarımının sınırıdır. Yeni bir kurmaca sahne üretmek serbesttir; yalnızca onu gerçek videoda gözlemlenmiş gibi sunma.
-5. Fikir geçmişini bağlam olarak kullanabilirsin; katı tekrar filtresi yapma. Yalnızca tekrar kaygısı yüzünden komedi üretimini engelleme.
-
-## Her çalıştırmada uygulanacak iş
-
-- Girdileri kısaca değerlendir; kullanıcıyı uzun veri raporuyla komediden uzaklaştırma.
-- İçeride çeşitli yaratıcı seçenekleri serbestçe dene; kullanıcıya fikir listesi sunma.
-- En komik ve üretilebilir bulduğun **tek fikri** seç. Sabit puan, zorunlu evet/hayır kapısı, 40/50 eşiği veya “geçerli aday yok” sonucu kullanma.
-- Fikri gerçek bir sahneye dönüştür; tam 10 saniyelik akışı belirginleştir.
-- Doğrudan kopyalanabilir tam video promptu üret. Promptta tam 10 saniye, 9:16 dikey Shorts, diyalog olmaması ve ASMR odaklı ses açıkça belirtilecek.
-- Diğer bütün yaratıcı kararlar — karakterler, mekân, nesneler, oyunculuk, gerçekçilik/absürtlük, fizik, ritim, kurgu ve final — komediyi kuvvetlendirmek için serbesttir.
-
-## Çıktı biçimi
-
-1. **Seçilen komedi fikri:** tek paragraf.
-2. **Neden komik:** kısa, sahneye özgü açıklama; teoriye uygunluğu puanlama.
-3. **10 saniyelik sahne akışı:** başlangıçtan sonuca kadar.
-4. **Tam üretim promptu:** kopyalanabilir, görsel ayrıntıları ve uygun ASMR seslerini içeren prompt.
-5. **Varsa tek üretim riski:** kısa not; veto gerekçesi değil.
-
-İngilizce başlık, tek insani duygu, gerçekçi fizik, ilk 0,3 saniyede kanca, en fazla 3–4 vuruş veya tamamlanmış loop şartı yoktur. Bunlar yalnızca seçilen fikrin komedisini güçlendiriyorsa kullanılabilir.
+Deadpan, doğal veya abartılı oyunculuk, absürt/gerçeküstü komedi, fiziksel gag, gündelik davranış, nesne odaklı fikir, imkânsız fizik, beklenmedik kurgu ve diğer yaratıcı yollar serbesttir. İnsan davranışı, tek duygu, belirli kanca süresi, gerçekçilik, belirli final biçimi veya tek komedi mekanizması zorunlu değildir. Bir risk varsa kısa risk notu eklenebilir; veto nedeni olamaz.
 
 ## Panelin teknik sınırı
 
-Panel veriyi toplar ve kopyalanabilir pakete dönüştürür; kendi başına yapay zekâ modeli çalıştırmaz. Sohbete yapıştırılan paket ise yalnızca analiz istemi değil, **komedi fikri ve video promptu üretme talimatı** içermelidir.
+Panel veriyi toplar, farklı metriklerdeki liderleri kodla hesaplar ve kopyalanabilir talimat paketine dönüştürür; kendi başına yapay zekâ modeli çalıştırmaz. Çıktı kalitesi sohbet modeline de bağlıdır. CI, JavaScript sözdizimini ve kritik motor sözleşmesinin paket kodunda bulunmasını denetler; komedinin kalitesini otomatik kanıtlamaz.
