@@ -1,4 +1,4 @@
-name: Deploy Boş Dükkân panel to GitHub Pages
+name: Validate Boş Dükkân panel
 
 on:
   push:
@@ -8,21 +8,14 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: github-pages
-  cancel-in-progress: true
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - name: Check out source
         uses: actions/checkout@v4
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
+
       - name: Validate inline JavaScript syntax in both panels
         run: |
           for file in index.html bos-dukkan-analiz.html; do
@@ -30,7 +23,8 @@ jobs:
             awk '/<script>/{inside=1; next} /<\/script>/{inside=0} inside' "$file" > "$output"
             node --check "$output"
           done
-      - name: Check global-source idea workflow contract
+
+      - name: Check global-source workflow contract
         run: |
           node <<'NODE'
           const fs = require('fs');
@@ -75,30 +69,8 @@ jobs:
             console.log('PASS ' + file + ': ' + required.length + ' global-source contracts present');
           }
           NODE
+
       - name: Test global source-trace validator
         run: |
           node --check source-trace-guard.js
           node --test tests/source-trace-guard.test.cjs
-      - name: Prepare static panel
-        run: |
-          mkdir -p _site
-          cp index.html _site/index.html
-          cp bos-dukkan-analiz.html _site/bos-dukkan-analiz.html
-          cp source-trace-guard.js _site/source-trace-guard.js
-          cp README.md _site/README.md
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-
-  deploy:
-    if: github.event_name != 'pull_request'
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Publish site
-        id: deployment
-        uses: actions/deploy-pages@v4

@@ -1,22 +1,27 @@
 name: Validate topic engine
+
 on:
   push:
     branches:
       - main
       - feat/data-driven-topic-engine
     paths:
+      - index.html
       - bos-dukkan-analiz.html
       - source-trace-guard.js
       - tests/source-trace-guard.test.cjs
       - .github/workflows/validate-topic-engine.yml
+      - .github/workflows/pages.yml
   pull_request:
     branches:
       - main
     paths:
+      - index.html
       - bos-dukkan-analiz.html
       - source-trace-guard.js
       - tests/source-trace-guard.test.cjs
       - .github/workflows/validate-topic-engine.yml
+      - .github/workflows/pages.yml
 
 permissions:
   contents: read
@@ -31,7 +36,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Extract inline JavaScript and check syntax
+      - name: Extract inline JavaScript and check syntax in both panels
         run: |
           python - <<'PY'
           from html.parser import HTMLParser
@@ -61,21 +66,25 @@ jobs:
                   if self.inline:
                       self.current.append(data)
 
-          source = Path("bos-dukkan-analiz.html").read_text(encoding="utf-8")
-          parser = InlineScripts()
-          parser.feed(source)
-          if not parser.scripts:
-              raise SystemExit("No inline JavaScript was found.")
-          Path("/tmp/topic-engine.js").write_text("\n;\n".join(parser.scripts), encoding="utf-8")
-          assert "createGlobalIdeaPrompt" in source, "Global-only idea workflow is missing"
-          assert "function buildGlobalIdeaPrompt" in source, "Global prompt builder is missing"
-          assert "SourceTraceGuard.chooseGlobalAnchor" in source, "Global source anchor is missing"
-          assert "window.bosOwnAnalyticsSnapshot" in source, "Own-channel analytics panel must remain available for post-publication comparison"
-          assert "Kopyalanmayan unsurlar" in source or "KOPYALANMAYAN UNSURLAR" in source, "Originality/source-difference rule is missing"
-          assert "Video oynatma" in source, "No-playback verification alternative must be documented"
-          assert "Kendi kanal verisi yalnızca yayın sonrası karşılaştırma içindir" in source, "Own-channel separation rule is missing"
-          assert "Konu Motoru paketini oluştur ve kopyala" in source or "Kanal sonrası ölçüm paketini oluştur ve kopyala" in source, "Post-publication analytics packet button is missing"
+          for filename in ("index.html", "bos-dukkan-analiz.html"):
+              source = Path(filename).read_text(encoding="utf-8")
+              parser = InlineScripts()
+              parser.feed(source)
+              if not parser.scripts:
+                  raise SystemExit(f"No inline JavaScript was found in {filename}.")
+              output = Path("/tmp") / (filename.replace(".html", "") + ".js")
+              output.write_text("\n;\n".join(parser.scripts), encoding="utf-8")
+              assert "createGlobalIdeaPrompt" in source, f"{filename}: global-only idea workflow is missing"
+              assert "function buildGlobalIdeaPrompt" in source, f"{filename}: global prompt builder is missing"
+              assert "SourceTraceGuard.chooseGlobalAnchor" in source, f"{filename}: global source anchor is missing"
+              assert "window.bosOwnAnalyticsSnapshot" in source, f"{filename}: own-channel metrics panel was unexpectedly removed"
+              assert "KOPYALANMAYAN UNSURLAR" in source, f"{filename}: originality/source-difference rule is missing"
+              assert "Video oynatma" in source, f"{filename}: no-playback verification alternative is missing"
+              assert "Kendi kanal verisi yalnızca yayın sonrası karşılaştırma içindir" in source, f"{filename}: channel separation rule is missing"
+              assert "Yayın sonrası ölçüm raporunu oluştur ve kopyala" in source, f"{filename}: separate analytics report action is missing"
+              for stale in ("ownDataForPrompt", "creativeEvidenceForPrompt", "ideaEvidenceTrace", "validateIdeaTrace"):
+                  assert stale not in source, f"{filename}: legacy mixed channel-data path remains: {stale}"
           PY
-          node --check /tmp/topic-engine.js
+          for file in /tmp/index.js /tmp/bos-dukkan-analiz.js; do node --check "$file"; done
           node --check source-trace-guard.js
           node --test tests/source-trace-guard.test.cjs

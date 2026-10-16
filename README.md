@@ -38,6 +38,12 @@ Storyboard otomatik görsel kontrol için bir alternatiftir; bağımsız web ara
 - **Yayın sonrası ölçüm raporu** yalnızca kendi kanalının yayımlanmış videolarının ölçümlerini dışa aktarır; komedi fikri, global kaynak veya video promptu oluşturmaz.
 - Eski birleştirilmiş “Konu Motoru” paket yolu kaldırıldı; kanal metrikleri artık fikir üretimi paketine bağlanmaz.
 
+## Otomatik kontroller ve dağıtım
+
+- `.github/workflows/pages.yml` yalnızca JavaScript söz dizimini, global kaynak sözleşmesini ve kaynak izi testlerini kontrol eder; site yayımlamaz.
+- Site yayını, GitHub Pages'in mevcut ana dal yayımlama mekanizmasına bırakılır. Böylece ikinci bir özel yayın akışı aynı anda deploy başlatıp hata oluşturmaz.
+- `.github/workflows/deploy-pages.yml` kaldırıldı; önceki “deployment in progress” hataları birden fazla yayın akışının çakışmasından kaynaklanıyordu.
+
 ## Global kaynak izi kontrolü
 Konu Motoru paketi, global YouTube aramasından seçilmiş kaydı sabitler. Yanıt geri yapıştırıldığında **Global Kaynak İzi Kontrolü** video ID'si, tam başlık, kanal, yayın tarihi, kamusal toplam izlenme, ölçüm zamanı ve resmi URL'nin aynı kaynakla eşleşmesini; global web çapraz kontrolünün URL'sini veya bulunamadığı bilgisini; görsel sahnenin doğrulanmadığı sınırını ve özgün yaratıcı geçiş alanlarını denetler.
 
