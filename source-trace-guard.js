@@ -4,51 +4,57 @@
   if (root) root.SourceTraceGuard = api;
 })(typeof window !== "undefined" ? window : null, function () {
   "use strict";
+
   function normalizeText(value) {
     return String(value == null ? "" : value).normalize("NFD").replace(/[\u0300-\u036f]/g, "")
       .toLocaleLowerCase("tr-TR").replace(/ı/g, "i").replace(/[^a-z0-9]+/g, " ").trim().replace(/\s+/g, " ");
   }
-  function firstValid(candidates) {
-    for (const candidate of candidates) {
-      const item = candidate && candidate.item;
-      if (!item || !item.videoId || !item.title || !Number.isFinite(Number(item.value))) continue;
-      return {
-        sourceType: candidate.sourceType, videoId: String(item.videoId), title: String(item.title),
-        metricKey: String(item.metric || candidate.metricKey), metricLabel: candidate.metricLabel,
-        value: Number(item.value),
-        formattedValue: new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 2 }).format(Number(item.value)),
-        measurementWindow: candidate.measurementWindow, source: candidate.source || "",
-        evidenceBoundary: "This is a measured performance signal; it does not prove what visual scene caused the performance."
-      };
-    }
-    return null;
+
+  function formatNumber(value, maximumFractionDigits = 0) {
+    return new Intl.NumberFormat("tr-TR", { maximumFractionDigits }).format(Number(value));
   }
-  function chooseAnchor(evidence, videos, reportingWindowDays, source) {
-    const leaders = evidence && evidence.metricLeaders ? evidence.metricLeaders : {};
-    const windowText = "Son " + Number(reportingWindowDays || 0) + " günlük YouTube Analytics ölçüm dönemi";
-    const measured = firstValid([
-      { item: leaders.highestWindowViews, sourceType: "measured-analytics-period", metricKey: "viewsInWindow",
-        metricLabel: "Seçili dönem izlenmesi", measurementWindow: windowText, source },
-      { item: leaders.highestObservedDailyViewPace, sourceType: "measured-observed-daily-pace", metricKey: "viewsPerObservedDay",
-        metricLabel: "Gözlenen gün başına izlenme hızı",
-        measurementWindow: windowText + "; günlük hız, dönem izlenmesinin gözlenen gün sayısına bölünmesidir", source }
-    ]);
-    if (measured) return measured;
-    const publicRows = (Array.isArray(videos) ? videos : [])
-      .filter(v => v && v.id && v.title && Number.isFinite(Number(v.publicLifetimeViews)))
-      .slice().sort((a,b) => Number(b.publicLifetimeViews)-Number(a.publicLifetimeViews));
-    if (!publicRows.length) return null;
-    const v = publicRows[0];
+
+  // Locks a source from the global YouTube search snapshot, never from the user's channel.
+  // viewsPerDay is a rough lifetime-views / age-days proxy, not a historical daily metric.
+  function chooseGlobalAnchor(research, capturedAt) {
+    const rows = research && Array.isArray(research.videos) ? research.videos : [];
+    const valid = rows.filter(v => v && v.id && v.title && Number.isFinite(Number(v.views)));
+    if (!valid.length) return null;
+    const pace = v => {
+      const supplied = Number(v.viewsPerDay);
+      if (Number.isFinite(supplied) && supplied > 0) return supplied;
+      const age = Math.max(0.5, Number(v.ageDays) || 0.5);
+      return Number(v.views) / age;
+    };
+    valid.sort((a, b) => pace(b) - pace(a) || Number(b.views) - Number(a.views));
+    const v = valid[0];
+    const timestamp = String(capturedAt || research.searchEndedAt || new Date().toISOString());
+    const measuredDate = timestamp.slice(0, 10);
+    const publishedDate = v.publishedAt ? String(v.publishedAt).slice(0, 10) : null;
+    const id = String(v.id);
     return {
-      sourceType: "public-lifetime-counter-fallback", videoId: String(v.id), title: String(v.title),
-      metricKey: "publicLifetimeViews", metricLabel: "Kamusal ömür boyu toplam izlenme",
-      value: Number(v.publicLifetimeViews),
-      formattedValue: new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 0 }).format(Number(v.publicLifetimeViews)),
-      measurementWindow: "Videonun yayımlandığı tarihten ölçüm anına kadar; seçili Analytics dönemi değildir",
-      source: source || "YouTube Data API v3 public video statistics",
-      evidenceBoundary: "Public lifetime views are not a period metric and cannot prove which scene caused performance."
+      sourceType: "global-youtube-public-metadata",
+      source: research.source || "YouTube Data API v3 global search snapshot",
+      query: research.query || null,
+      videoId: id,
+      title: String(v.title),
+      channel: String(v.channel || ""),
+      channelId: String(v.channelId || ""),
+      publishedAt: publishedDate,
+      ageDays: Number.isFinite(Number(v.ageDays)) ? Number(v.ageDays) : null,
+      value: Number(v.views),
+      formattedValue: formatNumber(v.views),
+      metricKey: "publicLifetimeViews",
+      metricLabel: "Kamusal toplam izlenme",
+      measurementWindow: "Ölçüm zamanı " + measuredDate + "; ömür boyu birikimli sayaç, seçili Analytics dönemi değildir",
+      approximateViewsPerDay: Number(pace(v).toFixed(2)),
+      approximateViewsPerDayLabel: "Yaklaşık ömür boyu izlenme/gün (toplam izlenme ÷ video yaşı; kaba proxy, tarihsel günlük API metriği değildir)",
+      durationSeconds: Number.isFinite(Number(v.seconds)) ? Number(v.seconds) : null,
+      videoUrl: "https://www.youtube.com/watch?v=" + id,
+      evidenceBoundary: "Global YouTube metadata verifies the public source record and counters, not the exact visual scene or the cause of performance."
     };
   }
+
   function numberTokenMatches(text, expectedValue) {
     const raw = String(text == null ? "" : text);
     const match = raw.match(/^\s*(?:[:=]\s*)?([-+]?\d[\d.,\s]*)/);
@@ -64,58 +70,112 @@
     const tolerance = Number.isInteger(expected) ? 0.000001 : 0.011;
     return candidates.some(value => Math.abs(value - expected) <= tolerance);
   }
+
+  function urlsFrom(text) {
+    const matches = String(text || "").match(/https?:\/\/[^\s<>"\])}]+/gi) || [];
+    return matches.map(raw => {
+      const cleaned = raw.replace(/[.,;!?]+$/, "");
+      try { return { raw: cleaned, host: new URL(cleaned).hostname.toLowerCase() }; }
+      catch (_) { return { raw: cleaned, host: "" }; }
+    });
+  }
+
   function validate(output, anchor) {
-    const raw = String(output == null ? "" : output), normalized = normalizeText(raw);
+    const raw = String(output == null ? "" : output);
+    const normalized = normalizeText(raw);
     const rawLines = raw.split(/\r?\n/);
     const normalizedLines = rawLines.map(normalizeText);
     const errors = [], checks = {};
-    const test = (name, condition, message) => { checks[name] = Boolean(condition); if (!condition) errors.push(message); };
+    const test = (name, condition, message) => {
+      checks[name] = Boolean(condition);
+      if (!condition) errors.push(message);
+    };
+
     test("output-present", raw.trim().length > 0, "Model çıktısını kontrol alanına yapıştır.");
-    test("anchor-present", Boolean(anchor && anchor.videoId && anchor.title && Number.isFinite(Number(anchor.value))),
-      "Kodun sabitlediği gerçek kaynak kaydı yok; bu çıktı kaynak bakımından doğrulanamaz.");
-    if (!anchor || !anchor.videoId || !anchor.title || !Number.isFinite(Number(anchor.value))) {
-      return { ok: false, checks, errors, label: "DOĞRULANAMADI" };
+    test("global-anchor-present", Boolean(anchor && anchor.videoId && anchor.title && Number.isFinite(Number(anchor.value)) && anchor.videoUrl),
+      "Global YouTube arama kaydından sabitlenmiş kaynak yok. Önce Trend keşfi > Analiz et çalıştır; yine de fikir üretimi durmaz.");
+    if (!anchor || !anchor.videoId || !anchor.title || !Number.isFinite(Number(anchor.value)) || !anchor.videoUrl) {
+      return { ok: false, checks, errors, label: "GLOBAL KAYNAK KAYDI YOK" };
     }
-    test("source-section", normalized.includes("bu fikir nereden cikti") || normalized.includes("fikrin kaynak izi"),
-      "“Bu fikir nereden çıktı?” kaynak bölümü eksik.");
-    const measuredLineIndex = normalizedLines.findIndex(line =>
-      line.startsWith("olculmus bulgu ") &&
+
+    test("source-section", normalized.includes("bu fikir nereden cikti") || normalized.includes("global kaynak izi"),
+      "“Bu fikir nereden çıktı?” başlıklı global kaynak bölümü eksik.");
+
+    const sourceLineIndex = normalizedLines.findIndex(line =>
+      line.startsWith("global kaynak ") &&
       line.includes(normalizeText(anchor.videoId)) &&
-      line.includes(normalizeText(anchor.title)) &&
-      line.includes(normalizeText(anchor.metricLabel))
+      line.includes(normalizeText(anchor.title))
     );
-    const measuredLine = measuredLineIndex >= 0 ? normalizedLines[measuredLineIndex] : "";
-    const rawMeasuredLine = measuredLineIndex >= 0 ? rawLines[measuredLineIndex] : "";
-    const normalizedMetricLabel = normalizeText(anchor.metricLabel);
-    const metricLabelIndex = measuredLine.indexOf(normalizedMetricLabel);
-    const rawMetricLabel = String(anchor.metricLabel).toLocaleLowerCase("tr-TR");
-    const rawMetricLabelIndex = rawMeasuredLine.toLocaleLowerCase("tr-TR").indexOf(rawMetricLabel);
-    const valueField = rawMetricLabelIndex >= 0
-      ? rawMeasuredLine.slice(rawMetricLabelIndex + rawMetricLabel.length, rawMetricLabelIndex + rawMetricLabel.length + 40)
+    const sourceLine = sourceLineIndex >= 0 ? normalizedLines[sourceLineIndex] : "";
+    const rawSourceLine = sourceLineIndex >= 0 ? rawLines[sourceLineIndex] : "";
+    test("global-source-line", Boolean(sourceLine),
+      "“GLOBAL KAYNAK:” satırında sabit global video ID'si ve tam başlık birlikte yok.");
+    test("global-source-id-case", rawSourceLine.includes(String(anchor.videoId)),
+      "Sabitlenmiş global video ID'si GLOBAL KAYNAK satırında birebir bulunmuyor.");
+    test("global-source-title", sourceLine.includes(normalizeText(anchor.title)),
+      "Sabitlenmiş tam global video başlığı GLOBAL KAYNAK satırında yok.");
+    test("global-youtube-url", rawSourceLine.includes(anchor.videoUrl) ||
+      (rawSourceLine.includes("youtube.com") && rawSourceLine.includes(String(anchor.videoId))),
+      "GLOBAL KAYNAK satırında aynı video ID'sine giden resmi YouTube URL'si yok.");
+
+    const metricLabel = String(anchor.metricLabel || "Kamusal toplam izlenme");
+    const metricIndex = rawSourceLine.toLocaleLowerCase("tr-TR").indexOf(metricLabel.toLocaleLowerCase("tr-TR"));
+    const valueRemainder = metricIndex >= 0
+      ? rawSourceLine.slice(metricIndex + metricLabel.length, metricIndex + metricLabel.length + 45)
       : "";
-    test("measured-finding-line", Boolean(measuredLine),
-      "“ÖLÇÜLMÜŞ BULGU:” başlıklı ayrı kaynak satırı eksik veya sabit kaynakla uyuşmuyor.");
-    test("source-line-video-id", rawMeasuredLine.includes(String(anchor.videoId)),
-      "Programın sabitlediği video ID'si ÖLÇÜLMÜŞ BULGU satırında birebir (büyük/küçük harf dâhil) yok.");
-    test("source-line-title", measuredLine.includes(normalizeText(anchor.title)),
-      "Programın sabitlediği tam video başlığı ÖLÇÜLMÜŞ BULGU satırında yok.");
-    test("source-line-metric", metricLabelIndex >= 0,
-      "Programın sabitlediği gerçek metrik adı ÖLÇÜLMÜŞ BULGU satırında yok: " + anchor.metricLabel + ".");
-    test("source-line-value", numberTokenMatches(valueField, anchor.value),
-      "Programın sabitlediği ölçüm değeri metrik adının hemen yanında yok: " + anchor.formattedValue + ".");
-    test("source-line-window", measuredLine.includes(normalizeText(anchor.measurementWindow)),
-      "Programın sabitlediği ölçüm penceresi/sayaç sınırı ÖLÇÜLMÜŞ BULGU satırında yok: " + anchor.measurementWindow + ".");
-    test("idea-bridge", normalizedLines.some(line => line.startsWith("veriden fikre gecis ") && /yonlendirdi|cikarim|baglanti/.test(line)),
-      "“VERİDEN FİKRE GEÇİŞ:” başlıklı ayrı satırda veri-fikir bağlantısı açıklanmamış.");
-    test("link-strength", normalizedLines.some(line => line.startsWith("bagin gucu ") && line.includes("dolayli zayif bag")),
-      "“BAĞIN GÜCÜ: dolaylı/zayıf bağ” ayrı satırı eksik.");
-    test("creative-leap", normalizedLines.some(line => line.startsWith("yaratici sicrama ") && /veriden cikmadi|yaratici deney/.test(line)),
-      "“YARATICI SIÇRAMA:” satırında mekanizmanın veriden çıkmadığı/yaratıcı deney olduğu açık değil.");
-    test("limits", normalizedLines.some(line => line.startsWith("verinin kanitlamadigi ") && /sahne|basari|neden/.test(line)),
-      "“VERİNİN KANITLAMADIĞI:” satırında verinin sahne/başarı nedenini kanıtlamadığı belirtilmemiş.");
+    test("global-source-metric", metricIndex >= 0,
+      "GLOBAL KAYNAK satırında “" + metricLabel + "” sayacı yok.");
+    test("global-source-value", numberTokenMatches(valueRemainder, anchor.value),
+      "Global YouTube kaydındaki kamusal izlenme değeri metrik adının hemen yanında yok: " + anchor.formattedValue + ".");
+    test("global-source-channel", !anchor.channel || sourceLine.includes(normalizeText(anchor.channel)),
+      "Global kaynak satırında API kaydındaki kanal adı yok.");
+    test("global-source-date", !anchor.publishedAt || sourceLine.includes(normalizeText(anchor.publishedAt)),
+      "Global kaynak satırında API kaydındaki yayın tarihi yok.");
+    test("global-source-window", sourceLine.includes(normalizeText(anchor.measurementWindow)),
+      "GLOBAL KAYNAK satırında sayaç sınırı belirtilmemiş. Bunun ömür boyu toplam ve ölçüm zamanı olduğu açıkça yazılmalı.");
+
+    const webLine = normalizedLines.find(line => line.startsWith("global web kontrolu ")) || "";
+    const rawWebLine = rawLines[normalizedLines.indexOf(webLine)] || "";
+    const webUrls = urlsFrom(rawWebLine);
+    const externalWebUrls = webUrls.filter(u =>
+      u.host && !/(^|\.)youtube\.com$/.test(u.host) &&
+      !/(^|\.)youtu\.be$/.test(u.host) &&
+      !/(^|\.)youtube-browser-api\.netlify\.app$/.test(u.host) &&
+      !/(^|\.)ytimg\.com$/.test(u.host)
+    );
+    const explicitlyUnavailable = /bagimsiz (?:metinsel )?kaynak bulunamadi|ikinci kaynak bulunamadi|bagimsiz dogrulama bulunamadi|ek kaynak bulunamadi|yalnizca metadata dogrulandi|yalnizca youtube metadata/.test(webLine);
+    test("global-web-check-stated", Boolean(webLine) && (externalWebUrls.length > 0 || explicitlyUnavailable),
+      "“GLOBAL WEB KONTROLÜ:” satırında bağımsız bir yazılı kaynak URL'si veya bulunamadığına dair açık not yok. Video izlemek yerine global web çapraz kontrolü yap; bulamazsan bunu dürüstçe yaz.");
+
+    const visualLine = normalizedLines.find(line => line.startsWith("gorsel sahne durumu ")) || "";
+    const visualBoundary = /izlenmedi|izlenemedi|dogrulanmadi|sahne bilinmiyor|metadata.*kanıtlamaz|metaveri.*kanıtlamaz|metaveri.*kanıtlamaz|yalnizca metadata/.test(visualLine);
+    test("visual-limit-stated", Boolean(visualLine) && visualBoundary,
+      "“GÖRSEL SAHNE DURUMU:” satırı yok veya izlenmeyen/doğrulanmayan sahne sınırı açıkça belirtilmemiş. Video izleme şart değil; bilinmeyeni bilinmiyor diye etiketle.");
+
+    test("source-principle", normalizedLines.some(line => line.startsWith("kaynaktan alinan ilke ") && line.length > 45),
+      "Global kaynaktan çıkarılan geniş ilkeyi açıklayan “KAYNAKTAN ALINAN İLKE:” satırı eksik.");
+    test("idea-bridge", normalizedLines.some(line => line.startsWith("global isaretten fikre gecis ") && line.length > 55),
+      "“GLOBAL İŞARETTEN FİKRE GEÇİŞ:” satırında global kaynak işaretinden yeni fikre geçiş açıklanmamış.");
+    test("creative-leap", normalizedLines.some(line => line.startsWith("ozgun yaratici sicrama ") && /ozgun|degisik|farkli|yeni/.test(line)),
+      "“ÖZGÜN YARATICI SIÇRAMA:” satırında kaynaktan farklı yeni yaklaşım açıklanmamış.");
+    test("not-copied", normalizedizedHasLine(normalizedLines, "kopyalanmayan unsurlar"),
+      "Kaynağın hangi öğelerinin kopyalanmadığını belirten “KOPYALANMAYAN UNSURLAR:” satırı eksik.");
+    test("evidence-limits", normalizedLines.some(line => line.startsWith("kanit siniri ") && /sahne|basari|neden|metaveri|izlenme/.test(line)),
+      "“KANIT SINIRI:” satırı metadata/izlenme sayısının gerçek sahneyi veya başarı nedenini kanıtlamadığını belirtmeli.");
     test("hypothesis", normalizedLines.some(line => line.startsWith("test durumu ") && line.includes("test edilmemis yaratici hipotez")),
-      "“TEST DURUMU:” satırında fikir test edilmemiş yaratıcı hipotez olarak etiketlenmemiş.");
-    return { ok: errors.length === 0, checks, errors, label: errors.length === 0 ? "KAYNAK İZİ KONTROLLERİ GEÇTİ" : "KAYNAK İZİ EKSİK" };
+      "“TEST DURUMU:” satırında “test edilmemiş yaratıcı hipotez” etiketi yok.");
+
+    return {
+      ok: errors.length === 0,
+      checks,
+      errors,
+      label: errors.length === 0 ? "GLOBAL KAYNAK İZİ TAM; SAHNE DOĞRULAMASI AYRI" : "GLOBAL KAYNAK İZİ EKSİK"
+    };
   }
-  return { chooseAnchor, validate, normalizeText };
+
+  function normalizedizedHasLine(lines, prefix) {
+    return lines.some(line => line.startsWith(normalizeText(prefix)) && line.length > normalizeText(prefix).length + 5);
+  }
+
+  return { chooseGlobalAnchor, validate, normalizeText };
 });
