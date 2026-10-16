@@ -56,6 +56,7 @@
   }
   function validate(output, anchor) {
     const raw = String(output == null ? "" : output), normalized = normalizeText(raw);
+    const normalizedLines = raw.split(/\r?\n/).map(normalizeText);
     const errors = [], checks = {};
     const test = (name, condition, message) => { checks[name] = Boolean(condition); if (!condition) errors.push(message); };
     test("output-present", raw.trim().length > 0, "Model çıktısını kontrol alanına yapıştır.");
@@ -76,16 +77,16 @@
       "Gerçek ölçüm değeri çıktıda görünmüyor: " + anchor.formattedValue + ".");
     test("measurement-window", normalized.includes(normalizeText(anchor.measurementWindow)),
       "Ölçüm penceresi/sayaç sınırı tam belirtilmemiş: " + anchor.measurementWindow + ".");
-    test("idea-bridge", normalized.includes("veriden fikre gecis") && /yonlendirdi|cikarim|baglanti/.test(normalized),
-      "Kaynak kaydından fikre geçiş açıklaması yok; veri yalnızca sonradan eklenmiş olabilir.");
-    test("link-strength", normalized.includes("dolayli") || normalized.includes("zayif bag"),
-      "Veri-fikir bağının dolaylı/zayıf olduğu açıkça belirtilmemiş.");
-    test("creative-leap", /yaratici sicrama|veriden cikmadi|yaratici deney/.test(normalized),
-      "Verinin yönlendirdiği kısım ile yaratıcı sıçrama açıkça ayrılmamış.");
-    test("limits", /kanitlam|nedensellik|neden sonuc|kanit degil|ispatlamaz/.test(normalized),
-      "Verinin sahne mekanizmasını veya başarı nedenini kanıtlamadığı açıkça yazılmamış.");
-    test("hypothesis", normalized.includes("test edilmemis yaratici hipotez") || normalized.includes("yaratici hipotez"),
-      "Fikrin test edilmemiş yaratıcı hipotez olduğu belirtilmemiş.");
+    test("idea-bridge", normalizedLines.some(line => line.startsWith("veriden fikre gecis ") && /yonlendirdi|cikarim|baglanti/.test(line)),
+      "“VERİDEN FİKRE GEÇİŞ:” başlıklı ayrı satırda veri-fikir bağlantısı açıklanmamış.");
+    test("link-strength", normalizedLines.some(line => line.startsWith("bagin gucu ") && line.includes("dolayli zayif bag")),
+      "“BAĞIN GÜCÜ: dolaylı/zayıf bağ” ayrı satırı eksik.");
+    test("creative-leap", normalizedLines.some(line => line.startsWith("yaratici sicrama ") && /veriden cikmadi|yaratici deney/.test(line)),
+      "“YARATICI SIÇRAMA:” satırında mekanizmanın veriden çıkmadığı/yaratıcı deney olduğu açık değil.");
+    test("limits", normalizedLines.some(line => line.startsWith("verinin kanitlamadigi ") && /sahne|basari|neden/.test(line)),
+      "“VERİNİN KANITLAMADIĞI:” satırında verinin sahne/başarı nedenini kanıtlamadığı belirtilmemiş.");
+    test("hypothesis", normalizedLines.some(line => line.startsWith("test durumu ") && line.includes("test edilmemis yaratici hipotez")),
+      "“TEST DURUMU:” satırında fikir test edilmemiş yaratıcı hipotez olarak etiketlenmemiş.");
     return { ok: errors.length === 0, checks, errors, label: errors.length === 0 ? "KAYNAK İZİ KONTROLLERİ GEÇTİ" : "KAYNAK İZİ EKSİK" };
   }
   return { chooseAnchor, validate, normalizeText };
