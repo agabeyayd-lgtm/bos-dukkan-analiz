@@ -41,6 +41,9 @@ jobs:
             ['clean-run context reset', 'HER ÇALIŞTIRMADA SIFIRLAMA'],
             ['title is not scene evidence', 'KONU İPUCU İLE SAHNE KANITINI AYIR'],
             ['evidence labels', 'KANIT ETİKETİ'],
+            ['explicit idea provenance', 'FİKRİN KAYNAK İZİ ZORUNLU'],
+            ['no fabricated data linkage', 'SAHTE VERİ BAĞI YASAK'],
+            ['computed evidence map', 'A3. FİKİR SEÇİMİNDE KULLANILABİLECEK GERÇEK KANIT HARİTASI'],
             ['observed daily view pace', 'viewsPerObservedDay'],
             ['current trend sample state', 'currentState:']
           ];
