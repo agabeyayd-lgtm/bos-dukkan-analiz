@@ -398,7 +398,7 @@ $('#goGen').onclick=async()=>{
             'Önceden tanımlı mizah mekanizması kataloğu, konu ailesi, başarı formülü veya keyfî eşik kullanma. Veri desteklemiyorsa “bilinmiyor” de.',
             'Bu pakette kendi kanal verisi olmasa da mutlaka tek özgün komedi fikri ve tam 10 saniyelik video promptu üret. Trend ölçümlerini destekleyici sinyal olarak ayır; veri eksikliği yaratıcı çıktıyı engellemez.',
             'Başlık, thumbnail, görüntülenme veya yorumdan sahne uydurma. Gerçek kareler/gözle doğrulanmış sahne notları yoksa görsel mekanizmayı bilinmiyor olarak işaretle.',
-            'Çıktı: gözlenen ölçümler; örneklem ve seçilim yanlılığı; video yaşı/süre/kanal büyüklüğü sınırlamaları; tam video ID ile eşleşen yorumların sınırlı anlamı; sahne analizi için eksik kanıt.'
+            'ÇIKTI: Önce tek en güçlü komedi fikrini ve doğrudan kopyalanabilir tam promptu teslim et. Prompt tam 10 saniye, dikey 9:16 Shorts, diyalogsuz ASMR odaklı ses koşullarını içersin. Ardından yalnızca gerekli birkaç veri bulgusunu ve veri sınırını kısaca ekle. Veriler, sahne notları veya örneklem eksikliği fikir üretimini durduramaz.'
           ]
         };
         ta.value=JSON.stringify(payload,null,2);ta.style.display='block';ta.focus();ta.select();
@@ -691,11 +691,11 @@ $('#goOwn').onclick=async()=>{
           ideaHistory||'Fikir geçmişi girilmedi. Varsa yalnızca bağlam olarak kullan; yeni fikri yasaklama veya üretimi durdurma.',
           "",
           "KOMEDİ ÜRETİM GÖREVİ — veri notları komedi üretimini engelleyemez:",
-          "1) Kaynağı, tarih aralığını, örneklem boyutunu ve eksik alanları bildir. Kendi kanalında averageViewSeconds/averageViewedPercent/likesInWindow/subscribersGainedInWindow seçili Analytics dönemine; publicLifetimeViews tüm ömre aittir. Bu zaman pencerelerini karıştırma. Rakiplerde ortalama izleme metrikleri yoksa tahmin etme.",
-          "2) Kendi videolarını kendi aralarında kıyasla. İzlenme, ortalama izleme süresi, ortalama izlenen yüzde, beğeni oranı ve abone kazanımını ayrı sinyaller olarak incele. Küçük örneklemi, video yaşını ve seçili tarih penceresini not et; korelasyonu nedensellik diye sunma.",
+          "1) VERİYİ KISA TUT: Kanal/trend verisini hızlıca tara; yalnızca fikri seçmeye gerçekten yardımcı olan bulguyu kısaca belirt. Eksik metriği uydurma ve farklı ölçüm dönemlerini karıştırma. Uzun analiz raporu komedi fikrinin önüne geçmesin.",
+          "2) KANAL SİNYALİ: Gerçek ölçümlerden komediye yararlı olabilecek örüntüleri seç. İzlenme, ortalama izleme süresi, izlenen yüzde, beğeni ve abone metriklerini birbirine karıştırma; ama hepsini uzun uzun raporlamak zorunda değilsin.",
           "3) Yorumları yalnızca tam video ID'sine bağlı kayıttan kullan. Bunlar küçük, relevance sıralı örneklemdir; tüm izleyicileri temsil etmez. Yorumlar sahne karesi veya görsel kanıt değildir.",
           "4) Dış video metrikleri yalnızca trend keşif sinyalidir; insan davranışı veya sahne mekanizmasının kanıtı değildir. Başlık, thumbnail ve yorum gerçek sahne akışını kanıtlamaz. Görsel not yoksa mekanizmayı 'bilinmiyor' işaretle; uydurma sahne kurma.",
-          "Şu anki durum: B bölümündeki currentState alanı aramanın örnekleminde şu an neyin hızlı izlendiğini (watched) ve neyin izlenmediğini (notWatched) yaşa göre düzeltilmiş izlenme/gün ile verir. Konu ararken her ikisini de dikkate al: izlenenlerde ve izlenmeyenlerde tekrar eden davranış/duygu/format örüntülerini yalnızca veri destekliyorsa belirt; fark neden-sonuç değildir. requestedOrder “viewCount” ise izlenmeyenler eksik temsil edilir; bunu söyle. Başlık veya küçük resimden sahne mekanizması uydurma. currentState available:false ise bunu açıkça yaz ve tahmin yürütme.",
+          "B bölümündeki currentState alanı varsa yalnızca yardımcı ipucu olarak kullan. Bu alanın eksikliği veya yanlılığı komedi üretimini durdurmaz; sahne ayrıntılarını metadata'dan gözlemlenmiş gibi çıkarma.",
           "Eksik rakip sahne notları veya yetersiz veri komedi üretimini durdurmaz; gözlem olmayan şeyi gerçek diye anlatma, ama özgün bir sahne üret.",
           "KONU VE STİL ÖZGÜRLÜĞÜ: Her konuyu ve komedi biçimini deneyebilirsin. İnsan davranışı, duygu, gerçekçilik, belirli mekân veya belirli nesne şart değil.",
           "6) Tek güçlü fikri seçip geliştir ve teslim et. Adayları iç değerlendirme için karşılaştırabilirsin ama hiçbir puan/kapı yüzünden fikir vermekten vazgeçme.",
