@@ -623,6 +623,8 @@ $('#goOwn').onclick=async()=>{
             pick([...measured].filter(v=>v.viewsInWindow!=null).sort((a,b)=>b.viewsInWindow-a.viewsInWindow),'Seçili dönemde en çok izlenen');
             pick([...measured].filter(v=>v.viewsPerObservedDay!=null).sort((a,b)=>b.viewsPerObservedDay-a.viewsPerObservedDay),'Gözlenen gün başına yüksek izlenme hızı');
             pick([...measured].filter(v=>v.subscribersGainedPer1000WindowViews!=null).sort((a,b)=>b.subscribersGainedPer1000WindowViews-a.subscribersGainedPer1000WindowViews),'Dönem izlenmesine göre yüksek abone kazanımı');
+            pick([...measured].filter(v=>v.subscribersGainedInWindow!=null).sort((a,b)=>b.subscribersGainedInWindow-a.subscribersGainedInWindow),'En yüksek mutlak abone kazanımı');
+            pick([...measured].filter(v=>v.likeRateInWindow!=null).sort((a,b)=>b.likeRateInWindow-a.likeRateInWindow),'En yüksek dönem beğeni oranı');
             pick([...measured].filter(v=>v.averageViewSeconds!=null).sort((a,b)=>b.averageViewSeconds-a.averageViewSeconds),'En yüksek ortalama izleme süresi');
             pick([...measured].filter(v=>v.averageViewSeconds!=null).sort((a,b)=>a.averageViewSeconds-b.averageViewSeconds),'En düşük ortalama izleme süresi');
             pick([...own].sort((a,b)=>new Date(b.publishedAt)-new Date(a.publishedAt)),'En yeni video');
