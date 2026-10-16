@@ -67,7 +67,12 @@
     }
     test("source-section", normalized.includes("bu fikir nereden cikti") || normalized.includes("fikrin kaynak izi"),
       "“Bu fikir nereden çıktı?” kaynak bölümü eksik.");
-    const measuredLine = normalizedLines.find(line => line.startsWith("olculmus bulgu ")) || "";
+    const measuredLine = normalizedLines.find(line =>
+      line.startsWith("olculmus bulgu ") &&
+      line.includes(normalizeText(anchor.videoId)) &&
+      line.includes(normalizeText(anchor.title)) &&
+      line.includes(normalizeText(anchor.metricLabel)
+    )) || "";
     test("measured-finding-line", Boolean(measuredLine),
       "“ÖLÇÜLMÜŞ BULGU:” başlıklı ayrı kaynak satırı eksik.");
     test("source-line-video-id", measuredLine.includes(normalizeText(anchor.videoId)),
