@@ -36,7 +36,7 @@ jobs:
           const fs = require('fs');
           const required = [
             ['global source anchor', 'SourceTraceGuard.chooseGlobalAnchor'],
-            ['global source selection is locked', 'globalSourceAnchor'],
+            ['global source selection is locked', 'SABİTLENMİŞ GLOBAL KAYNAK (değiştirme)'],
             ['global-only idea prompt button', 'createGlobalIdeaPrompt'],
             ['standalone global prompt builder', 'function buildGlobalIdeaPrompt'],
             ['automatic storyboard fetcher', 'async function fetchPublicStoryboard'],
