@@ -80,6 +80,22 @@ a{color:var(--acc)}
     <textarea id="sceneNotes" rows="4" placeholder="Video URL/ID — 0.0–1.0 sn: ilk kare; 1.0–4.0 sn: görülen davranış; final: gerçekten görülen sonuç..." style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
   </details>
   <div id="outGen"></div>
+  <div class="msg" id="globalIdeaPanel">
+    <h2 style="margin-top:0">Global kaynak → tek yeni komedi fikri</h2>
+    <p class="note">Önce yukarıdan global YouTube araması yap. Bu düğme yalnızca global sonuçlardan tek kaynaklı istem hazırlar; kendi kanalına bağlanmak gerekmez. İstem video oynatma/ekran kaydı istemez ve global web çapraz kontrolünü talep eder.</p>
+    <p><button type="button" id="createGlobalIdeaPrompt">Global konu paketini oluştur ve kopyala</button></p>
+    <p id="globalIdeaSourceSummary" class="note">Global kaynak henüz seçilmedi. Önce Trend keşfi bölümünde arama yap.</p>
+    <p id="globalIdeaPromptStatus" class="note" aria-live="polite"></p>
+    <textarea id="globalIdeaPrompt" rows="10" readonly style="display:none;width:100%;max-width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
+  </div>
+  <div class="msg" id="globalIdeaTraceGate">
+    <h3 style="margin:0 0 6px">Global Kaynak İzi Kontrolü (izleme gerektirmez)</h3>
+    <p class="note">Yanıtı buraya yapıştır. Panel, sabitlenen global YouTube video ID’sini, başlığını, kanalını, tarihini, izlenme sayısını ve kaynak URL’sini kontrol eder; video oynatma veya ekran kaydı istemez. Gerçek sahne doğrulanamıyorsa bu ayrıca yazılmalıdır.</p>
+    <p id="globalIdeaTraceAnchorSummary" class="note">Global kaynak araması yapılmadı.</p>
+    <textarea id="globalIdeaOutputForValidation" rows="7" placeholder="Yanıtın global kaynak izi ve video promptu..." style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
+    <p><button type="button" id="validateGlobalIdeaTrace">Global kaynak izini kontrol et</button></p>
+    <div id="globalIdeaTraceValidationResult" aria-live="polite"></div>
+  </div>
 </section>
 
 <section id="kan" class="pane">
@@ -335,6 +351,12 @@ $('#goGen').onclick=async()=>{
     const sm=await subsMap([...new Set(vs.map(v=>v.channelId))]);
     vs.forEach(v=>{v.subs=sm[v.channelId]??null;v.brk=v.subs?v.views/v.subs:null});
     window.bosResearchSnapshot={query:q,source:'YouTube Data API v3 search.list + videos.list + channels.list',searchDays:+$('#days').value,searchStartedAt:new Date(Date.now()-$('#days').value*864e5).toISOString(),searchEndedAt:new Date().toISOString(),sortMode:$('#srt').value,requestedOrder:$('#ord').value,videoCount:vs.length,videos:vs.map(v=>({id:v.id,title:v.title,channel:v.channel,channelId:v.channelId,subscribers:v.subs,views:v.views,likes:v.likes,comments:v.comments,seconds:v.sec,publishedAt:v.date.toISOString(),ageDays:Number(ageDays(v.date).toFixed(2)),viewsPerSub:v.brk,viewsPerDay:Number(v.vpd.toFixed(2)),likeRate:v.views?v.likes/v.views:null,commentRate:v.views?v.comments/v.views:null,averageViewSeconds:null,averageViewedPercent:null}))};
+    window.bosIdeaSourceAnchor = window.SourceTraceGuard.chooseGlobalAnchor(window.bosResearchSnapshot, window.bosResearchSnapshot.searchEndedAt);
+    const globalSourceSummary = window.bosIdeaSourceAnchor
+      ? "Global kaynak adayı: " + window.bosIdeaSourceAnchor.title + " | ID " + window.bosIdeaSourceAnchor.videoId + " | " + window.bosIdeaSourceAnchor.formattedValue + " toplam izlenme."
+      : "Global kaynak adayı yok.";
+    if ($('#globalIdeaSourceSummary')) $('#globalIdeaSourceSummary').textContent = globalSourceSummary;
+    if ($('#globalIdeaTraceAnchorSummary')) $('#globalIdeaTraceAnchorSummary').textContent = globalSourceSummary;
     if($('#srt').value==='brk') vs.sort((a,b)=>(b.brk??-1)-(a.brk??-1)); else vs.sort((a,b)=>b.vpd-a.vpd);
     const words={};const stop=new Set('this that with from your what when they have just video shorts short funny'.split(' '));
     vs.forEach(v=>v.title.toLowerCase().replace(/[^a-z0-9ğüşöçı\s]/g,'').split(/\s+/).forEach(w=>{if(w.length>3&&!stop.has(w))words[w]=(words[w]||0)+1}));
@@ -410,6 +432,82 @@ $('#goGen').onclick=async()=>{
       finally{btn.disabled=false;}
     };
   }catch(e){fail(el,e)}
+};
+
+
+function buildGlobalIdeaPrompt(research, anchor) {
+  const rows = (research && Array.isArray(research.videos) ? research.videos : [])
+    .filter(v => v && v.id && v.title)
+    .slice()
+    .sort((a,b) => (Number(b.viewsPerDay ?? b.vpd) || 0) - (Number(a.viewsPerDay ?? a.vpd) || 0))
+    .slice(0,20)
+    .map(v => ({
+      videoId: v.id, title: v.title, channel: v.channel || null, channelId: v.channelId || null,
+      publishedAt: v.publishedAt || (v.date instanceof Date ? v.date.toISOString() : v.date) || null,
+      publicLifetimeViews: Number.isFinite(Number(v.views)) ? Number(v.views) : null,
+      ageDays: Number.isFinite(Number(v.ageDays)) ? Number(v.ageDays) : null,
+      approximateViewsPerDay: Number.isFinite(Number(v.viewsPerDay ?? v.vpd)) ? Number(v.viewsPerDay ?? v.vpd) : null,
+      durationSeconds: Number.isFinite(Number(v.seconds ?? v.sec)) ? Number(v.seconds ?? v.sec) : null,
+      officialUrl: 'https://www.youtube.com/watch?v=' + v.id
+    }));
+  return [
+    "ROL: Global Shorts araştırmacısı + web kaynak doğrulayıcısı + acımasız komedi yaratıcı yönetmeni.",
+    "KAYNAK SINIRI: Fikri kullanıcının kendi kanalından DEĞİL, global YouTube ve global web kaynaklarından al. Kendi kanal ölçümleri bu pakete dahil değildir ve fikir seçimini yönlendiremez.",
+    "VİDEO İZLEME ALTERNATİFİ: Video oynatmak, ekran kaydı veya kare çıkarmak zorunlu değil. YouTube API metaverisiyle video ID + başlık + kanal + yayın tarihi + kamusal toplam izlenme kaydını eşleştir. Sonra aynı ID ve tam başlığı global webde ara. Mümkünse YouTube dışı bağımsız yazılı kaynak URL'si ekle; bulunamazsa “bağımsız metinsel kaynak bulunamadı” de. Sahnenin kendisi izlenmediyse GÖRSEL SAHNE DURUMU olarak “doğrulanmadı” yaz; başlıktan, thumbnail'dan veya izlenmeden sahne uydurma.",
+    "SAYAÇ SINIRI: Kamusal toplam izlenme ömür boyu birikimli sayıdır; belirli bir dönemin izlenmesi değildir. Yaklaşık izlenme/gün yalnızca toplam izlenmenin video yaşına bölünmesiyle elde edilen kaba vekildir; tarihsel grafik veya başarı nedeni kanıtı değildir.",
+    "SABİTLENMİŞ GLOBAL KAYNAK (değiştirme): " + JSON.stringify(anchor || null),
+    "GLOBAL YOUTUBE ARAMA ÖRNEKLEMİ (en fazla 20 sonuç; evreni temsil etmez): " + JSON.stringify(rows),
+    "GÖREV: Global kaynaktan geniş bir öncül çıkar ama kaynak videosunu sahne sahne kopyalama. Tek yeni ve en güçlü komedi fikri seç; fikir listesi verme. Eksik sahne verisi fikir üretimini durduramaz.",
+    "ÇIKTI ŞABLONU — her alan ayrı satırda:",
+    "GLOBAL KAYNAK: video ID, tam başlık, kanal, yayın tarihi, Kamusal toplam izlenme, ölçüm zamanı ve resmi YouTube URL'si.",
+    "GLOBAL WEB KONTROLÜ: bağımsız yazılı kaynak URL'si veya bağımsız metinsel kaynak bulunamadığına dair açık ifade.",
+    "GÖRSEL SAHNE DURUMU: video izlenmedi/doğrulanmadı ise bunu açıkça söyle.",
+    "KAYNAKTAN ALINAN İLKE: kaydın gerçekten desteklediği geniş, sınırlı çıkarım.",
+    "GLOBAL İŞARETTEN FİKRE GEÇİŞ: kaynak sinyalinin seçimi nasıl yönlendirdiğini açıkla; veri komedi mekanizmasını kanıtlamaz.",
+    "ÖZGÜN YARATICI SIÇRAMA: kaynaktan farklı yeni bir görsel mekanizma.",
+    "KOPYALANMAYAN UNSURLAR: kaynak videosundan kopyalanmayan karakter/eylem/nesne sırası/final.",
+    "KANIT SINIRI: izlenme sayısı veya başlık sahneyi ya da başarı nedenini kanıtlamaz.",
+    "TEST DURUMU: test edilmemiş yaratıcı hipotez.",
+    "ARDINDAN: (1) tek fikir, (2) neden komik, (3) 0–10 saniyenin tamamını kapsayan net olay akışı, (4) doğrudan kopyalanabilir tam video promptu.",
+    "TEK ZORUNLU VİDEO KOŞULLARI: exactly 10 seconds; vertical 9:16; no dialogue; ASMR-focused natural audio. Başka bir mizah biçimi filtresi koyma, puan nedeniyle üretimi durdurma."
+  ].join("\n");
+}
+$('#createGlobalIdeaPrompt').onclick = async () => {
+  const status = $('#globalIdeaPromptStatus');
+  const area = $('#globalIdeaPrompt');
+  const research = window.bosResearchSnapshot;
+  if (!research || !Array.isArray(research.videos) || !research.videos.length) {
+    status.textContent = 'Önce Trend keşfi bölümünde arama yap; global kaynaklar gelmeden kaynak kaydı sabitlenemez.';
+    return;
+  }
+  const anchor = window.SourceTraceGuard.chooseGlobalAnchor(research, research.searchEndedAt || new Date().toISOString());
+  window.bosIdeaSourceAnchor = anchor;
+  if (!anchor) {
+    status.textContent = 'Global kaynak kaydı seçilemedi. İstek yine hazırlanabilir ama kaynak izi doğrulanmış sayılmaz.';
+    return;
+  }
+  area.value = buildGlobalIdeaPrompt(research, anchor);
+  area.style.display = 'block';
+  area.focus();
+  area.select();
+  const summary = "Global kaynak sabitlendi: " + anchor.title + " | ID: " + anchor.videoId + " | " + anchor.formattedValue + " toplam izlenme | " + anchor.videoUrl;
+  $('#globalIdeaSourceSummary').textContent = summary;
+  $('#globalIdeaTraceAnchorSummary').textContent = summary;
+  try {
+    await navigator.clipboard.writeText(area.value);
+    status.textContent = 'Global konu paketi kopyalandı. Web erişimi olan sohbet asistanına yapıştır; video izleme/ekran kaydı gerekmez.';
+  } catch (_) {
+    status.textContent = 'Paket aşağıda hazır ve seçili. Kopyala düğmesiyle alıp web erişimi olan sohbet asistanına yapıştır.';
+  }
+};
+$('#validateGlobalIdeaTrace').onclick = () => {
+  const result = window.SourceTraceGuard.validate($('#globalIdeaOutputForValidation').value, window.bosIdeaSourceAnchor);
+  const target = $('#globalIdeaTraceValidationResult');
+  if (result.ok) {
+    target.innerHTML = '<p class="y"><strong>✓ GLOBAL KAYNAK İZİ TAM</strong></p><p class="note">Kimlik, sayaç, kaynak URL’si, web çapraz kontrolünün durumu ve sahne sınırı yazılmış. Bu, görsel sahnenin doğrulandığını veya fikrin başarılı olacağını kanıtlamaz.</p>';
+  } else {
+    target.innerHTML = '<p class="n"><strong>✗ GLOBAL KAYNAK İZİ EKSİK</strong></p><ul>' + result.errors.map(e => '<li>' + esc(e) + '</li>').join('') + '</ul><p class="note">Video izleme gerekmez. Eksik metinsel kaynak veya görsel sahne sınırı açıkça yazılsın. Bu denetim fikir üretimini durdurmaz.</p>';
+  }
 };
 
 /* ---------- 2. KANAL ANALİZİ ---------- */
@@ -578,7 +676,7 @@ $('#goOwn').onclick=async()=>{
     <p class="note">Hazır bir başarı eşiği kullanılmaz. Videoları kendi karşılaştırılabilir dönemleri içinde değerlendir; %100 üzeri izlenen kısım, tekrar izleme için olası bir sinyaldir, tek başına başarı nedeni değildir.</p>
     <h2>Konu Motoru · global kaynak + özgün fikir</h2>
     <p class="note">Önce global trend aramasını yap, ardından paketi oluştur. Fikir kaynağı global YouTube içerikleri olacak; kendi kanal ölçümleri fikri seçmez ve yalnızca yayın sonrası kıyaslama içindir. Video oynatma/ekran kaydı/kare çıkarma zorunlu değil: resmi video kimliği ve sayaçları API kaydıyla eşleştir, global web üzerinde bağımsız yazılı doğrulama ara; sahne doğrulanamıyorsa bunu belirt ama üretimi durdurma. Bu sayfa kendi başına yapay zekâ modeli çalıştırmaz; paketi sohbet içinde kullan.</p>
-    <p><button id="copyCompare">Konu Motoru paketini oluştur ve kopyala</button> <button id="downloadCompare" class="ghost" disabled>Konu paketini indir (.txt)</button></p>
+    <p><button id="copyCompare">Kanal sonrası ölçüm paketini oluştur ve kopyala</button> <button id="downloadCompare" class="ghost" disabled>Konu paketini indir (.txt)</button></p>
     <div id="commentDiag" class="note" aria-live="polite">Yorum teşhisi henüz çalıştırılmadı. Yukarıdaki düğmeye bastığında yorumların alınıp alınmadığı ve varsa API hatası burada gösterilecek.</div>
     <textarea id="compareTxt" readonly rows="8" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea><div class="msg" id="ideaTraceGate"><h3 style="margin:0 0 6px">Global Kaynak İzi Kontrolü (izleme gerektirmez)</h3><p class="note">Kopyaladığın yanıtı buraya yapıştır. Panel global YouTube video ID’sini, başlığı, kanalını, yayın tarihini, kamusal izlenme sayısını, resmi kaynak URL’sini ve global web çapraz kontrolünün dürüstçe bildirildiğini denetler. Video oynatma, ekran kaydı ve sahne izleme zorunlu değildir. Kontrolün geçmesi görsel sahnenin izlenerek doğrulandığı veya fikrin başarılı olacağı anlamına gelmez.</p><p id="ideaTraceAnchorSummary" class="note">Kaynak kaydı, paket oluşturulurken kod tarafından sabitlenecek.</p><textarea id="ideaOutputForValidation" rows="8" placeholder="Modelin ürettiği kaynak izi bölümünü ve fikir çıktısının tamamını buraya yapıştır..." style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea><p><button id="validateIdeaTrace" type="button">Kaynak izini kontrol et</button></p><div id="ideaTraceValidationResult" aria-live="polite"></div></div>`;
     $('#validateIdeaTrace').onclick=()=>{
@@ -768,8 +866,8 @@ $('#goOwn').onclick=async()=>{
           "",
           "KOMEDİ ÜRETİM GÖREVİ — veri notları komedi üretimini engelleyemez:",
           "0) HER ÇALIŞTIRMADA SIFIRLAMA: Bu paketi bağımsız bir görev olarak ele al. Sohbetin paket DIŞINDAKİ önceki mesajlarından veya önceki asistan önerilerinden konu, nesne, karakter, sahne ya da mekanizma taşıma. Yalnızca bu paketteki A/B/C/D verilerini ve kullanıcının açıkça verdiği yeni talimatı kullan. D alanı boşsa geçmiş fikir verilmemiştir. Önceki konuşmadaki öneriyi yeniden adlandırıp yeni fikir diye sunma.",
-          "0A) GLOBALDEN FİKRE GEÇİŞ: Yalnız global YouTube arama örneklemini ve globalSourceAnchor kaydını kullan. Kendi kanal metrikleri konu seçimini etkilemez. views/ageDays yalnız kaba hız göstergesidir; tarihsel günlük API ölçümü veya neden-sonuç kanıtı değildir.",",
-          "0B) VİDEO İZLEME YERİNE KAYNAK ÇAPRAZ KONTROLÜ: Video izlemek veya ekran kaydı şart değil. Resmî video URL/ID, tam başlık, kanal, yayın tarihi ve kamusal sayaçları API kaydıyla eşleştir. Aynı video başlığı/ID için global web araması yap; mümkünse YouTube dışı bağımsız yazılı kaynak bul. Kaynak yoksa bunu açıkça söyle. Bu işlem metinsel öncülü kontrol eder; görsel sahneyi doğruladığını iddia etme.",",
+          "0A) GLOBALDEN FİKRE GEÇİŞ: Yalnız global YouTube arama örneklemini ve globalSourceAnchor kaydını kullan. Kendi kanal metrikleri konu seçimini etkilemez. views/ageDays yalnız kaba hız göstergesidir; tarihsel günlük API ölçümü veya neden-sonuç kanıtı değildir.",
+          "0B) VİDEO İZLEME YERİNE KAYNAK ÇAPRAZ KONTROLÜ: Video izlemek veya ekran kaydı şart değil. Resmî video URL/ID, tam başlık, kanal, yayın tarihi ve kamusal sayaçları API kaydıyla eşleştir. Aynı video başlığı/ID için global web araması yap; mümkünse YouTube dışı bağımsız yazılı kaynak bul. Kaynak yoksa bunu açıkça söyle. Bu işlem metinsel öncülü kontrol eder; görsel sahneyi doğruladığını iddia etme.",
           "0C) ÖZGÜNLÜK KONTROLÜ: Fikri yazmadan önce kendi içinde birkaç belirgin biçimde farklı yaklaşım üret ve tek kazananı seç. Son kazananı A bölümündeki mevcut videoların konu öncülleriyle ve D alanında açıkça verilen fikirlerle karşılaştır. Aynı fikri, yalnızca nesnesini/karakterini değiştirerek sunma. Benzerlik fark edilirse temel görsel mekanizmayı değiştir; fakat yaratıcı bir veto veya puan eşiği oluşturma.",
           "0D) KANIT ETİKETİ: Global API sayaçları “ölçülmüş global metadata”; webde bulunan bağımsız yazılı açıklama “metinsel çapraz kontrol”; izlenmeyen sahne “görsel olarak doğrulanmadı”; yeni fikir “test edilmemiş yaratıcı hipotez” diye etiketlenir.",
           "1) VERİYİ KISA TUT: Kanal/trend verisini hızlıca tara; yalnızca fikri seçmeye gerçekten yardımcı olan bulguyu kısaca belirt. Eksik metriği uydurma ve farklı ölçüm dönemlerini karıştırma. Uzun analiz raporu komedi fikrinin önüne geçmesin.",
@@ -784,7 +882,7 @@ $('#goOwn').onclick=async()=>{
           "8) Nihai çıktı: veri bulgularını gerekiyorsa kısaca bildir; ardından tek komedi fikri, neden komik olduğu, 10 saniyenin tamamını kapsayan sahne akışı ve tam video üretim promptu ver. Başlık dili, belirli zaman aralıkları ve yaratıcı stil zorunlu değil.",
           "9) Yayın sonrası görüntülenme, ortalama izleme süresi, izlenen yüzde, beğeni/yorum oranı ve abone kazanımını ayrı değerlendir. Başarı garantisi veya veride olmayan eşik verme.",
           "10) Kanıt düzeylerini ayır: global API metadata / bağımsız metinsel çapraz kontrol / görsel sahne doğrulanmadı (izleme yok) / test edilmemiş yaratıcı hipotez.",
-          "11) FİKRİN KAYNAK İZİ ZORUNLU: Fikirden önce kısa bir 'BU FİKİR NEREDEN ÇIKTI?' bölümü ver. (a) Seçimi etkileyen gerçek ölçümü ve video başlığını/ID'sini, değerini ve ölçüm penceresini belirt; ölçüm yoksa 'yok' de. (b) Ölçümün gerçekten desteklediği sınırlı çıkarımı yaz. (c) Veriden yeni görsel fikre geçişi açıkça anlat: hangi kısmı veri yönlendirdi, hangi kısmı yaratıcı sıçrama olarak sen ekledin. (d) Verinin kanıtlamadığı noktayı belirt. (e) Bu nedenle fikri 'test edilmemiş yaratıcı hipotez' olarak işaretle. (f) Gerçek sahne notu yoksa sahne mekanizmasını kanıt diye kullanma.",
+          "11) GLOBAL KAYNAK İZİ ZORUNLU: Fikirden önce “BU FİKİR NEREDEN ÇIKTI?” bölümünü yaz. GlobalSourceAnchor kaydındaki video ID, tam başlık, kanal, yayın tarihi, kamusal toplam izlenme sayısı, ölçüm zamanı ve resmi YouTube URL’sini aynen eşleştir. Aynı video ID ve tam başlığı global webde ara; mümkünse YouTube dışı bağımsız metinsel kaynak URL’si ekle, bulunamazsa bunu açıkça söyle. Video izleme veya ekran kaydı isteme. Görsel sahne doğrulanmadıysa sahne uydurma; yine de özgün fikir ve tam prompt üret.",
           "11A) GLOBAL KAYNAK İZİ: Fikir seçmeden önce globalSourceAnchor içindeki YouTube videosunu kaynak olarak sabitle. Başlık/metadata yalnızca geniş öncülü verir. Aynı ID ve başlığı global web üzerinde çapraz kontrol et; en az bir bağımsız yazılı kaynak bulabilirsen URL ekle, bulamazsan “bağımsız metinsel kaynak bulunamadı” diye açıkça yaz. Video izlemek şart değil.",
           "11B) GLOBAL KAYNAK SATIRI: “GLOBAL KAYNAK:” satırında globalSourceAnchor içindeki video ID, tam başlık, kanal, yayın tarihi, kamusal toplam izlenme değeri, ölçüm tarihi ve resmi URL'yi eşleştir. İzlenme sayısını dönem metriği gibi gösterme. “GLOBAL WEB KONTROLÜ:” satırında bağımsız yazılı URL veya kaynak bulunamadığı bilgisini yaz. “GÖRSEL SAHNE DURUMU:” satırı videonun izlenmediğini/doğrulanmadığını ve sahne eylemlerinin gözlenmiş gibi anlatılmadığını açıkça söylesin.",
           "11D) KAYNAK İZİ SABİT ŞABLONU: Ayrı satırlarda “GLOBAL KAYNAK:”, “GLOBAL WEB KONTROLÜ:”, “GÖRSEL SAHNE DURUMU:”, “KAYNAKTAN ALINAN İLKE:”, “GLOBAL İŞARETTEN FİKRE GEÇİŞ:”, “ÖZGÜN YARATICI SIÇRAMA:”, “KOPYALANMAYAN UNSURLAR:”, “KANIT SINIRI:” ve “TEST DURUMU: test edilmemiş yaratıcı hipotez.” etiketlerini kullan. Kaynak veya ek web doğrulaması yoksa uydurma; sınırı açıkla ama fikri ve promptu yine üret.",
