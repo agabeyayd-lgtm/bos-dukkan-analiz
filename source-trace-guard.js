@@ -56,7 +56,8 @@
   }
   function validate(output, anchor) {
     const raw = String(output == null ? "" : output), normalized = normalizeText(raw);
-    const normalizedLines = raw.split(/\r?\n/).map(normalizeText);
+    const rawLines = raw.split(/\r?\n/);
+    const normalizedLines = rawLines.map(normalizeText);
     const errors = [], checks = {};
     const test = (name, condition, message) => { checks[name] = Boolean(condition); if (!condition) errors.push(message); };
     test("output-present", raw.trim().length > 0, "Model çıktısını kontrol alanına yapıştır.");
@@ -67,22 +68,29 @@
     }
     test("source-section", normalized.includes("bu fikir nereden cikti") || normalized.includes("fikrin kaynak izi"),
       "“Bu fikir nereden çıktı?” kaynak bölümü eksik.");
-    const measuredLine = normalizedLines.find(line =>
+    const measuredLineIndex = normalizedLines.findIndex(line =>
       line.startsWith("olculmus bulgu ") &&
       line.includes(normalizeText(anchor.videoId)) &&
       line.includes(normalizeText(anchor.title)) &&
       line.includes(normalizeText(anchor.metricLabel))
-    ) || "";
+    );
+    const measuredLine = measuredLineIndex >= 0 ? normalizedLines[measuredLineIndex] : "";
+    const rawMeasuredLine = measuredLineIndex >= 0 ? rawLines[measuredLineIndex] : "";
+    const normalizedMetricLabel = normalizeText(anchor.metricLabel);
+    const metricLabelIndex = measuredLine.indexOf(normalizedMetricLabel);
+    const valueField = metricLabelIndex >= 0
+      ? measuredLine.slice(metricLabelIndex + normalizedMetricLabel.length, metricLabelIndex + normalizedMetricLabel.length + 40)
+      : "";
     test("measured-finding-line", Boolean(measuredLine),
-      "“ÖLÇÜLMÜŞ BULGU:” başlıklı ayrı kaynak satırı eksik.");
-    test("source-line-video-id", measuredLine.includes(normalizeText(anchor.videoId)),
-      "Programın sabitlediği video ID'si ÖLÇÜLMÜŞ BULGU satırında yok.");
+      "“ÖLÇÜLMÜŞ BULGU:” başlıklı ayrı kaynak satırı eksik veya sabit kaynakla uyuşmuyor.");
+    test("source-line-video-id", rawMeasuredLine.includes(String(anchor.videoId)),
+      "Programın sabitlediği video ID'si ÖLÇÜLMÜŞ BULGU satırında birebir (büyük/küçük harf dâhil) yok.");
     test("source-line-title", measuredLine.includes(normalizeText(anchor.title)),
       "Programın sabitlediği tam video başlığı ÖLÇÜLMÜŞ BULGU satırında yok.");
-    test("source-line-metric", measuredLine.includes(normalizeText(anchor.metricLabel)),
+    test("source-line-metric", metricLabelIndex >= 0,
       "Programın sabitlediği gerçek metrik adı ÖLÇÜLMÜŞ BULGU satırında yok: " + anchor.metricLabel + ".");
-    test("source-line-value", numberTokenMatches(measuredLine, anchor.value),
-      "Programın sabitlediği ölçüm değeri ÖLÇÜLMÜŞ BULGU satırında yok: " + anchor.formattedValue + ".");
+    test("source-line-value", numberTokenMatches(valueField, anchor.value),
+      "Programın sabitlediği ölçüm değeri metrik adının hemen yanında yok: " + anchor.formattedValue + ".");
     test("source-line-window", measuredLine.includes(normalizeText(anchor.measurementWindow)),
       "Programın sabitlediği ölçüm penceresi/sayaç sınırı ÖLÇÜLMÜŞ BULGU satırında yok: " + anchor.measurementWindow + ".");
     test("idea-bridge", normalizedLines.some(line => line.startsWith("veriden fikre gecis ") && /yonlendirdi|cikarim|baglanti/.test(line)),
