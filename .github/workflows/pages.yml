@@ -30,35 +30,28 @@ jobs:
             awk '/<script>/{inside=1; next} /<\/script>/{inside=0} inside' "$file" > "$output"
             node --check "$output"
           done
-      - name: Check topic-engine data and originality contract
+      - name: Check global-source idea workflow contract
         run: |
           node <<'NODE'
           const fs = require('fs');
           const required = [
-            ['computed performance summary', 'creativeEvidenceForPrompt'],
-            ['program-locked source anchor', 'SourceTraceGuard.chooseAnchor'],
-            ['source-trace output validation', 'SourceTraceGuard.validate'],
-            ['validator panel', 'ideaOutputForValidation'],
-            ['locked source payload label', 'A3A. KOD TARAFINDAN FİKİR ÜRETİLMEDEN ÖNCE SABİTLENEN KAYNAK KAYDI'],
-            ['explicit data-to-idea bridge', 'VERİDEN FİKRE GEÇİŞ:'],
-            ['explicit weak-link classification', 'dolaylı/zayıf bağ'],
-            ['fixed provenance format', '11D) KAYNAK İZİ SABİT ŞABLONU'],
-            ['measured finding label', 'ÖLÇÜLMÜŞ BULGU:'],
-            ['relationship strength label', 'BAĞIN GÜCÜ: dolaylı/zayıf bağ'],
-            ['creative leap label', 'YARATICI SIÇRAMA:'],
-            ['evidence limitation label', 'VERİNİN KANITLAMADIĞI:'],
-            ['hypothesis status label', 'TEST DURUMU: test edilmemiş yaratıcı hipotez'],
-            ['A2 summary label', 'A2. KOD TARAFINDAN HESAPLANAN PERFORMANS SİNYALLERİ'],
-            ['full-row metric calculation', 'const creativeMetricRows=own.filter(v=>v&&v.analyticsAvailable);'],
-            ['reach and metric separation', 'VERİDEN FİKRE GEÇİŞ'],
-            ['clean-run context reset', 'HER ÇALIŞTIRMADA SIFIRLAMA'],
-            ['title is not scene evidence', 'KONU İPUCU İLE SAHNE KANITINI AYIR'],
-            ['evidence labels', 'KANIT ETİKETİ'],
-            ['explicit idea provenance', 'FİKRİN KAYNAK İZİ ZORUNLU'],
-            ['no fabricated data linkage', 'SAHTE VERİ BAĞI YASAK'],
-            ['computed evidence map', 'A3. FİKİR SEÇİMİNDE KULLANILABİLECEK GERÇEK KANIT HARİTASI'],
-            ['observed daily view pace', 'viewsPerObservedDay'],
-            ['current trend sample state', 'currentState:']
+            ['global source anchor', 'SourceTraceGuard.chooseGlobalAnchor'],
+            ['global source selection is locked', 'globalSourceAnchor'],
+            ['global-only idea prompt button', 'createGlobalIdeaPrompt'],
+            ['standalone global prompt builder', 'function buildGlobalIdeaPrompt'],
+            ['no channel OAuth in the global idea flow', 'Global konu paketini oluştur ve kopyala'],
+            ['global source trace validator', 'SourceTraceGuard.validate'],
+            ['global validator input', 'globalIdeaOutputForValidation'],
+            ['global video URL in prompt', 'https://www.youtube.com/watch?v='],
+            ['external web cross-check label', 'GLOBAL WEB KONTROLÜ'],
+            ['visual scene limitation label', 'GÖRSEL SAHNE DURUMU'],
+            ['source principle label', 'KAYNAKTAN ALINAN İLKE'],
+            ['original creative leap label', 'ÖZGÜN YARATICI SIÇRAMA'],
+            ['not copied label', 'KOPYALANMAYAN UNSURLAR'],
+            ['evidence boundary label', 'KANIT SINIRI'],
+            ['unverified hypothesis label', 'test edilmemiş yaratıcı hipotez'],
+            ['video playback not required', 'Video oynatma/ekran kaydı fikir üretmek için zorunlu değildir'],
+            ['own-channel metrics are post-publication only', 'Kendi kanal verisi yalnızca yayın sonrası karşılaştırma içindir']
           ];
           for (const file of ['index.html', 'bos-dukkan-analiz.html']) {
             const html = fs.readFileSync(file, 'utf8');
@@ -68,10 +61,13 @@ jobs:
             if (!html.includes('Tam 10 saniye') && !html.includes('TEK ZORUNLU VİDEO KOŞULLARI')) {
               throw new Error(file + ': required 10-second video format contract missing');
             }
-            console.log('PASS ' + file + ': ' + required.length + ' topic-engine contracts present');
+            if (html.includes('SourceTraceGuard.chooseAnchor(')) {
+              throw new Error(file + ': stale own-channel source anchor still wired into idea engine');
+            }
+            console.log('PASS ' + file + ': ' + required.length + ' global-source contracts present');
           }
           NODE
-      - name: Test source-trace validator
+      - name: Test global source-trace validator
         run: |
           node --check source-trace-guard.js
           node --test tests/source-trace-guard.test.cjs
