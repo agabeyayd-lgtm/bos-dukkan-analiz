@@ -81,6 +81,30 @@ test("rejects missing creative leap, limitation, or hypothesis labels", () => {
   assert.equal(result.ok, false);
   assert.ok(result.errors.length >= 3);
 });
+test("accepts a fractional observed-daily-pace metric in Turkish number format", () => {
+  const dailyAnchor = SourceTraceGuard.chooseAnchor({
+    metricLeaders: {
+      highestWindowViews: null,
+      highestObservedDailyViewPace: {
+        videoId: "abcDE123xyz",
+        title: "Daily pace example",
+        metric: "viewsPerObservedDay",
+        value: 1732.1
+      }
+    }
+  }, [], 28, "YouTube Analytics API v2");
+  const output = [
+    "BU FİKİR NEREDEN ÇIKTI?",
+    "ÖLÇÜLMÜŞ BULGU: Daily pace example (video ID abcDE123xyz); Gözlenen gün başına izlenme hızı: 1.732,1; Son 28 günlük YouTube Analytics ölçüm dönemi; günlük hız, dönem izlenmesinin gözlenen gün sayısına bölünmesidir.",
+    "VERİDEN FİKRE GEÇİŞ: Bu ölçüm genel erişim öncülünü seçmeme yönlendirdi.",
+    "BAĞIN GÜCÜ: dolaylı/zayıf bağ.",
+    "YARATICI SIÇRAMA: Bu mekanizma veriden çıkmadı; yaratıcı deney olarak eklendi.",
+    "VERİNİN KANITLAMADIĞI: Ölçüm sahnenin neden başarılı olacağını kanıtlamaz.",
+    "TEST DURUMU: test edilmemiş yaratıcı hipotez."
+  ].join("\n");
+  const result = SourceTraceGuard.validate(output, dailyAnchor);
+  assert.equal(result.ok, true, JSON.stringify(result.errors));
+});
 test("uses public lifetime counters only as a labelled fallback", () => {
   const fallback = SourceTraceGuard.chooseAnchor({ metricLeaders: {} },
     [{ id: "public123", title: "Public counter example", publicLifetimeViews: 1234 }], 28, "YouTube Data API v3");
