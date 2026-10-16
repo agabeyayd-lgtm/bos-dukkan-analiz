@@ -10,11 +10,12 @@ const validOutput = [
   "## BU FİKİR NEREDEN ÇIKTI?",
   "Ölçülmüş bulgu: Not Every Ice Cream Container Has Ice Cream (video ID wEA-VZhxq6Y).",
   "Seçili dönem izlenmesi: 27,569. Son 28 günlük YouTube Analytics ölçüm dönemi.",
-  "Bu ölçüm yalnızca erişim düzeyini gösterir; sahne mekanizmasını veya başarının nedenini kanıtlamaz.",
-  "VERİDEN FİKRE GEÇİŞ: Bu ölçüm başlığın genel öncülünü fikir seçimine yönlendirdi; bu bağlantı sınırlıdır.",
-  "Bağın gücü: dolaylı/zayıf bağ; izlenme sayısı sahnenin neden tuttuğunu kanıtlamaz.",
-  "Başlığın genel öncülü fikir seçimini yönlendirdi; somut görsel olay yaratıcı sıçrama olarak eklendi.",
-  "Bu fikir test edilmemiş yaratıcı hipotezdir."
+  "ÖLÇÜLMÜŞ BULGU: Not Every Ice Cream Container Has Ice Cream (video ID wEA-VZhxq6Y); seçili dönem izlenmesi 27,569; son 28 günlük YouTube Analytics ölçüm dönemi.",
+  "VERİDEN FİKRE GEÇİŞ: Bu ölçüm başlığın genel öncülünü fikir seçimine yönlendirdi; bu bağlantıyı sınırlı tutuyorum.",
+  "BAĞIN GÜCÜ: dolaylı/zayıf bağ; izlenme sayısı sahnenin neden tuttuğunu kanıtlamaz.",
+  "YARATICI SIÇRAMA: Bu mekanizma veriden çıkmadı; yaratıcı deney olarak eklendi.",
+  "VERİNİN KANITLAMADIĞI: Ölçüm, önerilen görsel sahnenin başarılı olacağını veya izlenme nedenini kanıtlamaz.",
+  "TEST DURUMU: test edilmemiş yaratıcı hipotez."
 ].join("\n");
 
 test("selects measured period reach leader as locked source", () => {
@@ -33,20 +34,21 @@ test("rejects responses that omit the locked source ID", () => {
   assert.ok(result.errors.some(e => e.includes("ID")));
 });
 test("rejects a source citation without a clear data-to-idea bridge", () => {
-  const incomplete = validOutput.replace("VERİDEN FİKRE GEÇİŞ: Bu ölçüm başlığın genel öncülünü fikir seçimine yönlendirdi; bu bağlantı sınırlıdır.", "");
+  const incomplete = validOutput.replace(/VERİDEN FİKRE GEÇİŞ:.*/, "");
   const result = SourceTraceGuard.validate(incomplete, anchor);
   assert.equal(result.ok, false);
-  assert.ok(result.errors.some(e => e.includes("geçiş açıklaması")));
+  assert.ok(result.errors.some(e => e.includes("GEÇİŞ")));
 });
 test("rejects a response that does not label the data-idea link as indirect or weak", () => {
-  const incomplete = validOutput.replace("Bağın gücü: dolaylı/zayıf bağ; izlenme sayısı sahnenin neden tuttuğunu kanıtlamaz.", "");
+  const incomplete = validOutput.replace(/BAĞIN GÜCÜ:.*/, "");
   const result = SourceTraceGuard.validate(incomplete, anchor);
   assert.equal(result.ok, false);
-  assert.ok(result.errors.some(e => e.includes("dolaylı/zayıf")));
+  assert.ok(result.errors.some(e => e.includes("BAĞIN GÜCÜ")));
 });
 test("rejects missing creative leap, limitation, or hypothesis labels", () => {
-  const incomplete = validOutput.replace("yaratıcı sıçrama", "yeni bölüm")
-    .replace("kanıtlamaz", "gösterir").replace("test edilmemiş yaratıcı hipotez", "kesin sonuç");
+  const incomplete = validOutput.replace(/YARATICI SIÇRAMA:.*/, "")
+    .replace(/VERİNİN KANITLAMADIĞI:.*/, "")
+    .replace(/TEST DURUMU:.*/, "");
   const result = SourceTraceGuard.validate(incomplete, anchor);
   assert.equal(result.ok, false);
   assert.ok(result.errors.length >= 3);
