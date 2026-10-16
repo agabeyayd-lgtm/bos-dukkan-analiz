@@ -62,6 +62,7 @@ Kapıyı geçen fikirler aşağıdaki beş başlıkta 0–10 arasında puanlanı
 - Diyalog, müzik, açıklayıcı yazı veya altyazı mizahı kurtarmak için kullanılmasın; doğal ASMR sesleri yeterli olsun.
 - Dünya çoğunlukla gerçekçi kalsın; tek bir belirgin absürtlük taşısın.
 - Karakter komikliği açıklamasın, kameraya göz kırpmasın ve şaka yaptığını belli etmesin. Ancak herkesi ifadesiz/ciddi oynatmak zorunlu değildir; doğal şaşkınlık, üzüntü, telaş, sevinç veya başka uygun tepkiler kullanılabilir.
+- **Deadpan (ifadesiz/ciddi oynama) zorunlu stil değildir.** Yalnızca sahneye doğal uyuyorsa seçilir; her fikre otomatik olarak eklenmez.
 
 ## 5. Otomatik kırmızı bayraklar
 
