@@ -19,6 +19,9 @@ Bunun dışında sabit mizah türü, fizik/gerçekçilik şartı, tek duygu veya
 4. **Özgün fikir seç.** Birkaç farklı yaklaşımı kendi içinde değerlendir, tek fikri sun. Yüksek performanslı videonun aynısını ya da yalnızca nesnesi değiştirilmiş kopyasını üretme. Veriden ilham al, fakat ölçümlerin kanıtlamadığı bir başarı nedeni iddia etme.
 5. **Kanıt türünü etiketle.** Ölçülmüş bulgu; başlık/metadata ipucu; gerçekten izlenmiş sahne notu; test edilmemiş yaratıcı hipotez birbirinden ayrı tutulur.\n6. **Her fikrin kaynağını açıkla.** Paket, kodla hesaplanan metrik liderlerini ayrıca `A3. Fikir Seçiminde Kullanılabilecek Gerçek Kanıt Haritası` bölümüne koyar. Çıktı, fikri seçmeden önce ilgili video başlığını/ID'sini, ölçüm değerini ve dönemini; ölçümün desteklediği sınırlı çıkarımı; yaratıcı sıçramayı; verinin kanıtlamadığı kısmı yazmalıdır. Veri fikrin mekanizmasını göstermiyorsa “bu mekanizma veriden çıkmadı; yaratıcı deney olarak seçildi” demelidir.
 
+## Fikir kaynağı izi
+Fikir seçimi önce ölçülmüş kanal sinyali, sonra yaratıcı geliştirme sırasıyla yapılır. Her çıktıda ilgili video ID'si/başlığı, metrik değeri ve ölçüm penceresi gösterilir; ölçümün desteklediği sınırlı çıkarım, yaratıcı sıçrama ve verinin kanıtlamadığı noktalar ayrı yazılır. Somut komedi mekanizması ölçümden çıkmadıysa açıkça “Bu mekanizma veriden çıkmadı; yaratıcı sıçrama olarak eklendi” denir. Rastgele fikri sonradan metrikle haklı gösterme yasaktır.
+
 ## Veri kaynağı ve sınırlar
 - Trend keşfi: YouTube Data API v3 aramasından gelen sınırlı bir örneklemdir; YouTube'un tamamını temsil etmez.
 - Kendi kanalın: Google OAuth ve YouTube Analytics API ile seçili dönem performansı.
