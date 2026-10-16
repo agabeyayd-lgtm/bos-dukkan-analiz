@@ -99,9 +99,9 @@ a{color:var(--acc)}
   </div>
   <p class="note">Yalnızca kendi kanalın için çalışır. Google Cloud'da OAuth istemcisini "Web uygulaması" olarak oluştur, yetkili JavaScript kaynağı olarak <code>https://agabeyayd-lgtm.github.io</code> ekle ve "YouTube Analytics API"yi de etkinleştir.</p>
   <div class="panel" style="margin:10px 0">
-    <label for="ideaHistory"><strong>Fikir geçmişi / tekrar engeli</strong></label>
-    <p class="note">Yayımlanmış, denenmiş, reddedilmiş veya istemediğin fikirleri buraya yaz. Bu alan yalnızca bu tarayıcıda saklanır ve konu motoru paketine eklenir.</p>
-    <textarea id="ideaHistory" rows="4" placeholder="Fikir / temel davranış / neden denendi veya reddedildi..." style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
+    <label for="ideaHistory"><strong>Önceki fikirler (isteğe bağlı bağlam)</strong></label>
+    <p class="note">Önceki fikirleri çeşitlilik için paylaşabilirsin. Bu alan yalnızca bağlamdır; yeni komedi üretimini durdurmaz ve kesin yasak listesi oluşturmaz.</p>
+    <textarea id="ideaHistory" rows="4" placeholder="Önceki fikirler veya bağlam (isteğe bağlı)..." style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
   </div>
   <div id="outOwn"></div>
 </section>
@@ -143,7 +143,7 @@ a{color:var(--acc)}
   <div class="msg" style="margin-top:12px">
     <h3 style="margin:0 0 6px">Kare gözlemleri → Konu Motoru</h3>
     <p class="note" style="margin:0 0 8px">Kareleri bu sohbetle paylaşıp görsel analizi aldıktan sonra zaman damgalı gözlemleri buraya yaz. Bu alan mevcut Konu Motoru paketine otomatik bağlanır; panel tek başına görüntüleri yorumladığını iddia etmez.</p>
-    <textarea id="frameSceneNotes" rows="5" placeholder="Video ID / başlık (varsa) — 0.0–0.3 sn: ilk gerçek görüntü; 0.3–1.5 sn: davranış; 1.5–4.5 sn: gelişme; 4.5–8.0 sn: sonuç. Belirsiz olanı 'bilinmiyor' yaz." style="display:block;width:100%;max-width:100%;box-sizing:border-box;margin:8px 0;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
+    <textarea id="frameSceneNotes" rows="5" placeholder="Video ID / başlık (varsa) — 0.0–0.3 sn: ilk gerçek görüntü; 0.3–1.5 sn: davranış; 1.5–4.5 sn: gelişme; 4.5–10.0 sn: sonuç. Belirsiz olanı 'bilinmiyor' yaz." style="display:block;width:100%;max-width:100%;box-sizing:border-box;margin:8px 0;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
     <div class="bar" style="padding:0;border:0;background:transparent">
       <button id="syncFrameNotes" type="button">Notları Konu Motoru'na bağla</button>
       <button id="clearFrameNotes" class="ghost" type="button">Notları temizle</button>
@@ -229,7 +229,7 @@ function chooseResearchCommentVideos(videos,maxVideos=8){
   const desc=key=>[...pool].sort((a,b)=>(Number(b[key])||0)-(Number(a[key])||0));
   pick(desc('viewsPerSub'),'Kanal abonesine göre yüksek izlenme');
   pick(desc('viewsPerDay'),'Günlük izlenme hızı yüksek');
-  pick([...pool].sort((a,b)=>Math.abs((Number(a.seconds)||60)-8)-Math.abs((Number(b.seconds)||60)-8)||(b.views||0)-(a.views||0)),'8 saniyelik formata süre bakımından en yakın');
+  pick([...pool].sort((a,b)=>Math.abs((Number(a.seconds)||60)-10)-Math.abs((Number(b.seconds)||60)-10)||(b.views||0)-(a.views||0)),'10 saniyelik formata süre bakımından en yakın');
   pick([...pool].sort((a,b)=>(b.comments||0)/Math.max(1,b.views||0)-(a.comments||0)/Math.max(1,a.views||0)),'İzlenmeye göre yorum oranı yüksek');
   pick([...pool].sort((a,b)=>(b.likes||0)/Math.max(1,b.views||0)-(a.likes||0)/Math.max(1,a.views||0)),'İzlenmeye göre beğeni oranı yüksek');
   pick(desc('views'),'Mutlak görüntülenmesi en yüksek');
@@ -258,27 +258,27 @@ function askClaude(vs,q){
   const lines=pool.map((v,i)=>(i+1)+'. "'+v.title+'" | '+v.channel+' | '+fmt(v.subs)+' abone | '+fmt(v.views)+' izlenme | '+v.sec+' sn | '+v.brk.toFixed(1)+'x').join('\n');
   const avoid=$('#avoidIdeas')?.value.trim()||'Belirtilmedi.';
   const txt=[
-    "ROLÜN: Yalnızca harici rakip keşif verisini denetleyen analistsin. Bu aşamada nihai konu veya çekim senaryosu seçme.",
+    "ROLÜN: Trend verisini yardımcı bağlam olarak analiz et, sonra mutlaka tek komedi fikri ve tam 10 saniyelik üretim promptu ver.",
     "",
-    "SABİT SINIRLAR: 8 saniye, dikey 9:16, diyalog yok, doğal ASMR sesleri. İngilizce başlık. Yayın Çarşamba ve Pazar 19:00.",
-    "Mizah gerçekçi gündelik akıştan doğmalı. Zorlama tezat, rastgele absürtlük, imkânsız fizik, yalnızca nesneyi büyütme/değiştirme ve açıklama yazısı yok.",
-    "İnsan davranışı, beklenti, karar ve sonuç mizahı taşımalı. Karakterler olan biteni doğal karşılamalı.",
-    "İlk 0,3 saniyede güçlü görsel kanca; olay 8 saniyede anlaşılır; doğal yükseliş ve tamamlanmış somut final. Sırf loop için sonu yarım bırakma.",
+    "TEK ZORUNLU VİDEO KOŞULLARI: Tam 10 saniye; dikey 9:16 YouTube Shorts; diyalog yok ve ASMR odaklı ses. Bunların dışında komediyi güçlendirecek her yaratıcı seçim serbesttir.",
+    "YARATICI ÖZGÜRLÜK: Deadpan da doğal oyunculuk da abartılı tepki de kullanılabilir. Absürt, gerçeküstü, fiziksel, gündelik, nesne odaklı, imkânsız fizik içeren veya beklenmedik kurgulu komediyi önceden yasaklama. Tek duygu, tek absürtlük, insan davranışı, gerçekçi fizik, belirli bir kanca süresi veya belirli final biçimi zorunluluğu yoktur.",
+    "Her tür mizah, oyunculuk ve görsel yaklaşım serbesttir; insan davranışı veya doğal tepki şartı yoktur.",
+    "Kanca, tempo, final veya loop hakkında katı şart koyma; komediyi güçlendiren biçimi seç.",
     "",
     'ARAŞTIRMA VERİSİ — arama: "'+q+'". Yüksek izlenme/abone oranıyla seçilen videolar; bu oran tek başına neden-sonuç kanıtı değildir:',
     lines,
     "",
-    "ÖNCEKİ FİKİRLER / KAÇINILACAK TEKRARLAR:",
+    "ÖNCEKİ FİKİRLER / YALNIZCA BAĞLAM:",
     avoid,
     "",
     "KENDİ KANALIMI BU AŞAMADA DAHİL ETME. Yalnızca bu aramada bulunan harici videoları analiz et; kendi kanal metrikleri, videoları ve yorumları kullanılmayacak.",
-    "GÖREV — ÖNCEDEN BELİRLENMİŞ FİKİR LİSTESİ VE MİZAH MEKANİZMASI KATALOĞU KULLANMA:",
+    "GÖREV — veriyi yardım için kullan; komedi üretimini hiçbir formül, teori veya eleme kapısıyla sınırlandırma:",
     "1) Önce gerçek ölçümleri göster: veri kaynağı, örneklem sayısı, zaman aralığı ve eksik alanlar. İzlenme/abone oranını, izlenen yüzdeyi ve ortalama izleme süresini farklı metrikler olarak tut; birbirinin yerine kullanma.",
     "2) Başarılı ve zayıf videoları kendi uygun karşılaştırma grubuyla kıyasla. Video yaşı, süre, kanal büyüklüğü ve dağıtım farklarını hesaba kat. Tek örnekten kural çıkarma; korelasyonu neden-sonuç gibi sunma.",
     "3) Yorumları yalnızca doğru video ID'sine bağlı olduklarında kullan. Yorum örneklerini tüm izleyicilerin temsili sayma; sahne ayrıntılarını başlık veya yorumdan uydurma.",
     "4) Sabit bir mizah mekanizması listesi, önceden seçilmiş konu ailesi, elle yazılmış başarı formülü veya keyfî puan eşiği dayatma. Verilerde görülen örüntüleri kanıt gücüyle birlikte çıkar; veri desteklemiyorsa 'bilinmiyor' de.",
-    "5) Bu aşamada nihai video konusu veya çekim senaryosu seçme. Yalnızca ölçümleri, seçilim yanlılığını, eksik veriyi ve doğrulanması gereken görsel kanıtı raporla.",
-    "6) Tek nihai video önerme. Görsel kareler incelenmediyse sahne mekanizmasını bilinmiyor olarak işaretle. Nihai karar, 3. sekmedeki birleşik Konu Motoru paketiyle verilecek.",
+    "5) Verileri ve belirsizlikleri kısa raporla; ardından mutlaka tek özgün komedi fikri ve tam video promptu üret.",
+    "6) Tek güçlü komedi fikri seçip tam 10 saniyelik video promptuyla teslim et; sahne verisi eksikliği buna engel değildir.",
     "7) Yayın sonrası ölçüm planı ver: hangi metrikleri mevcut kanal tabanıyla karşılaştıracağımızı ve hangi sonucun yeniden test gerektireceğini belirt. Başarı garantisi verme; tam kanal manifestosu bu panele bağlı değilse bunu saklama."
   ].join('\n');
   const ta=$('#askTxt');ta.value=txt;ta.style.display='block';ta.select();
@@ -310,7 +310,7 @@ $('#goGen').onclick=async()=>{
     vs.forEach(v=>v.title.toLowerCase().replace(/[^a-z0-9ğüşöçı\s]/g,'').split(/\s+/).forEach(w=>{if(w.length>3&&!stop.has(w))words[w]=(words[w]||0)+1}));
     const top=Object.entries(words).sort((a,b)=>b[1]-a[1]).slice(0,12);
     const md=median(vs.map(v=>v.views));
-    el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(md),'medyan izlenme')}${stat(fmt(Math.max(...vs.map(v=>v.vpd))),'en yüksek günlük izlenme')}${stat(vs.filter(v=>v.brk!=null).length,'abone oranı hesaplanabilen video')}${stat(avg(vs.map(v=>v.sec)).toFixed(1)+' sn','ortalama süre')}${stat(Math.round(vs.filter(v=>v.sec>=7&&v.sec<=9).length/vs.length*100)+'%','8 sn civarı')}</div>
+    el.innerHTML=`<div class="stats">${stat(vs.length,'video')}${stat(fmt(md),'medyan izlenme')}${stat(fmt(Math.max(...vs.map(v=>v.vpd))),'en yüksek günlük izlenme')}${stat(vs.filter(v=>v.brk!=null).length,'abone oranı hesaplanabilen video')}${stat(avg(vs.map(v=>v.sec)).toFixed(1)+' sn','ortalama süre')}${stat(Math.round(vs.filter(v=>v.sec>=9&&v.sec<=11).length/vs.length*100)+'%','10 sn civarı')}</div>
     <h2>Başlıklarda sık geçen kelimeler</h2><div class="chips">${top.map(([w,c])=>`<span class="chip">${esc(w)} · ${c}</span>`).join('')}</div>
     <h2>Videolar</h2><p><button class="ghost" id="copyGen">Tabloyu kopyala</button></p><div class="wrap"><table id="tg"><tr><th>Başlık</th><th>Kanal</th><th>Abone</th><th>İzlenme</th><th>Fırlama</th><th>İzl./gün</th><th>Beğeni %</th><th>Yorum</th><th>Süre</th><th>Gün-saat</th></tr>
     ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${esc(v.channel)}</td><td>${v.subs==null?'–':fmt(v.subs)}</td><td>${fmt(v.views)}</td><td class="${v.brk>=5?'y':''}">${v.brk==null?'–':v.brk.toFixed(1)+'x'}</td><td>${fmt(v.vpd)}</td><td>${v.views?(v.likes/v.views*100).toFixed(1):'–'}</td><td>${fmt(v.comments)}</td><td>${v.sec} sn</td><td>${GUN[v.date.getDay()]} ${String(v.date.getHours()).padStart(2,'0')}:00</td></tr>`).join('')}</table></div>
@@ -341,8 +341,8 @@ $('#goGen').onclick=async()=>{
         research.videoCommentMatches=research.videos.map(v=>({...v,commentSample:byId.get(v.id)||{videoId:v.id,available:false,reason:'Bu video yorum örneklemi için seçilmedi.',sampled:0,comments:[]}}));
         research.commentSampleDesign={selection:'En fazla 8 video; farklı performans sinyallerine göre; her video için relevance sıralı en fazla 8 üst düzey yorum',selectedVideoIds:picks.map(v=>v.id),sampledComments:samples.reduce((n,v)=>n+v.sampled,0),commentRequestsSucceeded:samples.filter(v=>v.available).length,commentRequestsFailed:samples.filter(v=>!v.available).length};
         const payload={
-          role:'Rakip keşif denetçisi; yalnızca ölçülen harici veriyi ve eksik kanıtı raporla, nihai konu seçme.',
-          constraints:{durationSeconds:8,aspectRatio:'9:16',dialogue:false,audio:'natural ASMR',titleLanguage:'English',postingSchedule:'Wednesday and Sunday 19:00',humor:'realistic everyday human behavior, expectation, decision and consequence',mustHave:['strong visual hook in first 0.3 seconds','causal progression','concrete completed ending'],avoid:['forced contrast','random absurdity','impossible physics','only enlarging/changing an object','explanatory text','unfinished loop ending']},
+          role:'Komedi yaratıcısı ve trend analisti; veriyi destekleyici bağlam kullan ve mutlaka bir komedi fikri ile tam video promptu üret.',
+          constraints:{durationSeconds:10,aspectRatio:'9:16',dialogue:false,audio:'ASMR-focused sound',creativeFreedom:'No other mandatory style or content restrictions. Do not use a scoring gate or automatic rejection.'},
           sourceAndSample:{source:research.source||'YouTube Data API v3',query:research.query,requestedPublishedWindowDays:research.searchDays,windowStart:research.searchStartedAt,windowEnd:research.searchEndedAt,returnedVideoCount:research.videos.length,selection:'YouTube search results; no random or population-representative sample',selectionBias:'The search API returns a relevance/ranking-limited sample (max 50 here); videos are not a representative sample of all comedy Shorts.',ownChannelIncluded:false,ownChannelVideosIncluded:false,ownChannelCommentsIncluded:false},
           researchData:{
             videos:research.videos.slice().sort((a,b)=>(Number(b.views)||0)-(Number(a.views)||0)).slice(0,12).map(v=>({
@@ -364,7 +364,7 @@ $('#goGen').onclick=async()=>{
             'Videoları süre, video yaşı ve kanal büyüklüğü bakımından uygun gruplarda kıyasla. Video yaşı ve dağıtım farklılıklarını not et. Başarı ve zayıflık yalnızca gözlenen örneklem içinde söylenebilir; izlenme/abone oranı tek başına neden-sonuç değildir.',
             'Yorumları yalnızca aynı tam YouTube video ID’sinin commentSample alanıyla eşleştir. Yorumlar relevance sıralı küçük örneklemdir; tüm izleyicileri temsil etmez. Başlık veya yorumdan sahne uydurma. Görsel içerik gerçekten incelenmediyse bunu açıkça belirt.',
             'Önceden tanımlı mizah mekanizması kataloğu, konu ailesi, başarı formülü veya keyfî eşik kullanma. Veri desteklemiyorsa “bilinmiyor” de.',
-            'Bu paket yalnızca trend keşfidir. Nihai konu, yeni video fikri veya çekim senaryosu seçme; kendi kanal verisi bu pakette yoktur.',
+            'Bu pakette kendi kanal verisi olmasa da mutlaka tek özgün komedi fikri ve tam 10 saniyelik video promptu üret. Trend ölçümlerini destekleyici sinyal olarak ayır; veri eksikliği yaratıcı çıktıyı engellemez.',
             'Başlık, thumbnail, görüntülenme veya yorumdan sahne uydurma. Gerçek kareler/gözle doğrulanmış sahne notları yoksa görsel mekanizmayı bilinmiyor olarak işaretle.',
             'Çıktı: gözlenen ölçümler; örneklem ve seçilim yanlılığı; video yaşı/süre/kanal büyüklüğü sınırlamaları; tam video ID ile eşleşen yorumların sınırlı anlamı; sahne analizi için eksik kanıt.'
           ]
@@ -399,7 +399,7 @@ $('#goKan').onclick=async()=>{
     busy(el,'Videolar analiz ediliyor…');
     const vs=(await details(ids.slice(0,want))).filter(v=>v.sec<=180).sort((a,b)=>b.date-a.date);
     if(!vs.length){busy(el,'Bu kanalda Shorts benzeri (≤3 dk) video bulunamadı.');return}
-    vs.forEach(v=>{v.ok8=v.sec>=7&&v.sec<=9;v.en=isEn(v.title);v.slot=inSlot(v.date);v.score=(v.ok8?1:0)+(v.en?1:0)+(v.slot?1:0)});
+    vs.forEach(v=>{v.ok10=v.sec>=9&&v.sec<=11;v.en=isEn(v.title);v.slot=inSlot(v.date);v.score=(v.ok10?1:0)+(v.en?1:0)+(v.slot?1:0)});
     const pct=f=>Math.round(vs.filter(f).length/vs.length*100)+'%';
     const byDay=GUN.map((g,i)=>{const a=vs.filter(v=>v.date.getDay()===i);return{g,n:a.length,avg:avg(a.map(v=>v.views))}});
     const mx=Math.max(...byDay.map(d=>d.avg),1);
@@ -409,18 +409,18 @@ $('#goKan').onclick=async()=>{
     el.innerHTML=`<h2>${esc(c.snippet.title)}</h2>
     <div class="stats">${stat(fmt(+c.statistics.subscriberCount||0),'abone')}${stat(vs.length,'analiz edilen video')}${stat(fmt(median(vs.map(v=>v.views))),'medyan izlenme')}${stat(fmt(avg(vs.map(v=>v.views))),'ortalama izlenme')}</div>
     <h2>Manifesto uyumu</h2>
-    <div class="stats">${stat(pct(v=>v.ok8),'8 sn (7–9 sn)')}${stat(pct(v=>v.en),'İngilizce başlık')}${stat(pct(v=>v.slot),'Çar/Paz 18–20 arası yayın')}</div>
+    <div class="stats">${stat(pct(v=>v.ok10),'10 sn (9–11 sn)')}${stat(pct(v=>v.en),'İngilizce başlık')}${stat(pct(v=>v.slot),'Çar/Paz 18–20 arası yayın')}</div>
     <p class="note">En hızlı giden video: ${link(best)} (${fmt(best.vpd)} izlenme/gün). ${cmp}</p>
     <h2>Yayın gününe göre ortalama izlenme</h2>
     <div class="bars">${byDay.map(d=>`<div class="bar-row"><span>${d.g}</span><span><i style="width:${d.avg/mx*100}%"></i></span><span>${fmt(d.avg)} (${d.n})</span></div>`).join('')}</div>
-    <h2>Videolar</h2><div class="wrap"><table id="tk"><tr><th>Başlık</th><th>İzlenme</th><th>İzl./gün</th><th>Beğeni %</th><th>Süre</th><th>Yayın</th><th>8 sn</th><th>EN</th><th>Slot</th></tr>
-    ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${fmt(v.vpd)}</td><td>${v.views?(v.likes/v.views*100).toFixed(1):'–'}</td><td>${v.sec} sn</td><td>${GUN[v.date.getDay()]} ${v.date.toLocaleDateString('tr-TR')} ${String(v.date.getHours()).padStart(2,'0')}:00</td>${[v.ok8,v.en,v.slot].map(x=>`<td class="${x?'y':'n'}">${x?'✓':'✗'}</td>`).join('')}</tr>`).join('')}</table></div>
+    <h2>Videolar</h2><div class="wrap"><table id="tk"><tr><th>Başlık</th><th>İzlenme</th><th>İzl./gün</th><th>Beğeni %</th><th>Süre</th><th>Yayın</th><th>10 sn</th><th>EN</th><th>Slot</th></tr>
+    ${vs.map(v=>`<tr><td class="t">${link(v)}</td><td>${fmt(v.views)}</td><td>${fmt(v.vpd)}</td><td>${v.views?(v.likes/v.views*100).toFixed(1):'–'}</td><td>${v.sec} sn</td><td>${GUN[v.date.getDay()]} ${v.date.toLocaleDateString('tr-TR')} ${String(v.date.getHours()).padStart(2,'0')}:00</td>${[v.ok10,v.en,v.slot].map(x=>`<td class="${x?'y':'n'}">${x?'✓':'✗'}</td>`).join('')}</tr>`).join('')}</table></div>
     <p class="note">Tutma oranı (retention) ve loop verisi yalnızca kanal sahibi girişiyle YouTube Analytics API'den alınabilir; bunun için 3. sekmeyi kullan. Yayın saatleri tarayıcının yerel saat dilimine göredir.</p>
     <p><button class="ghost" id="copyKan">Tabloyu kopyala</button> <button class="ghost" id="csv">CSV indir</button></p>`;
     $('#copyKan').onclick=()=>copyTable('#tk','#copyKan');
     $('#csv').onclick=()=>{
-      const rows=[['baslik','izlenme','begeni','yorum','sure_sn','yayin','8sn','ingilizce','slot','url'],
-        ...vs.map(v=>[v.title,v.views,v.likes,v.comments,v.sec,v.date.toISOString(),v.ok8,v.en,v.slot,'https://youtu.be/'+v.id])];
+      const rows=[['baslik','izlenme','begeni','yorum','sure_sn','yayin','10sn','ingilizce','slot','url'],
+        ...vs.map(v=>[v.title,v.views,v.likes,v.comments,v.sec,v.date.toISOString(),v.ok10,v.en,v.slot,'https://youtu.be/'+v.id])];
       const csv=rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
       const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));a.download='kanal-analiz.csv';a.click();
     };
@@ -544,7 +544,7 @@ $('#goOwn').onclick=async()=>{
     <details class="note"><summary>Teknik teşhis (istatistikler neden 0?)</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(analyticsDebug,null,2)}</pre></details>
     <p class="note">Hazır bir başarı eşiği kullanılmaz. Videoları kendi karşılaştırılabilir dönemleri içinde değerlendir; %100 üzeri izlenen kısım, tekrar izleme için olası bir sinyaldir, tek başına başarı nedeni değildir.</p>
     <h2>Konu Motoru · trend sinyali + kendi kanalım</h2>
-    <p class="note">Sıra: önce <b>Trend keşfi</b> bölümünde güncel aramayı çalıştır, sonra burada Google ile kendi kanal verini getir, en son aşağıdaki düğmeye bas. Paket kendi kanalının gerçek performansını, trend aramasından gelen sınırlı dış sinyalleri ve fikir geçmişini birleştirir. Dış videoların sahne mekanizması çıkarılmaz; trend verisi yalnızca keşif sinyalidir. Konu Motoru paketinde <b>3. adım</b> her adayın mekanizmasını sabit şablonla çıkarır; <b>5. adım</b> beş maddelik Mizah Kapısı ve 50 puanlık öz-eleştiriyi uygular (40 altı aday nihai öneri olamaz). Kanal adı/markası konu filtresi değildir: market, boşaltma veya araba zorunluluğu yoktur. Paket otomatik kopyalanır; istersen dosya olarak da indirebilirsin. Bu sayfa kendi başına yapay zekâ sonucu üretmez; paketi bu sohbete gönderdiğinde analizi ben yaparım. Yorumlar kapalıysa örnek alınamayabilir.</p>
+    <p class="note">Sıra: trend aramasını ve kendi kanal verini getir, sonra paket oluştur. Paket gerçek verileri komedi üretimine yardımcı bağlam olarak iletir. Motor her durumda tek güçlü komedi fikri ve tam video promptu üretmelidir; sabit mizah kalıbı, puan kapısı veya otomatik ret kullanmaz. Zorunlu video koşulları yalnızca 10 saniye, dikey 9:16 Shorts ve diyalogsuz ASMR odaklı sestir. Bu sayfa kendi başına yapay zekâ modeli çalıştırmaz; paketi sohbet içinde kullan.</p>
     <p><button id="copyCompare">Konu Motoru paketini oluştur ve kopyala</button> <button id="downloadCompare" class="ghost" disabled>Konu paketini indir (.txt)</button></p>
     <div id="commentDiag" class="note" aria-live="polite">Yorum teşhisi henüz çalıştırılmadı. Yukarıdaki düğmeye bastığında yorumların alınıp alınmadığı ve varsa API hatası burada gösterilecek.</div>
     <textarea id="compareTxt" readonly rows="8" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
@@ -639,11 +639,11 @@ $('#goOwn').onclick=async()=>{
           note:'Analytics-period metrics and public lifetime counters are separate. Missing retention is unknown, not zero.'
         };
         const txt=[
-          "ROL: Veri analisti + yaratıcı yönetmen + acımasız kalite hakemi. Kanalın gerçek performansından öğren; çok fikir sıralama, tek güçlü ve test edilebilir bir sonraki video seç.",
+          "ROL: Komedi yaratıcısı + veri analisti. Öncelik komedi üretmek; her çalıştırmada bir güçlü fikir ve doğrudan kullanılabilir tam video promptu ver. Veri eksikliği, puanlama veya katı bir yaratıcı formül yüzünden çıktıyı durdurma.",
           "",
           "MARKA KURALI: “Boş Dükkân” yalnızca kanal adı/markasıdır; konu filtresi değildir. Market, dükkânın boşalması, alışveriş arabası, çalışan veya ürün toplama ZORUNLU DEĞİL. Bunları yalnızca seçilen fikrin doğal parçasıysa kullan; sırf kanal adı yüzünden konuya zorlama.",
-          "ASIL HEDEF: Diyalogsuz, dünya çapında anlaşılabilir görsel mizah. Mizah insan davranışından, beklenti/karar/hareket ile gerçek sonucunun ilişkisinden doğsun. Doğal ASMR/foley yalnızca ses katmanıdır; içerik hedefi görsel mizah ve komik sonuçtur.",
-          "SABİT ÇEKİM SINIRLARI: 8 saniye, dikey 9:16, diyalog yok, İngilizce başlık; ilk 0,3 saniyede net görsel kanca; doğal neden-sonuç; gerçekçi fizik; tamamlanmış ve tek bakışta anlaşılan final. Zorlama tezat, rastgele absürtlük, imkânsız fizik, yalnızca nesneyi büyütüp/değiştirme, açıklama yazısı ve yarım bırakılmış loop yok.",
+          "ASIL HEDEF: En komik görsel fikri üret. İnsan davranışı, belirli bir duygu, gerçekçilik veya absürtlük düzeyi seçeneklerdir; hiçbiri zorunlu değildir. Karakter, nesne, mekân, oyunculuk, kurgu ve komedi türünü serbestçe seç. Otomatik ret filtresi kullanma.",
+          "TEK ZORUNLU VİDEO KOŞULLARI: Tam 10 saniye; dikey 9:16 YouTube Shorts; diyalog yok ve ASMR odaklı ses. Bunların dışında komediyi güçlendirecek her yaratıcı seçim serbesttir.",
           "",
           "A. KENDİ KANALIM — BİRİNCİL PERFORMANS KANITI:",
           JSON.stringify(ownDataForPrompt,null,2),
@@ -654,20 +654,20 @@ $('#goOwn').onclick=async()=>{
           "C. GÖZLE DOĞRULANMIŞ SAHNE NOTLARI:",
           sceneNotes||'Sahne notu yok. Rakiplerin gerçek görsel mekanizması bilinmiyor; başlık, küçük resim, izlenme veya yorumlardan sahne uydurma.',
           "",
-          "D. TEKRAR ENGELİ / FİKİR GEÇMİŞİ:",
-          ideaHistory||'Fikir geçmişi girilmedi. Konuşmada açıkça reddedilmiş fikirleri tekrar önerme; bilinmeyen geçmişi kayıtlı gerçek gibi sunma.',
+          "D. ÖNCEKİ FİKİRLER — BAĞLAM:",
+          ideaHistory||'Fikir geçmişi girilmedi. Varsa yalnızca bağlam olarak kullan; yeni fikri yasaklama veya üretimi durdurma.',
           "",
-          "ZORUNLU ÇALIŞMA YÖNTEMİ — SIRAYI KORU; 3. VE 5. ADIMLAR ZORUNLUDUR:",
+          "KOMEDİ ÜRETİM GÖREVİ — aşağıdaki veri ilkeleri yaratıcı üretimi durduramaz:",
           "1) KANIT SINIRLARI: Kaynağı, tarih aralığını, örneklem büyüklüğünü ve eksik alanları bildir. Kendi kanalında averageViewSeconds/averageViewedPercent/likesInWindow/subscribersGainedInWindow seçili Analytics dönemine; publicLifetimeViews tüm ömre aittir. Bu zaman pencerelerini karıştırma. Rakiplerde ortalama izleme metrikleri yoksa tahmin etme.",
           "2) PERFORMANS VE YORUM ANALİZİ: Kendi videolarını kendi aralarında kıyasla. İzlenme, ortalama izleme süresi, ortalama izlenen yüzde, beğeni oranı ve abone kazanımını ayrı sinyaller olarak incele. Küçük örneklemi, video yaşını ve tarih penceresini not et; korelasyonu neden-sonuç gibi sunma. Yorumları yalnızca tam video ID'sine bağlı kayıttan kullan; küçük ve relevance sıralı örneklemin tüm izleyicileri temsil etmediğini belirt. Yorumlar sahne karesi veya görsel kanıt değildir.",
-          "3) MEKANİZMA ÇIKARIMI — HER ADAY İÇİN BU ŞABLONU DOLDUR: Davranış | Duygu | İhlal (hangi norm) | Neden zararsız | Ters köşe nerede (sn) | Tek absürt | Final. Her alan somut, sahnede görülebilir bir davranışla açıklansın; 'komik', 'absürt' veya 'beklenmedik' tek başına açıklama sayılmaz. Var olan bir videonun gerçek mekanizmasını yalnızca gözle doğrulanmış, zaman damgalı sahne notlarından çıkar. Sahne notu yoksa o videonun mekanizmasını 'bilinmiyor' yaz; başlık, küçük resim, izlenme veya yorumdan sahne uydurma. Yeni özgün fikrin mekanizması ise ölçülmüş gerçek değil, test edilmemiş yaratıcı hipotez olarak işaretlensin.",
-          "4) ADAY ÜRETİMİ: Ölçülen kanal performansı hangi biçimlerin izleyici davranışıyla birlikte görüldüğüne dair sınırlı yön gösterir; sahne mekanizmasını kanıtlamaz. İnsanların gündelik kararları, inadı, gururu, ikramı, sahiplenmesi, vicdanı veya beklenti-sonuç ilişkilerinden birden çok adayı içeride üret. Kanal adı, market, dükkân, belirli bir mekân veya nesneyi konu şartı yapma. Sabit konu/mizah kataloğu ya da verinin desteklemediği başarı formülü kullanma. Rakip sahne notlarının eksikliği özgün fikir üretimini durdurmaz; çıkarımı hipotez diye etiketle.",
-          "5) MİZAH KAPISI + 50 PUANLIK ÖZ-ELEŞTİRİ — ZORUNLU ELEME: Önce her aday için aşağıdaki 5 soruya EVET/HAYIR ve sahneye dayalı kısa kanıt ver: (a) İhlal ilk 3 saniyede açıkça görülüyor mu? (b) Gerçek zarar, aşağılama, iğrenme veya korku olmadan zararsız mı? (c) İhlal ile zararsız çerçeve aynı anda okunabiliyor mu? (d) Gerçekçi dünyanın içindeki tek belirgin absürtlük mü? (e) Diyalog veya yazı olmadan anlaşılabiliyor mu? Beşinin tamamı EVET değilse puanlama yapma; düzelt veya ele. Kapıyı geçen adaya 0–10 puan ve gerekçe ver: Kanca (ihlâl görünürlüğü ilk 0,3–1 sn), Ters köşe (beklentiyi finalde bozması), Çözüm kolaylığı (anlamın yaklaşık 1 sn'de çözülmesi), Doğallık (tepkinin karaktere ve duruma uygun, inandırıcı olması; ciddi, şaşkın, telaşlı veya üzgün tepki sahneye göre seçilebilir; deadpan zorunlu değildir), Duygu (tek net insani duygu). Toplam /50 hesapla; 40/50 altını nihai aday olarak sunma. Gerçek zarar/utandırma, iğrenme-korku, yalnızca sevimli sahne, duygusuz saf gag, birden fazla nesneyi izleme zorunluluğu, açıklama ihtiyacı, tekrar mekanizması veya yarım final kırmızı bayraktır; varsa reddet ya da temelden düzelt. Kanca/ihlâl ilk saniyede, ters köşe son yüzde 20'de olmalı; final somut ve tamamlanmış, anlatı en fazla 3–4 vuruş, fiziksel hareket zinciri olabildiğince basit olmalı. Mizah puanı izlenme tahmini değildir ve başarı garantisi vermez.",
-          "6) ACIMASIZ SEÇİM: Adayları içeride karşılaştır; kullanıcıya fikir listesi dökme. Yalnızca Mizah Kapısı'nı geçen, 40/50 veya üstü alan ve üretilebilirlik kontrollerini geçen tek güçlü adayı seç. Hiçbiri geçmezse zayıf bir fikri zorla seçmek yerine 'bu turda geçerli aday yok' de ve en önemli kusuru belirt.",
-          "7) ÜRETİLEBİLİRLİK VE SABİT FORMAT: 8 saniye, dikey 9:16, diyalog ve müzik yok, İngilizce başlık, doğal ASMR/foley. İlk 0,3 saniyede okunur görsel kanca; gerçekçi fizik ve neden-sonuç; en fazla 3–4 vuruş; açıklayıcı yazı yok; nesneyi sırf büyütmek/değiştirmek yok; son karede tek bakışta anlaşılan tamamlanmış sonuç. Karmaşık ip, kayan tabak ve birbirini çeken nesneler gibi AI üretiminde güvenilmez zincirleri azalt.",
-          "8) NİHAİ ÇIKTI: Ölçülmüş kanal bulgularını ve örnek sayısını; gözle doğrulanmış sahne kanıtının durumunu; 3. adımın mekanizma şablonunu; 5. adımda beş EVET/HAYIR kararını, gerekçelerini ve 5 ayrı puanı/toplamını; kırmızı bayrak kontrolünü; kanıt ile hipotez ayrımını göster. Kapı ve 40/50 eşiği geçilmişse tek fikir ver: İngilizce başlık, ilk kare tarifi, 0.0–0.3, 0.3–1.5, 1.5–4.5, 4.5–8.0 saniyelik eylem/kamera/doğal ses, tamamlanmış final, üretim riski ve neden diğer yaklaşımların elendiği. Geçerli aday yoksa çekim promptu uydurma.",
-          "9) YAYIN SONRASI KALİBRASYON: Görüntülenme, ortalama izleme süresi, izlenen yüzde, beğeni/yorum oranını ve abone kazanımını ayrı değerlendir; karşılaştırılabilir veri pencerelerini kullan. İnsanların yorumlarda alıntıladığı sahne anlarını not et. Rubrik puanlarını gerçek sonuçlarla zaman içinde karşılaştır; az sayıda videodan nedensellik veya evrensel kural çıkarma.",
-          "10) KANIT ETİKETLERİ: Her önemli çıkarımı ölçülmüş bulgu / gözle doğrulanmış sahne / yorumdan destek alan yorum / test edilmemiş yaratıcı hipotez şeklinde etiketle. Görsel kanıt, performans sinyali ve mizah puanını birbirinin yerine kullanma.",
+          "3) İSTEĞE BAĞLI MEKANİZMA DÜŞÜNCESİ: Fikri geliştirmeye yardımcı oluyorsa davranış, beklenti, duygu, absürtlük veya ters köşe gibi öğeleri düşün. Sabit şablona doldurmak zorunda değilsin; tek bir duygu veya mekanizma aramak zorunlu değil.",
+          "4) KOMEDİ ADAYLARI: İçeride farklı, cesur ve yaratıcı komedi yaklaşımlarını dene. Kanal adı, nesne, mekân, insan davranışı veya tek bir mizah türünü konu şartı yapma. Önceki fikirleri yalnızca bağlam olarak kullan. Veri eğilimleri ilham olabilir; özgün fikrin sınırı değildir.",
+          "5) KALIP VE PUAN KAPISI YOK: Mizah Kapısı, evet/hayır elemesi, 50 puanlık rubrik veya 40/50 eşiği kullanma. Bir fikri yalnızca gerçekçilik, absürtlük, duygu, oyunculuk, karmaşıklık, yenilik ya da bir teoriye uymama gerekçesiyle eleme.",
+          "6) MUTLAKA BİR FİKİR VER: Birkaç adayı kendi içinde karşılaştırıp en komik bulduğun tek adayı seç. Hiçbir aday kusursuz görünmese bile en iyi seçeneği geliştir ve teslim et; 'geçerli aday yok' diyerek komedi üretimini bırakma.",
+          "7) TEK FORMAT SINIRI: Tam 10 saniye, dikey 9:16 Shorts, diyalogsuz ve ASMR odaklı ses. İlk kare, tempo, karakter tepkisi, fizik, stil, ses ayrıntıları, kesmeler ve final için başka zorunlu kural yok; komediyi güçlendiren çözümü serbestçe seç.",
+          "8) NİHAİ ÇIKTI: Önce gerekiyorsa gerçek veri bulgularını ve sınırlamalarını çok kısa belirt; ardından tek komedi fikri, neden komik olduğu, 10 saniyenin tamamını kapsayan sahne akışı ve doğrudan kopyalanabilir tam video üretim promptu ver. Promptta yalnızca üç zorunlu koşulu açıkça koru. İngilizce başlık, ilk 0,3 saniyede kanca, belirli zaman bölümleri, tek duygu, gerçekçi fizik, bitmiş final veya puanlama şart değil.",
+          "9) YAYIN SONRASI ÖĞRENME: Gerçek görüntülenme, ortalama izleme süresi, izlenen yüzde, beğeni/yorum ve abone kazanımı verilerini ayrı değerlendir. Bunlar bir sonraki komedi fikrine yardımcı olur; evrensel kural, başarı garantisi veya yaratıcı veto üretmez.",
+          "10) KANIT DÜRÜSTLÜĞÜ: Ölçülmüş veri, gerçekten gözlemlenmiş sahne ve yeni kurmaca fikirleri birbirinden ayır. Bir rakip videonun sahnesini izlemediysen izlenmiş gibi anlatma; bu durum yeni komedi fikri üretmeye engel değildir.",
         ].join("\n");
         const ta=$('#compareTxt');ta.value=txt;ta.style.display='block';ta.select();
         const downloadBtn=$('#downloadCompare');downloadBtn.disabled=false;downloadBtn.onclick=()=>{const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='bos-dukkan-analiz-paketi.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);};
