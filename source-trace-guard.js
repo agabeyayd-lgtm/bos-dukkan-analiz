@@ -71,7 +71,7 @@
       line.startsWith("olculmus bulgu ") &&
       line.includes(normalizeText(anchor.videoId)) &&
       line.includes(normalizeText(anchor.title)) &&
-      line.includes(normalizeText(anchor.metricLabel)
+      line.includes(normalizeText(anchor.metricLabel))
     )) || "";
     test("measured-finding-line", Boolean(measuredLine),
       "“ÖLÇÜLMÜŞ BULGU:” başlıklı ayrı kaynak satırı eksik.");
