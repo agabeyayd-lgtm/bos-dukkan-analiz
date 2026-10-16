@@ -245,7 +245,7 @@ function currentStateSnapshot(videos){
   if(eligible.length<8)return {available:false,reason:'Yaşı en az 2 gün olan video sayısı 8’in altında ('+eligible.length+'); izlenen/izlenmeyen ayrımı için örneklem çok küçük. Aramayı genişlet (daha uzun süre, daha fazla video).',eligibleCount:eligible.length,excludedTooNew:tooNew};
   const sorted=[...eligible].sort((a,b)=>Number(b.viewsPerDay)-Number(a.viewsPerDay));
   const q=Math.max(3,Math.floor(sorted.length/4));
-  const slim=v=>({id:v.id,title:v.title,channel:v.channel,subscribers:v.subscribers??null,views:v.views??null,viewsPerDay:Number(v.viewsPerDay),ageDays:v.ageDays,seconds:v.seconds??null,likeRate:v.likeRate??null});
+  const slim=v=>({id:v.id,title:v.title,channel:v.channel,subscribers:v.subscribers??null,views:v.views??null,viewsPerDay:Number(v.viewsPerDay),ageDays:v.ageDays,seconds:v.seconds??v.sec??null,likeRate:v.likeRate??null});
   return {
     available:true,
     definition:'Örneklem: aramanın döndürdüğü videolardan yaşı en az 2 gün olanlar (2 günden yeni olanlar günlük izlenme gürültülü olduğu için dışarıda). Sıralama izlenme/gün (video yaşına göre düzeltilmiş). watched = en yüksek çeyrek, notWatched = en düşük çeyrek.',
@@ -672,7 +672,7 @@ $('#goOwn').onclick=async()=>{
           note:'Analytics-period metrics and public lifetime counters are separate. Missing retention is unknown, not zero.'
         };
         // Performans sinyallerini kod tarafında ayrı ayrı hesapla; modelin ham JSON'dan tek bir belirsiz "kazanan" çıkarmasına bırakma.
-        const creativeMetricRows=(ownDataForPrompt.videos||[]).filter(v=>v&&v.analyticsAvailable);
+        const creativeMetricRows=own.filter(v=>v&&v.analyticsAvailable);
         const bestCreativeMetric=(field,descending=true)=>{
           const valid=creativeMetricRows.filter(v=>v[field]!==null&&v[field]!==undefined&&Number.isFinite(Number(v[field])));
           valid.sort((a,b)=>(Number(a[field])-Number(b[field]))*(descending?-1:1));
