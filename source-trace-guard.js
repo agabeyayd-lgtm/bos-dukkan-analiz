@@ -76,6 +76,8 @@
       "Gerçek ölçüm değeri çıktıda görünmüyor: " + anchor.formattedValue + ".");
     test("measurement-window", normalized.includes(normalizeText(anchor.measurementWindow)),
       "Ölçüm penceresi/sayaç sınırı tam belirtilmemiş: " + anchor.measurementWindow + ".");
+    test("idea-bridge", normalized.includes("veriden fikre gecis") && /yonlendirdi|cikarim|baglanti/.test(normalized),
+      "Kaynak kaydından fikre geçiş açıklaması yok; veri yalnızca sonradan eklenmiş olabilir.");
     test("creative-leap", /yaratici sicrama|veriden cikmadi|yaratici deney/.test(normalized),
       "Verinin yönlendirdiği kısım ile yaratıcı sıçrama açıkça ayrılmamış.");
     test("limits", /kanitlam|nedensellik|neden sonuc|kanit degil|ispatlamaz/.test(normalized),
