@@ -38,3 +38,11 @@ Deadpan, doğal veya abartılı oyunculuk, absürt/gerçeküstü komedi, fizikse
 ## Panelin teknik sınırı
 
 Panel veriyi toplar, farklı metriklerdeki liderleri kodla hesaplar ve kopyalanabilir talimat paketine dönüştürür; kendi başına yapay zekâ modeli çalıştırmaz. Çıktı kalitesi sohbet modeline de bağlıdır. CI, JavaScript sözdizimini ve kritik motor sözleşmesinin paket kodunda bulunmasını denetler; komedinin kalitesini otomatik kanıtlamaz.
+
+
+## Kaynak izi için programatik kontrol
+Kaynak kaydı fikir üretilmeden önce kodla sabitlenir: öncelik seçili dönem izlenmesi liderindedir; o yoksa ölçülmüş gözlenen günlük hız; Analytics metriği yoksa kamusal ömür boyu toplam izlenme yalnızca açıkça bu sayaç diye etiketlenerek kullanılır. Veri yoksa hayali kayıt oluşturulmaz ve fikir üretimi yine devam eder.
+
+Kopyalanan AI yanıtı paneldeki denetleyiciye geri yapıştırılabilir. Denetleyici, sabit video ID'si ve başlığını, metrik adını/değerini/penceresini, yaratıcı sıçrama açıklamasını, kanıt sınırını ve “test edilmemiş yaratıcı hipotez” etiketini arar. Bunlardan biri yoksa çıktı kaynak izi bakımından geçmez. Bu, modelin gizli muhakemesini veya fikrin başarı nedenini otomatik kanıtlamaz; yalnızca denetlenebilir kaynak atfının eksiksizliğini garanti eder.
+
+Panel veriyi toplar ve kopyalanabilir talimat paketine dönüştürür; kendi başına yapay zekâ modeli çalıştırmaz. CI, JavaScript sözdizimi, kaynak-kontrol yardımcı fonksiyonları ve motor sözleşmesini test eder; komedi kalitesini otomatik kanıtlamaz.
