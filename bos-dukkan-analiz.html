@@ -271,15 +271,15 @@ function askClaude(vs,q){
     "ÖNCEKİ FİKİRLER / YALNIZCA BAĞLAM:",
     avoid,
     "",
-    "KENDİ KANALIMI BU AŞAMADA DAHİL ETME. Yalnızca bu aramada bulunan harici videoları analiz et; kendi kanal metrikleri, videoları ve yorumları kullanılmayacak.",
+    "BU ÖN ANALİZ PAKETİ YALNIZCA TREND VERİSİ TAŞIR: Kendi kanal ölçümleri bu pakette bulunmayabilir. Elindeki trend verisini yardımcı sinyal olarak kullan ama buna rağmen mutlaka tek komedi fikri ve tam prompt üret.",
     "GÖREV — veriyi yardım için kullan; komedi üretimini hiçbir formül, teori veya eleme kapısıyla sınırlandırma:",
-    "1) Önce gerçek ölçümleri göster: veri kaynağı, örneklem sayısı, zaman aralığı ve eksik alanlar. İzlenme/abone oranını, izlenen yüzdeyi ve ortalama izleme süresini farklı metrikler olarak tut; birbirinin yerine kullanma.",
-    "2) Başarılı ve zayıf videoları kendi uygun karşılaştırma grubuyla kıyasla. Video yaşı, süre, kanal büyüklüğü ve dağıtım farklarını hesaba kat. Tek örnekten kural çıkarma; korelasyonu neden-sonuç gibi sunma.",
+    "1) Veriyi kısaca tara; yalnızca fikri seçmeye gerçekten yardımcı olan ölçümleri belirt. Eksik metriği tahmin etme ve uzun veri raporuyla komediyi geciktirme.",
+    "2) Mümkün olduğunda videoları yaş, süre ve kanal büyüklüğü bakımından karşılaştır. Tek örnekten kesin başarı kuralı çıkarma; ama veri az diye fikir üretimini durdurma.",
     "3) Yorumları yalnızca doğru video ID'sine bağlı olduklarında kullan. Yorum örneklerini tüm izleyicilerin temsili sayma; sahne ayrıntılarını başlık veya yorumdan uydurma.",
     "4) Sabit bir mizah mekanizması listesi, önceden seçilmiş konu ailesi, elle yazılmış başarı formülü veya keyfî puan eşiği dayatma. Verilerde görülen örüntüleri kanıt gücüyle birlikte çıkar; veri desteklemiyorsa 'bilinmiyor' de.",
-    "5) Verileri ve belirsizlikleri kısa raporla; ardından mutlaka tek özgün komedi fikri ve tam video promptu üret.",
+    "5) ANA TESLİMAT: Her zaman önce tek en iyi komedi fikrini, 10 saniyelik sahne akışını ve doğrudan kopyalanabilir video promptunu ver. Veriler/sınırlamalar yalnızca gerekiyorsa kısa not olarak eklensin.",
     "6) Tek güçlü komedi fikri seçip tam 10 saniyelik video promptuyla teslim et; sahne verisi eksikliği buna engel değildir.",
-    "7) Yayın sonrası ölçüm planı ver: hangi metrikleri mevcut kanal tabanıyla karşılaştıracağımızı ve hangi sonucun yeniden test gerektireceğini belirt. Başarı garantisi verme; tam kanal manifestosu bu panele bağlı değilse bunu saklama."
+    "7) Başarı tahmini garanti değildir. İstenirse, yayın sonrası gerçek verinin nasıl değerlendirileceğini tek cümleyle belirt; asıl çıktı komedi fikri ve prompttur."
   ].join('\n');
   const ta=$('#askTxt');ta.value=txt;ta.style.display='block';ta.select();
   const done=ok=>{$('#ask').textContent=ok?"Kopyalandı ✓ Claude'a yapıştır":'Metni elle kopyala (aşağıda)'};
