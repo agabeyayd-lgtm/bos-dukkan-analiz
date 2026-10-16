@@ -18,14 +18,14 @@ Bunun dışında sabit mizah türü, fizik/gerçekçilik şartı, oyunculuk stil
 - Global YouTube arama örneklemi en fazla 50 video gibi arama/sıralama sınırlamalarına sahiptir; tüm Shorts evrenini temsil etmez.
 - Her kaynak tam video ID'si ve resmi YouTube URL'si ile sabitlenir.
 
-## Video izlemeye alternatif doğrulama
-1. YouTube Data API kaydından video ID'si, tam başlığı, kanal, yayın tarihi, süre ve kamusal sayaçları kontrol et.
-2. Aynı video ID'si ve tam başlığı global webde ara.
-3. Mümkünse YouTube dışı bağımsız yazılı kaynak URL'si ekle. Kaynak bulunamazsa bunu açıkça yaz.
-4. Video gerçek görüntüleri incelenmediyse “görsel sahne doğrulanmadı” diye belirt. Başlık, kapak görseli, yorum veya sayaçtan görülmeyen eylem uydurma.
-5. Bu sınırlama komedi fikrinin ve tam promptun üretilmesini durdurmaz.
+## Video oynatmaya alternatif doğrulama
+1. Global konu paketini oluşturduğunda panel aynı global arama içinden ilk üç uygun kayıtta otomatik storyboard/kare sayfası arar. Bulursa kare sayfalarının URL'lerini prompta ekler ve önizlemesini gösterir.
+2. Bu bağlantılar, web erişimli görsel asistanın kaynak videoyu oynatmadan kareleri incelemesi için hazırlanır. Kullanıcının videoyu açması, izlemesi veya ekran kaydı alması gerekmez.
+3. Storyboard bulunamazsa panel yine tam global kaynak paketini üretir. Asistan aynı video ID'sini/tam başlığını global webde çapraz kontrol etmeli; mümkünse YouTube dışı bağımsız yazılı kaynak vermelidir.
+4. Yazılı kaynak bulunamazsa bu açıkça söylenir. Storyboard veya kaynak metinleri görünmeyen sahne dizisini kanıtlamaz. Görseller gerçekten incelenemiyorsa “görsel sahne doğrulanmadı” yazılır; başlıktan/izlenmeden eylem uydurulmaz.
+5. Hiçbir eksik üretimi durdurmaz: sonuç yine tek özgün fikir ve tam 10 saniyelik 9:16 diyalogsuz, ASMR odaklı prompttur.
 
-Global webde yazılı kaynak bulmak, videonun kimliğini veya geniş öncülünü çapraz kontrol etmeye yarar; görülmeyen görsel sahne dizisini kanıtlamış sayılmaz.
+Storyboard otomatik görsel kontrol için bir alternatiftir; bağımsız web araması kimlik ve bağlam doğrulamasıdır. İkisi de başarısız olursa sahne doğrulanmaz sayılır ama fikir üretimi devam eder.
 
 ## Sayaç ve örneklem sınırları
 - Kamusal toplam izlenme, yayımdan ölçüm zamanına kadar birikmiş sayıdır; seçili dönem Analytics metriği değildir.
