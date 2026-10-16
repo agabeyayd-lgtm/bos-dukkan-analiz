@@ -67,16 +67,19 @@
     }
     test("source-section", normalized.includes("bu fikir nereden cikti") || normalized.includes("fikrin kaynak izi"),
       "“Bu fikir nereden çıktı?” kaynak bölümü eksik.");
-    test("video-id", normalized.includes(normalizeText(anchor.videoId)),
-      "Kaynak kaydının tam YouTube video ID'si çıktıda yok veya farklı.");
-    test("video-title", normalized.includes(normalizeText(anchor.title)),
-      "Kaynak kaydının tam video başlığı çıktıda yok veya farklı.");
-    test("metric-label", normalized.includes(normalizeText(anchor.metricLabel)),
-      "Doğru ölçüm adı çıktıda yok: " + anchor.metricLabel + ".");
-    test("metric-value", numberTokenMatches(raw, anchor.value),
-      "Gerçek ölçüm değeri çıktıda görünmüyor: " + anchor.formattedValue + ".");
-    test("measurement-window", normalized.includes(normalizeText(anchor.measurementWindow)),
-      "Ölçüm penceresi/sayaç sınırı tam belirtilmemiş: " + anchor.measurementWindow + ".");
+    const measuredLine = normalizedLines.find(line => line.startsWith("olculmus bulgu ")) || "";
+    test("measured-finding-line", Boolean(measuredLine),
+      "“ÖLÇÜLMÜŞ BULGU:” başlıklı ayrı kaynak satırı eksik.");
+    test("source-line-video-id", measuredLine.includes(normalizeText(anchor.videoId)),
+      "Programın sabitlediği video ID'si ÖLÇÜLMÜŞ BULGU satırında yok.");
+    test("source-line-title", measuredLine.includes(normalizeText(anchor.title)),
+      "Programın sabitlediği tam video başlığı ÖLÇÜLMÜŞ BULGU satırında yok.");
+    test("source-line-metric", measuredLine.includes(normalizeText(anchor.metricLabel)),
+      "Programın sabitlediği gerçek metrik adı ÖLÇÜLMÜŞ BULGU satırında yok: " + anchor.metricLabel + ".");
+    test("source-line-value", numberTokenMatches(measuredLine, anchor.value),
+      "Programın sabitlediği ölçüm değeri ÖLÇÜLMÜŞ BULGU satırında yok: " + anchor.formattedValue + ".");
+    test("source-line-window", measuredLine.includes(normalizeText(anchor.measurementWindow)),
+      "Programın sabitlediği ölçüm penceresi/sayaç sınırı ÖLÇÜLMÜŞ BULGU satırında yok: " + anchor.measurementWindow + ".");
     test("idea-bridge", normalizedLines.some(line => line.startsWith("veriden fikre gecis ") && /yonlendirdi|cikarim|baglanti/.test(line)),
       "“VERİDEN FİKRE GEÇİŞ:” başlıklı ayrı satırda veri-fikir bağlantısı açıklanmamış.");
     test("link-strength", normalizedLines.some(line => line.startsWith("bagin gucu ") && line.includes("dolayli zayif bag")),
