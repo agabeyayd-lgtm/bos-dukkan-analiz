@@ -6,7 +6,7 @@
   "use strict";
   function normalizeText(value) {
     return String(value == null ? "" : value).normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .toLocaleLowerCase("tr-TR").replace(/[^a-z0-9]+/g, " ").trim().replace(/\s+/g, " ");
+      .toLocaleLowerCase("tr-TR").replace(/ı/g, "i").replace(/[^a-z0-9]+/g, " ").trim().replace(/\s+/g, " ");
   }
   function firstValid(candidates) {
     for (const candidate of candidates) {
