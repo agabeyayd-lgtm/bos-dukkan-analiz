@@ -26,6 +26,30 @@ jobs:
         run: |
           awk '/<script>/{inside=1; next} /<\/script>/{inside=0} inside' index.html > /tmp/panel-inline.js
           node --check /tmp/panel-inline.js
+      - name: Check topic-engine data and originality contract
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const required = [
+            ['computed performance summary', 'creativeEvidenceForPrompt'],
+            ['reach and metric separation', 'VERİDEN FİKRE GEÇİŞ'],
+            ['clean-run context reset', 'HER ÇALIŞTIRMADA SIFIRLAMA'],
+            ['title is not scene evidence', 'KONU İPUCU İLE SAHNE KANITINI AYIR'],
+            ['evidence labels', 'KANIT ETİKETİ'],
+            ['observed daily view pace', 'viewsPerObservedDay'],
+            ['current trend sample state', 'currentState:']
+          ];
+          for (const file of ['index.html', 'bos-dukkan-analiz.html']) {
+            const html = fs.readFileSync(file, 'utf8');
+            for (const [label, phrase] of required) {
+              if (!html.includes(phrase)) throw new Error(file + ': missing contract: ' + label);
+            }
+            if (!html.includes('Tam 10 saniye') && !html.includes('TEK ZORUNLU VİDEO KOŞULLARI')) {
+              throw new Error(file + ': required 10-second video format contract missing');
+            }
+            console.log('PASS ' + file + ': ' + required.length + ' topic-engine contracts present');
+          }
+          NODE
       - name: Prepare static panel
         run: |
           mkdir -p _site
