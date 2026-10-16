@@ -29,8 +29,10 @@ Fikir seçimi önce ölçülmüş kanal sinyali, sonra yaratıcı geliştirme s�
 - Eksik metrikler sıfır sayılmaz. Farklı ölçüm dönemleri ve ömür boyu sayaçlar birbirine karıştırılmaz.
 - Dış video görsel olarak izlenmediyse gerçek sahne mekanizması bilinmiyor olarak kalır.
 
-## Panel akışı ve teknik sınır
-Panel, veriyi toplar ve yukarıdaki kuralları içeren bir paket oluşturur; kendi başına yapay zekâ modeli çalıştırmaz. Kopyalanan paket sohbet içinde kullanılmalıdır.
+## Kaynak izi için programatik kontrol
+Konu Motoru, fikirden önce gerçek YouTube Analytics ölçümleri arasından bir kaynak kaydını kodla sabitler (öncelik: seçili dönemde en çok izlenen video; gerekirse günlük hız; son çare olarak ayrı etiketlenmiş kamusal ömür boyu izlenme). Bu kayıt pakete açık video ID'si, başlık, metrik, değer ve ölçüm penceresiyle eklenir.
+
+Model yanıtı geri yapıştırıldığında **Kaynak izini kontrol et** düğmesi bu alanların tümünü ve yaratıcı sıçrama/kanıt sınırı etiketlerini denetler. Zorunlu alanlar eksikse sonuç geçmez ve doğrulanmış sayılmaz. Kontrol kaynak kaydına doğru atıf yapıldığını garanti eder; modelin iç düşünce sırasını, semantik bağın kusursuzluğunu veya videonun başarıya ulaşacağını garanti edemez. Panel kendi başına yapay zekâ modeli çalıştırmaz.
 
 ## Dosyalar
 - `index.html`: GitHub Pages ana paneli.
