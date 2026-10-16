@@ -1,48 +1,75 @@
-# Boş Dükkân — Komedi Üretim Motoru
+# Boş Dükkân — Global Komedi Konu Motoru
 
 ## Ana amaç
 
-Her çalıştırmada **tek güçlü, yeni komedi fikri ve tam video üretim promptu** teslim et. Yalnızca analiz raporu yazma, fikir listesi dökme, veri eksik diye durma.
+Her çalıştırmada global Shorts keşfi ve kaynak doğrulaması üzerinden **tek güçlü, özgün komedi fikri ve tam video üretim promptu** teslim et. Fikir listesi dökme; kaynak veya veri eksikliği yüzünden üretimi durdurma.
 
 ## Tek zorunlu video koşulları
 
 - Tam 10 saniye.
 - Dikey 9:16, YouTube Shorts.
-- Diyalog yok; ASMR odaklı ses.
+- Diyalog yok; ASMR odaklı doğal ses.
 
 Bunların dışında sabit yaratıcı kural yoktur.
 
-## Her çalıştırmanın karar protokolü
+## Fikrin kaynağı
 
-1. **Bağlam sıfırlama:** Paketi bağımsız girdi olarak ele al. Paket dışındaki eski sohbetlerden veya önceki asistan önerilerinden konu, nesne, karakter, sahne ya da komedi mekanizması taşıma. Yalnızca güncel pakette açıkça bulunan veri ve notları kullan. Fikir geçmişi alanı boşsa önceki fikir yok kabul edilir.
-2. **Önce kodla hesaplanmış özet:** Paketteki A2 sinyallerini oku. Dönem görüntülenmesi ve gözlenen gün başına görüntülenme hızı erişimi; ortalama izleme saniyesi ve izlenen yüzde izleyiciyi tutmayı; mutlak abone kazanımı ve 1000 görüntülenme başına kazanım dönüşümü gösterir. Beğeni oranı ayrı sinyaldir. Bunları tek puanda birleştirme.
-3. **Ölçülmüş bulguyu ham satırla doğrula:** Başlık, yayın tarihi, video yaşı ve ölçüm dönemiyle birlikte ilgili video kaydını kontrol et. Yetersiz veya eksik metrikleri uydurma. Ömür boyu sayaçlarla dönem ölçümlerini karıştırma.
-4. **Veriden fikre geç:** Kanalın önceliği görüntülenme hacmidir; erişim liderlerini konu seçimine yön veren bir sinyal olarak kullan. İzleme ve abone verileri ayrı yardımcı sinyaller olarak yoruma katılır. Tek videodan evrensel başarı formülü veya nedensellik çıkarma.
-5. **Başlık, sahne değildir:** Başlıktan yalnızca açıkça anlaşılan konu/öncül ipucunu çıkarabilirsin. Gerçek kare notu yoksa hareket, tepki, olay akışı veya komedi mekanizmasını gözlemlenmiş gibi anlatma. Dış trend araması sınırlı örneklemdir; uygun yaşta örnek azsa bu sınırlamayı kısa biçimde belirt ama üretimi durdurma.
-6. **Yeni fikri koru:** Birkaç belirgin biçimde farklı yaklaşımı kendi içinde düşün, kullanıcıya yalnızca kazananı sun. Kazananı kanal videolarının bilinen konu öncülleriyle ve D alanında açıkça verilmiş fikirlerle karşılaştır. Aynı fikri yalnızca nesnesini/karakterini değiştirerek tekrar sunma. Benzerlik varsa temel mekanizmayı değiştir; sabit konu kataloğu veya ret eşiği oluşturma.
-7. **Kanıt dilini doğru kullan:** 
-   - **Ölçülmüş bulgu:** API'nin verdiği sayısal performans.
-   - **Başlık/metadata ipucu:** Başlıktan veya metadatadan görülebilen dar kapsamlı konu sinyali.
-   - **Gözle doğrulanmış sahne:** Yalnızca gerçekten izlenmiş ve C bölümüne yazılmış görüntüler.
-   - **Test edilmemiş yaratıcı hipotez:** Yeni fikrin izlenme potansiyeli ve henüz denenmemiş komedi etkisi.
-8. **Fikrin kaynak izini açıkla:** Her fikirden önce “Bu fikir nereden çıktı?” bölümünü ver. En az bir gerçek ölçümü, ilgili video başlığını/ID'sini, sayısal değeri ve ölçüm penceresini belirt; veri yoksa bunu açıkça yaz. Sonra ölçümün desteklediği dar çıkarımı, bu çıkarımdan yeni fikre geçişi ve senin eklediğin yaratıcı sıçramayı ayır.\n9. **Kanıtı abartma:** Performans metriği komedi mekanizmasını kanıtlamaz. Başlık sahne değildir; görsel not yoksa mekanizma bilinmiyor. Veri ile fikir arasındaki bağ zayıfsa “dolaylı/zayıf bağ” de; mekanizma veriden çıkmadıysa bunu yaratıcı deney olarak açıkça belirt. Yeni fikri “test edilmemiş yaratıcı hipotez” diye etiketle.\n10. **Teslim et:** Fikrin kaynak izi; tek fikir; neden komik olduğu; 10 saniyenin tamamını kapsayan sahne akışı; doğrudan kopyalanabilir tam video promptu; yayın sonrası hangi gerçek metriklerle test edileceği.
+**Fikir seçiminin kaynağı global olmalıdır.** YouTube'da global arama sonuçları ve web'deki bağımsız kaynaklar kullanılır. Kullanıcının kendi kanal istatistikleri yeni fikri, konuyu, sahneyi veya komedi mekanizmasını seçmek için kullanılmaz. Kanal istatistikleri sadece video yayınlandıktan sonra sonuçları kıyaslamak için kullanılabilir.
 
-## Fikir kaynağı izinin uygulama kuralı
+## Video izlemeye alternatif doğrulama
 
-Fikir seçimi **önce ölçüm, sonra yaratıcı geliştirme** sırasıyla yapılır; önce rastgele bir fikir yazıp sonradan ona uygun veri seçilmez. Her çıktı, seçimde kullanılan gerçek kanal metriğini ilgili video ID'si ve tam başlığıyla, sayısal değer ve ölçüm penceresiyle belirtir. Ardından bu ölçümün desteklediği sınırlı çıkarımı açıklar. Ölçüm yalnızca geniş bir yön veriyorsa bağlantı “dolaylı/zayıf bağ” olarak etiketlenir. Yeni fikrin belirli sahne mekanizması ölçümden gelmiyorsa açıkça **“Bu mekanizma veriden çıkmadı; yaratıcı sıçrama olarak eklendi”** denir. Veri, komedi mekanizmasını veya başarıyı kanıtlamaz. Kaynak izi fikir seçimini açıklar; fikri sonradan veriyle süslemek için kullanılamaz.
+Video oynatma, ekran kaydı veya kare çıkarma iş akışında zorunlu değildir.
 
-## Yaratıcı özgürlük
+1. Global YouTube arama sonuçlarından bir video seç; tam video ID'si ve resmi URL'sini kaydet.
+2. YouTube Data API metaverisini kullanarak video ID, tam başlık, kanal, yayın tarihi, süre ve kamusal sayaçları eşleştir.
+3. Aynı tam başlık ve video ID'si ile global web araması yap. Mümkünse YouTube dışı bağımsız bir yazılı kaynak URL'si bul.
+4. Bağımsız metinsel kaynak bulunmazsa açıkça **“bağımsız metinsel kaynak bulunamadı; yalnızca YouTube metaverisi eşleşti”** diye yaz.
+5. Video gerçek görüntüleri incelenmemişse **görsel sahne doğrulanmadı** diye etiketle. Başlık, kapak, yorum ve izlenme sayısı gerçek sahne akışını kanıtlamaz. Hayali görsel ayrıntı ekleme.
+6. Bu eksiklikler özgün fikir ve tam prompt üretimini engelleyemez.
 
-Deadpan, doğal veya abartılı oyunculuk, absürt/gerçeküstü komedi, fiziksel gag, gündelik davranış, nesne odaklı fikir, imkânsız fizik, beklenmedik kurgu ve diğer yaratıcı yollar serbesttir. İnsan davranışı, tek duygu, belirli kanca süresi, gerçekçilik, belirli final biçimi veya tek komedi mekanizması zorunlu değildir. Bir risk varsa kısa risk notu eklenebilir; veto nedeni olamaz.
+Global webdeki yazılı doğrulama videonun kimliğini, başlık bağlamını veya iddialarını destekleyebilir; tek başına görünmeyen sahne dizisini kanıtlamış sayılmaz.
+
+## Metrikleri doğru kullanma
+
+- Kamusal toplam izlenme, yayımdan ölçüm zamanına kadar birikmiş sayıdır; seçili dönem YouTube Analytics verisi gibi gösterilmez.
+- Görüntülenme / video yaşı hesabı yalnızca kaba bir yaklaşık hız vekilidir; tarihsel günlük grafik veya nedensel kanıt değildir.
+- YouTube arama sonuçları sınırlı ve sıralamadan etkilenmiş bir örneklemdir; bütün global Shorts evrenini temsil etmez.
+- Metaveri kaydıyla bağımsız yazılı kaynak birbirinden farklı kanıt türleridir.
+- Görüntülenme sayısı, bir videonun hangi sahne yüzünden başarı kazandığını kanıtlamaz.
+
+## Karar protokolü
+
+1. Paketin dışındaki eski sohbetlerden fikir taşıma. Yalnız güncel global örneklem ve kullanıcı tarafından açıkça sağlanan kaçınılacak fikirleri kullan.
+2. Önce global YouTube aramasından gelen veri ve sabit global kaynak kaydını kontrol et.
+3. Kaynak videodan geniş bir konu/öncül ipucu çıkar; kaynak sahnesini kopyalama.
+4. Global webde aynı ID ve başlıkla kaynak çapraz kontrolü ara; bulunamazsa yokluğunu söyle.
+5. Video görüntüsü doğrulanmadıysa görsel sahne mekanizmasını bilinmiyor kabul et. Yine de kaynak ilkesinden bağımsız ve özgün yeni bir komedi mekanizması geliştir.
+6. Birkaç farklı yaklaşımı iç değerlendirmede karşılaştırabilirsin; kullanıcıya sadece kazananı sun. Katı puan kapısı veya otomatik ret kullanma.
+7. Yayın sonrası kendi kanal verileri ayrı bir analizde kullanılabilir; bu veriler önceki fikir seçiminde global kaynak yerine geçmez.
+
+## Zorunlu kaynak izi
+
+Fikirden önce aşağıdaki alanları ayrı satırlarda yaz:
+
+- **GLOBAL KAYNAK:** Video ID, tam başlık, kanal, yayın tarihi, kamusal toplam izlenme, ölçüm zamanı ve resmi YouTube URL'si.
+- **GLOBAL WEB KONTROLÜ:** YouTube dışı bağımsız yazılı kaynak URL'si veya bağımsız metinsel kaynak bulunamadığına dair açık ifade.
+- **GÖRSEL SAHNE DURUMU:** Gerçek görüntüler incelenmediyse “video izlenmedi; görsel sahne doğrulanmadı”.
+- **KAYNAKTAN ALINAN İLKE:** Metaverinin gerçekten desteklediği sınırlı geniş çıkarım.
+- **GLOBAL İŞARETTEN FİKRE GEÇİŞ:** Global kaynağın hangi dar anlamda fikir seçimini yönlendirdiğini açıkla.
+- **ÖZGÜN YARATICI SIÇRAMA:** Kaynaktan farklı oluşturulan mekanizma.
+- **KOPYALANMAYAN UNSURLAR:** Kaynağın hangi sahne/karakter/eylem/finalinin kopyalanmadığı.
+- **KANIT SINIRI:** İzlenme sayısı/başlık sahneyi veya başarı nedenini kanıtlamaz.
+- **TEST DURUMU:** “test edilmemiş yaratıcı hipotez”.
+
+## Nihai çıktı sırası
+
+1. Global kaynak izi.
+2. Tek komedi fikri.
+3. Neden komik olduğu.
+4. Saniye saniye veya bloklara ayrılmış tam 10 saniyelik sahne akışı.
+5. Doğrudan kopyalanabilir tam video promptu: 10 saniye, 9:16, diyalogsuz ve ASMR odaklı.
+6. Yayın sonrası test edilecek gerçek metrikler.
 
 ## Panelin teknik sınırı
 
-Panel veriyi toplar, farklı metriklerdeki liderleri kodla hesaplar ve kopyalanabilir talimat paketine dönüştürür; kendi başına yapay zekâ modeli çalıştırmaz. Çıktı kalitesi sohbet modeline de bağlıdır. CI, JavaScript sözdizimini ve kritik motor sözleşmesinin paket kodunda bulunmasını denetler; komedinin kalitesini otomatik kanıtlamaz.
-
-
-## Kaynak izi için programatik kontrol
-Kaynak kaydı fikir üretilmeden önce kodla sabitlenir: öncelik seçili dönem izlenmesi liderindedir; o yoksa ölçülmüş gözlenen günlük hız; Analytics metriği yoksa kamusal ömür boyu toplam izlenme yalnızca açıkça bu sayaç diye etiketlenerek kullanılır. Veri yoksa hayali kayıt oluşturulmaz ve fikir üretimi yine devam eder.
-
-Kopyalanan AI yanıtı paneldeki denetleyiciye geri yapıştırılabilir. Denetleyici “ÖLÇÜLMÜŞ BULGU:” satırında sabit video ID'si, tam başlık, metrik adı, değer ve ölçüm penceresinin aynı satırda bulunmasını; ayrıca ayrı satırlardaki şu alanları arar: “ÖLÇÜLMÜŞ BULGU:”, “VERİDEN FİKRE GEÇİŞ:”, “BAĞIN GÜCÜ: dolaylı/zayıf bağ”, “YARATICI SIÇRAMA:”, “VERİNİN KANITLAMADIĞI:” ve “TEST DURUMU: test edilmemiş yaratıcı hipotez”. Bunlardan biri yoksa çıktı kaynak izi bakımından geçmez. Bu, modelin gizli muhakemesini veya fikrin başarı nedenini otomatik kanıtlamaz; yalnızca denetlenebilir kaynak atfının ve zorunlu alanların eksiksizliğini garanti eder.
-
-Panel veriyi toplar ve kopyalanabilir talimat paketine dönüştürür; kendi başına yapay zekâ modeli çalıştırmaz. CI, JavaScript sözdizimi, kaynak-kontrol yardımcı fonksiyonları ve motor sözleşmesini test eder; komedi kalitesini otomatik kanıtlamaz.
+Panel YouTube Data API ile global arama sonuçlarını ve kamusal metaveriyi getirir ve web araştırması için kopyalanabilir bir istem hazırlar; sayfanın kendisi bir yapay zekâ modeli değildir. Bağımsız web doğrulaması, paketi web erişimi olan sohbet asistanında çalıştırarak yapılır. Kaynak izi denetleyicisi alanların varlığını ve kaynak kayıtla eşleşmesini denetler; görsel sahnenin gerçekten görülmüş olduğunu veya fikrin başarılı olacağını kanıtlamaz.
