@@ -19,7 +19,7 @@ Sahne önce anlaşılır bir beklenti kurar; final bu beklentiyi bozar; izleyici
 ### 1.3. Bergson — mekanikleşen insan davranışı
 Esnek ve canlı olması beklenen insanın bir davranışı katı, otomatik veya aşırı ciddi biçimde sürdürmesi komik olabilir.
 
-**Üretim sonucu:** Karakter olanı tam ciddiye alır; kameraya göz kırpmaz, şakayı açıklamaz ve komik olduğunu belli etmez.
+**Üretim sonucu:** Karakterin tepkisi sahnenin durumuna ve kendi kişiliğine uygun, doğal olmalı. Ciddi kalmak yalnızca seçeneklerden biridir; karakter gerektiğinde şaşırabilir, telaşlanabilir, üzülüp rahatlayabilir veya doğal biçimde tepki verebilir. Kameraya göz kırpmaz, şakayı açıklamaz ve yapay oyunculukla komediyi zorlamaz.
 
 ### 1.4. Üstünlük ve rahatlama
 İzleyici, karaktere karşı acımasız olmayan küçük bir üstünlük hissi yaşayabilir; finalde biriken gerilim çözülür.
@@ -45,7 +45,7 @@ Kapıyı geçen fikirler aşağıdaki beş başlıkta 0–10 arasında puanlanı
 | **Kanca** | /10 | İhlal ilk 0,3–1 saniyede görsel olarak yakalanıyor mu? |
 | **Ters köşe** | /10 | Final, kurulan beklentiyi belirgin biçimde bozuyor mu? |
 | **Çözüm kolaylığı** | /10 | İzleyici uyumsuzluğu yaklaşık 1 saniyede çözebiliyor mu? Çok basitlik sönük, aşırı karmaşıklık anlaşılmaz yapar. |
-| **Ciddiyet** | /10 | Karakter baştan sona ciddi ve ifadesiz kalabiliyor mu? |
+| **Doğallık** | /10 | Tepkiler karaktere ve duruma uygun, inandırıcı mı? Duygu yapay değil, davranıştan okunuyor mu? |
 | **Duygu** | /10 | Gurur, inat, ikram, vicdan, sevgi gibi tek ve anlaşılır bir insani duygu var mı? |
 
 **Geçme eşiği: 40/50.** 40'ın altındaki fikir kullanıcıya nihai aday olarak sunulmaz; düzeltilir veya elenir.
@@ -61,7 +61,7 @@ Kapıyı geçen fikirler aşağıdaki beş başlıkta 0–10 arasında puanlanı
 - İp, kayan tabak, birbirini çeken nesneler ve çok aşamalı fiziksel zincirler gibi üretim modelinin bozabileceği karmaşık hareketleri azalt.
 - Diyalog, müzik, açıklayıcı yazı veya altyazı mizahı kurtarmak için kullanılmasın; doğal ASMR sesleri yeterli olsun.
 - Dünya çoğunlukla gerçekçi kalsın; tek bir belirgin absürtlük taşısın.
-- Karakter komikliği açıklamasın, kameraya göz kırpmasın ve şaka yaptığını belli etmesin.
+- Karakter komikliği açıklamasın, kameraya göz kırpmasın ve şaka yaptığını belli etmesin. Ancak herkesi ifadesiz/ciddi oynatmak zorunlu değildir; doğal şaşkınlık, üzüntü, telaş, sevinç veya başka uygun tepkiler kullanılabilir.
 
 ## 5. Otomatik kırmızı bayraklar
 
@@ -159,4 +159,4 @@ Kanalın Çarşamba ve Pazar yayınlarından sonra puanlarla gerçek sonuçlar k
 - Bergson, H. *Le Rire* (*Gülme*).
 - Hobbes ve Freud'un üstünlük/rahatlama yaklaşımları, yardımcı açıklama çerçeveleri olarak kullanılır.
 
-**Temel kural:** Önce mekanizma ve zararsız ihlal; sonra anlaşılır ters köşe; ardından ciddiyet ve insani duygu. Son kararı ise yalnızca gerçek yayın verisi kalibre eder.
+**Temel kural:** Önce mekanizma ve zararsız ihlal; sonra anlaşılır ters köşe ve sahneye uygun doğal insan tepkisi. Ciddiyet/ifadesizlik bir zorunluluk değil, yalnızca gerektiğinde kullanılacak araçtır. Son kararı ise yalnızca gerçek yayın verisi kalibre eder.
