@@ -11,6 +11,7 @@ const validOutput = [
   "Ölçülmüş bulgu: Not Every Ice Cream Container Has Ice Cream (video ID wEA-VZhxq6Y).",
   "Seçili dönem izlenmesi: 27,569. Son 28 günlük YouTube Analytics ölçüm dönemi.",
   "Bu ölçüm yalnızca erişim düzeyini gösterir; sahne mekanizmasını veya başarının nedenini kanıtlamaz.",
+  "VERİDEN FİKRE GEÇİŞ: Bu ölçüm başlığın genel öncülünü fikir seçimine yönlendirdi; bu bağlantı sınırlıdır.",
   "Başlığın genel öncülü fikir seçimini yönlendirdi; somut görsel olay yaratıcı sıçrama olarak eklendi.",
   "Bu fikir test edilmemiş yaratıcı hipotezdir."
 ].join("\n");
@@ -29,6 +30,12 @@ test("rejects responses that omit the locked source ID", () => {
   const result = SourceTraceGuard.validate(validOutput.replace("wEA-VZhxq6Y", "another-video-id"), anchor);
   assert.equal(result.ok, false);
   assert.ok(result.errors.some(e => e.includes("ID")));
+});
+test("rejects a source citation without a clear data-to-idea bridge", () => {
+  const incomplete = validOutput.replace("VERİDEN FİKRE GEÇİŞ: Bu ölçüm başlığın genel öncülünü fikir seçimine yönlendirdi; bu bağlantı sınırlıdır.", "");
+  const result = SourceTraceGuard.validate(incomplete, anchor);
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some(e => e.includes("geçiş açıklaması")));
 });
 test("rejects missing creative leap, limitation, or hypothesis labels", () => {
   const incomplete = validOutput.replace("yaratıcı sıçrama", "yeni bölüm")
