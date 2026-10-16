@@ -50,7 +50,7 @@ jobs:
             ['not copied label', 'KOPYALANMAYAN UNSURLAR'],
             ['evidence boundary label', 'KANIT SINIRI'],
             ['unverified hypothesis label', 'test edilmemiş yaratıcı hipotez'],
-            ['video playback not required', 'Video oynatma/ekran kaydı fikir üretmek için zorunlu değildir'],
+            ['video playback not required', 'Video izleme/ekran kaydı fikir üretmek için zorunlu değildir'],
             ['own-channel metrics are post-publication only', 'Kendi kanal verisi yalnızca yayın sonrası karşılaştırma içindir']
           ];
           for (const file of ['index.html', 'bos-dukkan-analiz.html']) {
