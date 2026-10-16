@@ -12,6 +12,7 @@ const validOutput = [
   "Seçili dönem izlenmesi: 27,569. Son 28 günlük YouTube Analytics ölçüm dönemi.",
   "Bu ölçüm yalnızca erişim düzeyini gösterir; sahne mekanizmasını veya başarının nedenini kanıtlamaz.",
   "VERİDEN FİKRE GEÇİŞ: Bu ölçüm başlığın genel öncülünü fikir seçimine yönlendirdi; bu bağlantı sınırlıdır.",
+  "Bağın gücü: dolaylı/zayıf bağ; izlenme sayısı sahnenin neden tuttuğunu kanıtlamaz.",
   "Başlığın genel öncülü fikir seçimini yönlendirdi; somut görsel olay yaratıcı sıçrama olarak eklendi.",
   "Bu fikir test edilmemiş yaratıcı hipotezdir."
 ].join("\n");
@@ -36,6 +37,12 @@ test("rejects a source citation without a clear data-to-idea bridge", () => {
   const result = SourceTraceGuard.validate(incomplete, anchor);
   assert.equal(result.ok, false);
   assert.ok(result.errors.some(e => e.includes("geçiş açıklaması")));
+});
+test("rejects a response that does not label the data-idea link as indirect or weak", () => {
+  const incomplete = validOutput.replace("Bağın gücü: dolaylı/zayıf bağ; izlenme sayısı sahnenin neden tuttuğunu kanıtlamaz.", "");
+  const result = SourceTraceGuard.validate(incomplete, anchor);
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some(e => e.includes("dolaylı/zayıf")));
 });
 test("rejects missing creative leap, limitation, or hypothesis labels", () => {
   const incomplete = validOutput.replace("yaratıcı sıçrama", "yeni bölüm")
