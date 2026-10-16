@@ -1,27 +1,31 @@
-# Boş Dükkân Veri Analizi
+# Boş Dükkân Komedi Motoru ve Veri Analizi
 
 **Canlı panel:** https://agabeyayd-lgtm.github.io/bos-dukkan-analiz/
 
 ## Amaç
-Öncelik güncel trend keşfi; ardından Boş Dükkân kanalının gerçek performansıyla bu sinyalleri karşılaştırıp insani davranış ve duygu temelli özgün bir sonraki Shorts fikri bulmak.
+Konu motorunun temel görevi komediyi kendisinin üretip kullanıcıya vermesidir. Kanal verisi ve trendler destekleyici sinyallerdir; fikir üretimini daraltan şartlar veya veto kapıları değildir.
+
+## Yalnızca üç zorunlu video koşulu
+- Tam 10 saniye.
+- Dikey 9:16, YouTube Shorts.
+- Diyalogsuz, ASMR odaklı ses.
+
+Bunun dışında sabit mizah türü, fizik/gerçekçilik şartı, tek duygu veya davranış şartı, oyunculuk stili, puan eşiği ya da otomatik ret listesi yoktur.
 
 ## Panel akışı
-1. **Trend keşfi:** YouTube Data API v3 ile seçili zaman aralığında kısa video araması. Yayın tarihi, günlük izlenme hızı, izlenme/abone ve etkileşim sayaçları incelenir. Bu örneklem tüm YouTube'u temsil etmez.
-2. **Kendi kanalım + Konu Motoru:** Google OAuth ve YouTube Analytics API ile seçili dönem performansı. Ortalama izleme süresi, ortalama izlenen yüzde, beğeni ve kazanılan abone ayrı değerlendirilir.
-3. **Yaratıcı karar:** Trend sinyali + kendi kanalının ölçümleri + fikir geçmişi; gerçek insan davranışı ve tek bir insani duygu üzerine kurulu, 8 saniyelik, diyalogsuz, doğal ASMR'lı senaryo.
+1. **Trend keşfi:** YouTube Data API v3 ile seçili arama penceresindeki videoların erişilebilir sayaçlarını toplar. Bu sınırlı bir örneklemdir.
+2. **Kendi kanal verim:** Google OAuth ve YouTube Analytics API ile seçili dönem performansı alınır.
+3. **Komedi üretimi:** Veri paketi trend ve kanal sinyallerini yardımcı bağlam olarak iletir. Model her çalıştırmada tek güçlü komedi fikri, 10 saniyelik akış ve kopyalanabilir tam video promptu üretmelidir.
 
-## Bilinçli olarak kaldırıldı
-Rakip Shorts izleme/kare çıkarma akışı ve ayrı rakip kanal analiz ekranı kullanıcı arayüzünden kaldırıldı. Ekran kaydı veya rakip sahnelerinin doğrulanması konu üretmek için şart değildir. Trend araması, dış videoların sahnesini analiz ettiğini iddia etmez.
+## Yaratıcı özgürlük
+Deadpan, doğal veya abartılı oyunculuk, absürt/gerçeküstü komedi, fiziksel gag, nesne değişimi, beklenmedik kurgu ve diğer yaratıcı yollar otomatik olarak yasaklanamaz. Önceki fikirler, veri eksikliği veya üretim riski komedi üretimini durduramaz.
 
-## Sınırlar
-- YouTube Data API anahtarı ve kendi kanal verileri için OAuth yapılandırması gerekir.
-- Dış arama sonuçları sınırlı bir örneklemdir; trend sinyali neden-sonuç kanıtı değildir.
-- Rakiplerin ortalama izleme süresi/izlenen yüzde verileri herkese açık API'de bulunmadığından tahmin edilmez.
-- Panel kendi başına yapay zekâ sonucu üretmez; analiz paketini sohbet içinde değerlendirmek gerekir.
-- Seçili Analytics dönemi ve tüm ömür kamusal sayaçları karıştırılmaz; küçük örneklem ve belirsizlik açıkça belirtilir.
+## Veri doğruluğu
+Ölçülmeyen metrikleri uydurma; korelasyonu neden-sonuç diye sunma; bir videonun sahnesi görülmediyse onu gözlemlenmiş gibi anlatma. Bu sınırlar yeni kurmaca komedi fikri üretmeye engel değildir. Panel kendi başına yapay zekâ sonucu üretmez; kopyalanan paket sohbet içinde kullanılır.
 
-## Dosyalar ve dağıtım
-- index.html: canlı panelin ana kaynağı.
-- bos-dukkan-analiz.html: panelin eş kopyası.
-- TOPIC_ENGINE_SPEC.md: trend ve yaratıcı karar kuralları.
-- .github/workflows/pages.yml: GitHub Pages dağıtımı.
+## Dosyalar
+- `index.html`: GitHub Pages ana paneli.
+- `bos-dukkan-analiz.html`: panelin ikinci kopyası.
+- `TOPIC_ENGINE_SPEC.md`: komedi üretim motorunun temel talimatı.
+- `HUMOR_RUBRIC.md`: komedi üretim rehberi; puanlama kapısı veya otomatik ret listesi içermez.
+- `.github/workflows/pages.yml`: GitHub Pages dağıtımı.
