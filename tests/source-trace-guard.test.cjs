@@ -37,7 +37,7 @@ test("rejects metric values copied elsewhere when the measured-finding source li
   assert.ok(result.errors.some(e => e.includes("ÖLÇÜLMÜŞ BULGU satırında")));
 });
 test("rejects responses that omit the locked source ID", () => {
-  const result = SourceTraceGuard.validate(validOutput.replace("wEA-VZhxq6Y", "another-video-id"), anchor);
+  const result = SourceTraceGuard.validate(validOutput.replace(/wEA-VZhxq6Y/g, "another-video-id"), anchor);
   assert.equal(result.ok, false);
   assert.ok(result.errors.some(e => e.includes("ID")));
 });
