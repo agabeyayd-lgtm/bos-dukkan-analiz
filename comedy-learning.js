@@ -1,8 +1,9 @@
 /* Boş Dükkân comedy learning module.
    Hazır (ezber) promptlar, ilke listeleri ve usta atlası kaldırıldı.
-   Bu dosya ayrıca ana sayfadaki hazır prompt metinlerini devre dışı bırakır:
+   Bu dosya ayrıca ana sayfadaki hazır içerikleri devre dışı bırakır:
    - Global konu paketi artık yalnızca veriden oluşur (kaynak, arama örneklemi, durum, storyboard, kullanıcı notları).
    - Eski "rakip keşif / ön analiz istemi" bölümü her analizde kaldırılır.
+   - 1. sekmedeki sabit ilke kartları, usta atlası ve psikoloji çekirdeği metni kaldırılır.
    Bu modül model eğitmez. */
 (function () {
   'use strict';
@@ -19,6 +20,21 @@
     const el = $(sel);
     if (el) el.style.display = 'none';
   });
+  // 1. sekmedeki sabit ezber içerik: ilke kartları, usta atlası ve psikoloji çekirdeği metni.
+  (function stripStaticLearnContent() {
+    const learn = $('#learn');
+    if (!learn) return;
+    const cards = learn.querySelector('.stats');
+    if (cards) cards.remove();
+    Array.from(learn.querySelectorAll('h2')).forEach((h) => {
+      const t = (h.textContent || '').trim();
+      if (t.indexOf('Usta komedyen atlası') === 0 || t.indexOf('Psikoloji çekirdeği') === 0) {
+        const next = h.nextElementSibling;
+        if (next && next.tagName !== 'H2' && next.tagName !== 'BUTTON') next.remove();
+        h.remove();
+      }
+    });
+  })();
   const notes = $('#comedyResearchNotes');
   if (notes) {
     notes.value = readNotes();
