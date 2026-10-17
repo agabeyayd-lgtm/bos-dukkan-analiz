@@ -33,6 +33,12 @@ jobs:
           const required = [
             'COMEDY_CORE_PRINCIPLES',
             'COMEDY_MASTERS',
+            'BASELINE_COMEDY_LESSONS',
+            'Pierre Étaix',
+            'Stephen Chow',
+            'Kishore Kumar',
+            'Totò',
+            'function compiledLessons()',
             'function buildComedyStudyPrompt',
             'bd_comedy_research_notes',
             'KULLANICININ BU TARAYICIDA KAYDETTİĞİ KOMEDİ DERSLERİ',
