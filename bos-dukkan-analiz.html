@@ -53,7 +53,7 @@ a{color:var(--acc)}
 </head>
 <body>
 <h1>Boş Dükkân Analiz Paneli</h1>
-<p class="sub">Global YouTube trend keşfi + global kaynak doğrulaması. Kendi kanal verisi yalnızca yayın sonrası karşılaştırma içindir. Video izleme/ekran kaydı fikir üretmek için zorunlu değildir.</p>
+<p class="sub">Global YouTube trend keşfi + global kaynak doğrulaması. Kendi kanal Analytics verisi yeni konuya kaynak olmaz; tarayıcıda kayıtlıysa performans bağlamı olarak kullanılabilir. Video izleme/ekran kaydı fikir üretmek için zorunlu değildir.</p>
 
 <div class="bar" role="group" aria-label="API anahtarı">
   <input id="key" type="password" placeholder="YouTube Data API v3 anahtarı" autocomplete="off">
@@ -106,7 +106,7 @@ a{color:var(--acc)}
 
 <section id="gen" class="pane">
   <h2 style="margin-top:0">2. Global konu motoru</h2>
-  <p class="note">Fikir kaynağı yalnızca global YouTube ve global web araştırmasıdır. Kaydettiğin komedi dersleri isteme eklenir; kendi kanal Analytics verisi burada kullanılmaz.</p>
+  <p class="note">Global kaynak her zaman dış YouTube/web araştırmasıdır. Kaydedilmiş komedi dersleri, önceki fikir geçmişi ve (varsa) yerel kanal Analytics ölçümleri isteme bağlam ekler; kanal ölçümü global kaynağın yerine geçmez.</p>
   <div class="bar">
     <input id="q" placeholder="Global arama terimi (örn. visual comedy, everyday behavior)">
     <select id="days"><option value="7">Son 7 gün</option><option value="30" selected>Son 30 gün</option><option value="90">Son 90 gün</option></select>
@@ -150,7 +150,9 @@ a{color:var(--acc)}
 
 <section id="own" class="pane">
   <h2 style="margin-top:0">3. Yayın sonrası ölçüm</h2>
-  <p class="note">Bu alan yalnızca yayımlanmış videoların performansını ölçer; usta öğrenme notlarına veya global konu seçimine veri göndermez.</p>
+  <p class="note">Bu alan yayımlanmış videoları ölçer. Ölçümler alındığında parola/anahtar ve yorum metni içermeyen kompakt metrik özeti bu tarayıcıda tutulur; sonraki global konu paketine performans bağlamı olarak eklenebilir. Veriler repoya yüklenmez.</p>
+  <p class="note" id="ownAnalyticsLearningStatus" aria-live="polite">Yerel Analytics öğrenme önbelleği henüz yüklenmedi. Google ile ölçümleri getirdiğinde özet bu cihazda saklanır.</p>
+  <p><button id="clearOwnAnalyticsLearning" type="button" class="ghost">Yerel kanal verisi önbelleğini temizle</button></p>
   <div class="bar">
     <input id="cid" placeholder="OAuth istemci kimliği (...apps.googleusercontent.com)">
     <select id="odays"><option value="28" selected>Son 28 gün</option><option value="90">Son 90 gün</option><option value="365">Son 365 gün</option></select>
@@ -569,7 +571,7 @@ function buildGlobalIdeaPrompt(research, anchor, visual) {
     }));
   return [
     "ROL: Global Shorts araştırmacısı + kaynak doğrulayıcı + acımasız komedi yaratıcı yönetmeni.",
-    "KAYNAK SINIRI: Fikri kullanıcının kendi kanalından DEĞİL, global YouTube ve global web kaynaklarından al. Kendi kanal ölçümleri bu pakete dahil değildir ve fikir seçimini yönlendiremez.",
+    "KAYNAK SINIRI: SABİTLENMİŞ GLOBAL KAYNAK mutlaka dış YouTube kaydından seçilir. Kendi kanal ölçümleri global kaynak yerine geçmez; yalnızca gerçek performans bağlamı olarak fikrin yönünü etkileyebilir. Kendi eski videosunu veya sadece nesnesi değiştirilmiş bir kopyasını önerme.",
     "VİDEO OYNATMAYA ALTERNATİF: Önce aşağıdaki otomatik storyboard kare sayfalarını gerçekten açmayı dene; erişilebiliyorsa yalnızca görüntüde görünen unsurları dar biçimde anlat. Storyboard eksik veya kısmi olabilir; tek başına tam kronoloji kanıtı değildir. Görseller açılamıyorsa video oynatma, ekran kaydı veya manuel kare çıkarma isteme; görsel sahneyi doğrulanmadı olarak bırak.",
     "GLOBAL STORYBOARD GÖRSEL PAKETİ: " + JSON.stringify(visual || { available: false, reason: "Public storyboard unavailable; do not require video playback or screen recording.", visualSceneStatus: "not visually verified" }),
     "YAZILI ÇAPRAZ DOĞRULAMA: Sabit global kaynağın aynı video ID'sini ve tam başlığını webde ara. Mümkünse YouTube dışı bağımsız yazılı kaynak URL'si getir. Bağımsız kaynak bulunamazsa 'bağımsız metinsel kaynak bulunamadı; yalnızca YouTube metaverisi eşleşti' de. Yazılı kaynak sahnenin görünmeyen eylem dizisini kanıtlamaz.",
@@ -772,6 +774,52 @@ $('#goOwn').onclick=async()=>{
       const x=metrics.get(id)||[];
       const m=meta[id]||{title:id,sec:0,publicViews:0}; const hasAnalytics=metrics.has(id); return {id,views:hasAnalytics?+(x[1]||0):m.publicViews,min:hasAnalytics?+(x[2]||0):null,avgSec:hasAnalytics?+(x[3]||0):null,pct:hasAnalytics?+(x[4]||0):null,likes:hasAnalytics?+(x[5]||0):null,subs:hasAnalytics?+(x[6]||0):null,hasAnalytics,...m};
     }).filter(v=>v.sec<=180).sort((a,b)=>b.date-a.date);
+    // Save a compact metrics-only learning snapshot immediately after Analytics data loads.
+    // This lets the next global topic package use real channel outcomes without requiring the separate report button.
+    const learningWindowDays = Number($('#odays').value) || 28;
+    const learningRows = vs.map(v => {
+      const has = Boolean(v.hasAnalytics);
+      const age = Math.max((Date.now() - new Date(v.date).getTime()) / 864e5, 0.5);
+      const observedDays = Math.max(0.5, Math.min(learningWindowDays, age));
+      const viewsInWindow = has && Number.isFinite(v.views) ? v.views : null;
+      const gained = has && Number.isFinite(v.subs) ? v.subs : null;
+      return {
+        id: v.id, title: v.title,
+        publishedAt: v.date ? new Date(v.date).toISOString().slice(0,10) : null,
+        seconds: Number.isFinite(v.sec) ? v.sec : null,
+        analyticsAvailable: has,
+        analyticsWindowDays: learningWindowDays,
+        viewsInWindow,
+        averageViewSeconds: has && Number.isFinite(v.avgSec) ? v.avgSec : null,
+        averageViewedPercent: has && Number.isFinite(v.pct) ? v.pct : null,
+        likesInWindow: has && Number.isFinite(v.likes) ? v.likes : null,
+        subscribersGainedInWindow: gained,
+        publicLifetimeViews: Number.isFinite(v.publicViews) ? v.publicViews : null,
+        publicLifetimeLikes: Number.isFinite(v.publicLikes) ? v.publicLikes : null,
+        publicLifetimeComments: Number.isFinite(v.publicComments) ? v.publicComments : null,
+        viewsPerObservedDay: viewsInWindow !== null ? Number((viewsInWindow / observedDays).toFixed(2)) : null,
+        subscribersGainedPer1000WindowViews: viewsInWindow > 0 && gained !== null ? Number((gained / viewsInWindow * 1000).toFixed(3)) : null,
+        likeRateInWindow: viewsInWindow > 0 && has && Number.isFinite(v.likes) ? Number((v.likes / viewsInWindow).toFixed(5)) : null
+      };
+    });
+    window.bosOwnAnalyticsSnapshot = {
+      source: 'YouTube Analytics API v2 + YouTube Data API v3 metadata',
+      reportingWindowDays: learningWindowDays,
+      requestedAt: new Date().toISOString(),
+      channelSubscriberCount: Number(cj.items?.[0]?.statistics?.subscriberCount || 0),
+      totalVideoRows: learningRows.length,
+      analyticsVideoRows: learningRows.filter(v => v.analyticsAvailable).length,
+      videos: learningRows
+    };
+    const localLearningSave = window.BosDukkanComedyLearning &&
+      window.BosDukkanComedyLearning.saveOwnAnalyticsSnapshot(window.bosOwnAnalyticsSnapshot);
+    const localLearningStatus = $('#ownAnalyticsLearningStatus');
+    if (localLearningStatus) {
+      localLearningStatus.textContent = localLearningSave && localLearningSave.ok
+        ? 'Yerel öğrenme önbelleği güncellendi: ' + localLearningSave.measuredVideos + ' ölçümlü video. Bu özet sonraki global konu paketinde kullanılabilir.'
+        : 'Ölçümler ekranda hazır; tarayıcı önbelleğine kaydedilemedi. ' + (localLearningSave && localLearningSave.reason || '');
+    }
+
     analyticsDebug.sonVideolar=vs.slice(0,10).map(v=>({id:v.id,title:v.title,views:v.views,publicViews:v.publicViews,hasAnalytics:v.hasAnalytics,metadataFound:!!meta[v.id],seconds:v.sec}));
     if(!vs.length){busy(el,'Kanalda analiz edilecek video bulunamadı.');return}
     const analyticsVideos=vs.filter(v=>v.hasAnalytics&&Number.isFinite(v.views)&&v.views>0);
@@ -808,7 +856,7 @@ $('#goOwn').onclick=async()=>{
     <details class="note"><summary>Teknik teşhis (istatistikler neden 0?)</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${JSON.stringify(analyticsDebug,null,2)}</pre></details>
     <p class="note">Hazır bir başarı eşiği kullanılmaz. Videoları kendi karşılaştırılabilir dönemleri içinde değerlendir; %100 üzeri izlenen kısım, tekrar izleme için olası bir sinyaldir, tek başına başarı nedeni değildir.</p>
     <h2>Yayın sonrası ölçüm raporu — fikir üretmez</h2>
-    <p class="note">Bu bölüm yalnızca kendi kanalının yayınlanmış videolarını ölçmek ve karşılaştırmak içindir. Bu rapor yeni konu, sahne veya kaynak seçmez; global fikir üretiminden ayrı tutulur. Yeni fikir için 1. Trend keşfi bölümündeki “Global konu paketini oluştur ve kopyala” düğmesini kullan.</p>
+    <p class="note">Bu rapor yayımlanmış videoların ölçümünü dışa aktarır ve kendi başına fikir üretmez. Ölçüm verisi, global kaynağın yerine geçmeden, yerel öğrenme bağlamı olarak sonraki konu paketini yönlendirebilir. Tam Analytics özeti yalnızca bu tarayıcıda tutulur; GitHub deposuna yazılmaz.</p>
     <p><button id="copyCompare">Yayın sonrası ölçüm raporunu oluştur ve kopyala</button> <button id="downloadCompare" class="ghost" disabled>Ölçüm raporunu indir (.txt)</button></p>
     <div id="commentDiag" class="note" aria-live="polite">Yayın sonrası yorum teşhisi henüz çalıştırılmadı. Rapor düğmesi yalnızca ölçüm raporu çıkarır; yorumlar bu ekranda ayrı gösterilir.</div>
     <textarea id="compareTxt" readonly rows="8" style="display:none;width:100%;max-width:100%;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>`;
@@ -867,6 +915,7 @@ $('#goOwn').onclick=async()=>{
         const researchMatched=researchCommentPicks.map(v=>({...v,commentSample:researchCommentById.get(v.id)||{videoId:v.id,available:false,reason:researchPickedIds.has(v.id)?'Yorum isteği başarısız oldu':'Yorum örneği yok',sampled:0,comments:[]}}));
         if(research){research.commentSamples=researchComments;research.videoCommentMatches=researchMatched;}
         window.bosOwnAnalyticsSnapshot={source:'YouTube Analytics API v2 + YouTube Data API v3 video metadata',reportingWindowDays:periodDays,requestedAt:new Date().toISOString(),channelSubscriberCount:Number(cj.items?.[0]?.statistics?.subscriberCount||0),totalVideoRows:own.length,analyticsVideoRows:analyticsOwn.length,note:'Analytics-window metrics and public lifetime counters must not be mixed.',videos:own,commentSamples:ownComments};
+        if (window.BosDukkanComedyLearning) window.BosDukkanComedyLearning.saveOwnAnalyticsSnapshot(window.bosOwnAnalyticsSnapshot);
         const renderMatchedGroup=(label,records,kind)=>'<h3>'+esc(label)+'</h3>'+((records&&records.length)?records.map(v=>{
           const s=v.commentSample||{}, metrics=kind==='own'
             ? 'Dönem izlenmesi: '+(Number.isFinite(v.views)?fmt(v.views):'veri yok')+' · Ort. izleme: '+(Number.isFinite(v.averageViewSeconds)?v.averageViewSeconds+' sn':'veri yok')+' · İzlenen: '+(Number.isFinite(v.averageViewedPercent)?v.averageViewedPercent+'%':'veri yok')+' · Dönem beğenisi: '+(Number.isFinite(v.likes)?fmt(v.likes):'veri yok')+' · Kamusal toplam yorum: '+(Number.isFinite(v.comments)?fmt(v.comments):'veri yok')
