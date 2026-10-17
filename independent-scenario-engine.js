@@ -127,7 +127,7 @@
   }
   async function searchCrossref(query) {
     const params = new URLSearchParams({
-      query.bibliographic: query,
+      "query.bibliographic": query,
       rows: "4",
       select: "DOI,title,author,published,URL,container-title,abstract,type"
     });
@@ -135,7 +135,7 @@
     return (json.message && json.message.items || []).map(item => ({
       title: clean((item.title || [])[0], 240),
       authors: clean((item.author || []).slice(0, 3).map(a => [a.given, a.family].filter(Boolean).join(" ")).join(", "), 180),
-      year: clean((((item.published || {}).date-parts || [])[0] || []).join("-"), 20),
+      year: clean((((item.published || {})["date-parts"] || [])[0] || []).join("-"), 20),
       journal: clean((item["container-title"] || [])[0], 120),
       abstract: clean(String(item.abstract || "").replace(/<[^>]*>/g, " "), 600),
       url: item.DOI ? "https://doi.org/" + item.DOI : item.URL || "",
