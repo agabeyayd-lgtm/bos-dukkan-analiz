@@ -10,7 +10,7 @@ Her çalıştırmada canlı komedi araştırması ve davranış psikolojisi öğ
 - Dikey 9:16, YouTube Shorts.
 - Diyalog yok; ASMR odaklı doğal ses.
 
-Bunların dışında sabit yaratıcı kural yoktur.
+Bunların dışında tek sabit yaratıcı kural duygu ilkesidir (aşağıdaki “Duygu ilkesi” bölümü).
 
 ## Varsayılan bağımsız araştırma → senaryo → hakem akışı
 
@@ -19,7 +19,7 @@ Bağımsız senaryo motoru varsayılandır. **YouTube trendi, kaynak video, kana
 - Tarayıcı, ücretsiz Wikipedia API'sinden farklı ülkeler/dönemlerden komedi ustası adaylarını; Europe PMC'den mizah psikolojisi ve görsel komedi konulu yayın kayıtlarını ve sunuluyorsa özetlerini canlı arar. Gerekirse Crossref yayın metaverisini yedek olarak arar.
 - Kaynak bağlantısı ve kanıt türü korunur: tam abstract, kısa Wikipedia özeti, arama sonucu veya yalnızca yayın künyesi birbirinden ayrılır. Başarısız istekler açıkça yazılır; kaynağın açılmadığı durumda okunmuş gibi davranılmaz.
 - İlk panel bölümü canlı komedi araştırması ve öğrenme notları içindir. İkinci bölüm bu malzemeyi kullanarak kanal/trend verisinden bağımsız tek senaryo görevi hazırlar. Üçüncü bölüm aday senaryoyu acımasızca eleştirme ve gerekiyorsa tek bir daha güçlü nihai sürüm oluşturma görevini hazırlar; aynı bölümde yayın sonrası Analytics aracı da korunur.
-- Tek zorunlu çıktı koşulları: **tam 10 saniye, dikey 9:16, diyalogsuz, doğal ASMR odaklı ses**. Diğer tüm mizah türleri ve yaratıcı yaklaşımlar serbesttir; sabit mekanizma, gerçekçilik, oyunculuk, konu veya puan eşiği dayatılmaz.
+- Tek zorunlu çıktı koşulları: **tam 10 saniye, dikey 9:16, diyalogsuz, doğal ASMR odaklı ses**. Diğer tüm mizah türleri ve yaratıcı yaklaşımlar serbesttir; sabit mekanizma, gerçekçilik, oyunculuk, konu veya puan eşiği dayatılmaz (duygu ilkesi mekanizma değil, kanal kuralıdır).
 - Motor kullanıcıya fikir listesi değil bir tek yeni senaryo, tam 0–10 saniye akışı ve üretim aracına doğrudan verilecek İngilizce promptu hazırlayan bir görev verir. Çıktının komik olup olmadığı garanti edilmez; yayın sonrası gerçek verilerle test edilmelidir.
 - GitHub Pages statik bir JavaScript sayfasıdır: açık kaynak araştırması gerçekten tarayıcıdan yapılır, ancak sayfanın içinde dil modeli çalışmaz. Kopyalanan görev web erişimli ChatGPT'ye gönderildiğinde senaryo üretimi ve hakemlik dil modeli tarafından yapılır.
 
@@ -70,6 +70,14 @@ Kanal sahibi OAuth ile ölçümleri getirdiğinde panel, yorum metinlerini ve er
 
 Kaynaklar teknikleri araştırmak içindir; birebir sahne, karakter veya bitiş kopyalanmaz. Psikoloji teorileri kesin ve evrensel komedi formülleri olarak sunulmaz.
 
+## Duygu ilkesi (kanal kuralı)
+
+Bu bir hipotez değil, kanalın net kuralıdır: komedi net bir insani duygudan (gurur, merak, yas, utanç, özlem, sahiplenme gibi) beslenir ve bu duygu gag'e çevrilir. Duygusuz, yalnızca mekanik bir gag tek başına yeterli sayılmaz.
+
+- Duygu ilk karede veya ilk saniyelerde okunabilmelidir; açıklama, diyalog veya altyazı gerektirmemelidir.
+- Duygu mekanizma değildir: hangi komedi mekanizmasının (tekrar, ölçek, uyumsuzluk, statü vb.) kullanılacağını dayatmaz.
+- Kanıt notu: bu kural kanal sahibinin kararıdır. Kanal verisi duygunun tek başına başarıyı garanti etmediğini gösteriyor (sanayi ustası videoları duygu açısından güçlü olduğu hâlde düşük izlendi); bu yüzden duygu, tanıdık ve ilk karede anlaşılan bir durumla birlikte kurulmalıdır.
+
 ## Kanal gözlemleri (YARATICI HİPOTEZ — kural değil)
 
 Bu bölüm zorunlu mekanizma dayatmaz; senaryo motoru bunlardan yalnızca ilham olarak yararlanabilir. Kanıt türü: kanalın kendi Analytics görüntüleme ve izlemeye devam edenler verisi; videoların içerik tarifi kanal sahibinden. Abone sayısı kanal sahibinin kendi çevresinden geldiği için sinyal olarak kullanılmaz.
@@ -86,6 +94,14 @@ Bu bölüm zorunlu mekanizma dayatmaz; senaryo motoru bunlardan yalnızca ilham 
 - En çok izlenen dört videonun ikisinde yaşlı figürler var (construction videosundaki dedeler, kurdele tabure videosundaki yaşlı kalabalık).
 - Kullanım kuralı: devamlı olmayacak; aralıklı kullanılır ve art arda iki videoda tekrar edilmez.
 - Durum: örnek sayısı az; kesin kural değil.
+
+### Referans gen: Kurdele Tabure
+
+- Kaynak video: tek bir plastik tabure için ciddi açılış töreni. Yaşlı adam kurdeleyi gerçekten keser, madalya takılır, eli kalbinde alkış ve davul-zurna; sert kesmeyle sıradaki adam ikinci kurdeleli tabureye yürür. Kanal verisi: yaklaşık 5.100 görüntüleme, izlemeye devam edenler yaklaşık %75.
+- Mekanizma: sıradan bir nesne tam bir ciddiyetle yüceltilir; kimse durumun saçmalığını fark etmez. Duygu gururdur (duygu ilkesine uygun). Sert kesme, olayın tek olmadığını gösteren bir sıra/ölçek finaline geçer.
+- Süzgeç soruları: (1) Sıradan nesne veya eylem ciddiyetle mi yüceltiliyor ve karakterler bunu doğal mı karşılıyor? (2) Gerçek bir insani duygu görünüyor mu? (3) Final, durumun tek olmadığını veya büyüdüğünü gösteriyor mu? (4) Önemli eylem gerçekten gerçekleşiyor mu (kesilen şey kendiliğinden kesilmiş gibi görünmüyor)?
+- Tekrar filtresi: aynı nesne+tören kalıbı art arda iki videoda kullanılmaz; aynı mekân, kalabalık ve yaşlı karakter dizilimi birebir tekrarlanmaz. Kopyalanan şey mekanizmadır, sahne değil.
+- Durum: yaratıcı hipotez; tek video örneğine dayanır.
 
 ### Karşı örnekler (genin sınırı)
 
@@ -122,7 +138,7 @@ Storyboard kareleri görsel kontrol için bir alternatiftir; bağımsız web kay
 
 ## Karar protokolü
 
-1. Üç teknik koşulu koru: tam 10 saniye, dikey 9:16, diyalogsuz ve doğal ASMR odaklı ses.
+1. Üç teknik koşulu koru: tam 10 saniye, dikey 9:16, diyalogsuz ve doğal ASMR odaklı ses. Ayrıca duygu ilkesini uygula.
 2. Canlı komedi ustası keşiflerini, araştırma özetlerini ve akademik yayınları gerçekten gelen kanıt türüne göre incele; salt arama sonucu ile okunan makaleyi eşit tutma.
 3. Öğrenilen teknikleri kopyalanacak sahne olarak değil, yeni bir olay veya davranış tasarlamada kullan.
 4. YouTube trendi, kendi kanal Analytics verisi veya sabit konu kalıbını bağımsız senaryo için zorunlu girdi yapma.
