@@ -1,7 +1,8 @@
-/* Boş Dükkân — küresel kaynak akışına bağlı komedi öğrenme katmanı.
-   Ana panelin Trend keşfi araması, sabit kaynak seçimi ve storyboard doğrulaması korunur.
-   Bu modül kaynaklı komedi öğrenmelerini ve kullanıcının yerel konu geçmişini
-   mevcut global kaynak paketine ekler; ana üretim düğmesinin işleyişini değiştirmez. */
+/* Boş Dükkân — web araştırması, komedi öğrenmesi ve tek senaryo üretimi tek akışta.
+   Ana panelin global YouTube keşfi, kaynak sabitlemesi ve storyboard kontrolü korunur.
+   Kaynaklı komedi araştırması, psikoloji bulguları ve yerel öğrenme notları global senaryo
+   paketine eklenir. Statik GitHub Pages modeli çalıştırmaz; araştırmayı istemi kullanan
+   web erişimli sohbet asistanı yapar. */
 (function () {
   'use strict';
   const $ = (selector) => document.querySelector(selector);
@@ -280,75 +281,6 @@
     render();
   })();
 
-
-  // BAĞIMSIZ SENARYO YAZARI: global kaynak, trend, kanal Analytics veya API anahtarı gerektirmez.
-  // Statik GitHub Pages kendi başına LLM çalıştırmaz; bu mod bağımsız yazarlık istemini hazırlar.
-  function buildIndependentScenarioPrompt() {
-    return [
-      "ROL: Kendi başına düşünen, davranış psikolojisini kullanan bağımsız görsel komedi senaristisin.",
-      "AMAÇ: Dış kaynak veya kullanıcı tarafından verilmiş konu beklemeden, tek bir yeni ve güçlü 10 saniyelik görsel ASMR komedisi yaz.",
-      "BAĞIMSIZLIK: YouTube videoları, rakipler, global trendler, web araştırması, dış kaynak, kanal Analytics'i, görüntülenme sayıları ve önceden verilmiş kaynak başlıklarını kullanma. Kaynak arama veya araştırma yapma. Bir kaynak izine ihtiyaç yok. Kendi yaratıcı muhakemenle sahne kur.",
-      "YARATICI MOTOR: Önce karakterin gerçekçi arzusunu, alışkanlığını, korkusunu, gururunu, sahiplenmesini, kısa yol arayışını, yanlış kararını veya yüzünü kurtarma çabasını belirle. Sonra karakterin seçiminin doğurduğu açık bir beklenti ve doğal bir neden-sonuç zinciri kur. Komedi, davranışın sonucu ile karakterin beklediği sonuç arasındaki anlamlı sürtüşmeden doğsun. Bunlar seçeneklerdir; her senaryoda aynı psikolojik kalıbı kullanma.",
-      "ÖZGÜNÜLÜK: Rastgele saçmalık, zoraki zıtlık, yalnızca bir nesneyi büyütüp/değiştirme, açıklama yazısı veya aynı finali başka nesneyle tekrarlama üretme. İmkânsız fizik kullanma. Farklı karakter hedefleri, kararlar, mekânlar, nesne ilişkileri ve sonuçlar türet. Sahne herkes için görsel olarak anlaşılır olsun.",
-      "ZORUNLU TEKNİK BİÇİM: Tam 10 saniye; dikey 9:16; fotogerçekçi; tek tutarlı olay; konuşma, seslendirme, müzik, altyazı ve ekranda yazı yok; yalnızca görüntüdeki eylemlerden çıkan doğal ASMR sesleri.",
-      "AÇILIŞ: İlk 0,0–0,3 saniyede olayın ortasından giren, soru uyandıran ve görüntüden anlaşılabilen bir kanca kur. Giriş/kuruluş çekimiyle zaman harcama.",
-      "OLAY AKIŞI: 0–10 saniyenin tamamını zaman kodlarıyla kapla. Her hareketin nedeni belli olsun ve bir sonraki hareketi hazırlasın. Ses, hareket ve nesne fiziği eşleşsin.",
-      "FİNAL: 10. saniyeye kadar açık, somut ve tamamlanmış bir komik sonuç göster. Final yalnızca şaşkın bakıştan, açıklamadan veya kesilmeden ibaret olmasın. Sonucu doğuran eylem görünür olsun.",
-      "KENDİ KENDİNİ DÜZENLEME: İç değerlendirmende birkaç farklı yaklaşım düşünebilirsin ama bunları kullanıcıya listeleme. Seçtiğin fikri; ilk kare, anlaşılabilir hedef, neden-sonuç, davranıştan doğan mizah, doğal ASMR ve tamamlanmış final açısından sorgula. Zayıfsa yeniden yaz. Sayısal puan uydurma, puan eşiği koyma ve üretimi durdurma.",
-      "ÇIKTI: Önce tek cümlelik fikir adı/açıklaması. Sonra neden komik olduğuna dair kısa açıklama. Ardından 0.0–10.0 saniyenin tamamını kapsayan net zaman çizelgesi. Son olarak doğrudan video üretim aracına yapıştırılabilecek eksiksiz İngilizce video promptu. İngilizce promptta bütün teknik koşulları, kancayı, eylemleri, doğal ASMR seslerini, kamera/kadrajı, sürekliliği ve tamamlanmış finali tekrar açıkça belirt.",
-      "KURAL: Kullanıcıdan konu isteme. Kaynak, veri veya sahne referansı isteme. Tek en güçlü senaryoyu hemen üret. Dünya çapında başarılı olacağını garanti etme."
-    ].join("\n");
-  }
-
-  (function mountIndependentScenarioPanel() {
-    if (!btn || $('#independentScenarioEnginePanel')) return;
-    const panel = document.createElement('div');
-    panel.id = 'independentScenarioEnginePanel';
-    panel.className = 'msg';
-    panel.style.margin = '12px 0';
-    const heading = document.createElement('h3');
-    heading.textContent = 'Bağımsız 10 saniyelik senaryo yazarı';
-    heading.style.margin = '0 0 6px';
-    const explanation = document.createElement('p');
-    explanation.className = 'note';
-    explanation.textContent = 'Bu mod global video, rakip, web araştırması, kanal Analytics’i veya YouTube API anahtarı kullanmaz. Düğme bağımsız senaryo yazarı talimatını hazırlar ve kopyalar. Panel statik bir web uygulaması olduğu için senaryoyu kendi içinde yazan bir yapay zekâ modeli çalıştırmaz; kopyalanan talimatı ChatGPT sohbetine yapıştırınca model tek senaryoyu üretir.';
-    const actionRow = document.createElement('div');
-    actionRow.className = 'bar';
-    actionRow.style.cssText = 'padding:0;border:0;background:transparent;margin:8px 0';
-    const make = document.createElement('button');
-    make.type = 'button';
-    make.textContent = 'Bağımsız motor talimatını oluştur ve kopyala';
-    const status = document.createElement('p');
-    status.className = 'note';
-    status.setAttribute('aria-live', 'polite');
-    status.textContent = 'Global arama yapmadan kullanılabilir.';
-    const output = document.createElement('textarea');
-    output.id = 'independentScenarioEnginePrompt';
-    output.readOnly = true;
-    output.rows = 10;
-    output.style.cssText = 'display:none;width:100%;max-width:100%;box-sizing:border-box;margin:8px 0;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)';
-    make.addEventListener('click', async () => {
-      output.value = buildIndependentScenarioPrompt();
-      output.style.display = 'block';
-      output.focus();
-      output.select();
-      let copied = false;
-      try {
-        await navigator.clipboard.writeText(output.value);
-        copied = true;
-      } catch (_) {
-        try { copied = document.execCommand('copy'); } catch (_) {}
-      }
-      status.textContent = copied
-        ? 'Bağımsız motor talimatı kopyalandı. Bu sohbete yapıştır; tek senaryo ve tam video promptu üretilecek.'
-        : 'Talimat aşağıda seçili. Kopyala seçeneğini kullanıp bu sohbete yapıştır.';
-    });
-    actionRow.appendChild(make);
-    panel.append(heading, explanation, actionRow, status, output);
-    const globalPanel = $('#globalIdeaPanel');
-    if (globalPanel && globalPanel.parentElement) globalPanel.before(panel);
-    else btn.parentElement.before(panel);
-  })();
 
   // Ana HTML içindeki global YouTube + storyboard konu üreticisini sar; asla ezme.
   const originalGlobalIdeaPromptBuilder = window.buildGlobalIdeaPrompt;
