@@ -24,6 +24,14 @@ Komedi öğrenme katmanı bilinen ustaların canlı Wikipedia özetlerini, farkl
 
 Önceki fikirleri tekrar etmeme kontrolü, yalnızca `knowledge.json` içinde (varsa) ve bu telefonda/tarayıcıda yerel saklanan konu geçmişinde bulunan kayıtları kapsar. Yerel geçmiş açık depoda yayımlanmaz. Kaydedilmemiş eski konuların otomatik olarak bilindiği varsayılmamalıdır.
 
+## Kalıcı komedi öğrenme protokolü
+
+- `knowledge.json` artık kaynaklı bulgular yanında `learningProtocol` kurallarını ve kanıt durumu açıkça işaretlenmiş `artistResearchCandidates` araştırma adaylarını taşır.
+- Protokol, bağımsız senaryo paketine, komedi ustaları/psikoloji araştırma görevine, isteğe bağlı global-trend görevine ve acımasız hakem istemine otomatik olarak eklenir; her seferinde elle kopyalamak gerekmez.
+- Arama sonucu/biyografi sahne incelemesi sayılmaz; akademik yayın künyesi abstract'ın veya tam metnin okunduğunu göstermez.
+- Psikoloji teorileri ayrı mercekler olarak kullanılır; amaçtan başlayan, nedensel eylemlerle ilerleyen ve somut tamamlanmış finali olan tek özgün senaryo seçilir.
+- Yeni adaylar doğrulanmış teknik gibi öğretilmez. Kayıt, kaynak/kanıt düzeyi ve test sonrası performansla güncellenir. Sayfa kendi başına dil modeli eğitmez; protokolü ve kaynakları üretim/hakem görevlerine bağlar.
+
 ## Kaynak ve öğrenme verisini ayrı tutma
 - Yeni fikir için kaynaklar global YouTube araması ve global web araştırmasıdır.
 - Kendi kanal Analytics verileri, global kaynağın yerine geçmeden geçmiş performansı anlamak ve yeni fikri yönlendirmek için ayrı bağlam olarak kullanılabilir. Bunlar kopyalanacak şablon veya neden-sonuç kanıtı değildir.
