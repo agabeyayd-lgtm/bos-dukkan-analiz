@@ -22,7 +22,9 @@ Panel üç bölüme ayrılmıştır:
 
 ### Öğrenme nasıl kalıcı olur?
 
-Panel kendi başına model eğitmez, film izlemez veya dışarıda web araması yapmaz. İlk bölüm kaynaklı araştırma istemi üretir; web erişimli sohbet asistanı araştırmayı yürütür. Araştırmadan elde edilen kısa dersler **Öğrenilen dersleri sakla** alanına yapıştırılır ve tarayıcının yerel depolamasında saklanır. Sonraki global konu paketine otomatik eklenir. Temel psikoloji ilkeleri ve usta atlası kodun parçasıdır.
+Panel kendi başına bir yapay zekâ modeli eğitmez. Kullanıcı **Trend keşfi** bölümünde YouTube Data API anahtarıyla global arama yapar; panel bu gerçek arama örneklemini ve sabitlenen video kaydını global konu paketine bağlar. Komedi öğrenme katmanı Wikipedia'dan seçilmiş usta ve mizah türü özetlerini, `knowledge.json` içindeki kaynaklı bulguları ve bu telefonda kaydedilen araştırma notlarını aynı pakete ekler. Paket ayrıca web erişimli sohbet asistanından aynı video ID'sini bağımsız web kaynaklarıyla çapraz kontrol etmesini ister; bu bağımsız web araştırması panelin kendi yaptığı bir işlem gibi gösterilmez. Panel filmi otomatik baştan sona izlemez; storyboard karelerini erişilebildiğinde dener ve görünmeyen sahneler konusunda kesinlik iddia etmez. 
+
+Önceki konu tekrarı yalnızca `knowledge.json` içinde (varsa) veya bu tarayıcının yerel konu geçmişine kaydedilen kayıtlar için yapılabilir. Yerel geçmiş telefona/tarayıcıya özeldir; depoda tutulmaz. Kaydedilmemiş eski konuların kendiliğinden hatırlandığı varsayılmamalıdır.
 
 ### Kaynakla desteklenmiş başlangıç dersleri
 
