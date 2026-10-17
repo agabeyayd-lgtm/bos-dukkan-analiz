@@ -31,29 +31,32 @@ jobs:
           const fs = require('fs');
           const js = fs.readFileSync('comedy-learning.js', 'utf8');
           const required = [
-            'COMEDY_CORE_PRINCIPLES',
-            'COMEDY_MASTERS',
-            'BASELINE_COMEDY_LESSONS',
-            'Pierre Étaix',
-            'Stephen Chow',
-            'Kishore Kumar',
-            'Totò',
-            'function compiledLessons()',
-            'function buildComedyStudyPrompt',
-            'bd_comedy_research_notes',
-            'KULLANICININ BU TARAYICIDA KAYDETTİĞİ KOMEDİ DERSLERİ',
-            'window.buildGlobalIdeaPrompt'
+            'MASTER_PAGES',
+            'PSYCH_PAGES',
+            'FALLBACK_FINDINGS',
+            'HISTORY_KEY',
+            'async function loadKnowledge()',
+            'function readHistory()',
+            'function writeHistory(list)',
+            'function readNotes()',
+            'const originalGlobalIdeaPromptBuilder = window.buildGlobalIdeaPrompt;',
+            'originalGlobalIdeaPromptBuilder.apply(this, arguments)',
+            'await getResearchBundle();',
+            'originalGlobalIdeaClickHandler.call(this, event)',
+            'KOMEDİ ÖĞRENME VE TEKRAR KONTROLÜ',
+            'window.BosDukkanComedyLearning'
           ];
           for (const phrase of required) {
-            if (!js.includes(phrase)) throw new Error('Missing comedy learning contract: ' + phrase);
+            if (!js.includes(phrase)) throw new Error('Missing dynamic comedy learning contract: ' + phrase);
           }
           for (const file of ['index.html', 'bos-dukkan-analiz.html']) {
             const html = fs.readFileSync(file, 'utf8');
             for (const phrase of ['data-p="learn"', 'data-p="gen"', 'data-p="own"', 'comedy-learning.js', 'id="comedyResearchNotes"']) {
               if (!html.includes(phrase)) throw new Error(file + ': missing three-part panel contract: ' + phrase);
             }
+            console.log('PASS ' + file + ': dynamic learning and native global-research contracts present');
           }
-          console.log('PASS comedy learning module and three-part panel contracts');
+          console.log('PASS dynamic comedy learning overlay and three-part panel contracts');
           NODE
 
       - name: Check global-source workflow contract
