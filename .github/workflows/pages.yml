@@ -65,6 +65,42 @@ jobs:
           console.log('PASS dynamic comedy learning overlay and three-part panel contracts');
           NODE
 
+      - name: Verify comedy learning protocol is persisted and connected
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const knowledge = JSON.parse(fs.readFileSync('knowledge.json', 'utf8'));
+          if (!Array.isArray(knowledge.learningProtocol) || knowledge.learningProtocol.length < 8) {
+            throw new Error('knowledge.json must include the persistent learningProtocol');
+          }
+          if (!Array.isArray(knowledge.artistResearchCandidates) || knowledge.artistResearchCandidates.length < 7) {
+            throw new Error('knowledge.json must retain artist research candidates with evidence status');
+          }
+          const scenario = fs.readFileSync('independent-scenario-engine.js', 'utf8');
+          const learning = fs.readFileSync('comedy-learning.js', 'utf8');
+          const spec = fs.readFileSync('TOPIC_ENGINE_SPEC.md', 'utf8');
+          const scenarioContracts = [
+            'KANIT ETİKETLERİ',
+            'USTA BAŞINA KAYIT',
+            'PSİKOLOJİYİ ÇOKLU MERCEKLE KULLAN',
+            'ÖĞRENME → ÖZGÜN NEDENSEL MEKANİZMA',
+            'KALICI MOTOR ÖĞRENME PROTOKOLÜ',
+            'KANIT STANDARDI'
+          ];
+          for (const phrase of scenarioContracts) {
+            if (!scenario.includes(phrase) && !learning.includes(phrase)) {
+              throw new Error('Missing scenario/research/judge protocol contract: ' + phrase);
+            }
+          }
+          for (const phrase of ['MOTOR ÖĞRENME PROTOKOLÜ', 'YENİ USTA ARAŞTIRMA ADAYLARI', 'learningProtocol']) {
+            if (!learning.includes(phrase)) throw new Error('Missing trend prompt binding: ' + phrase);
+          }
+          if (!spec.includes('Kalıcı motor öğrenme protokolü — çalışan sözleşme')) {
+            throw new Error('TOPIC_ENGINE_SPEC.md must document the connected protocol');
+          }
+          console.log('PASS persistent comedy learning protocol: knowledge → research → scenario → trend → judge');
+          NODE
+
       - name: Check global-source workflow contract
         run: |
           node <<'NODE'

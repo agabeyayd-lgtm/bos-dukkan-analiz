@@ -20,8 +20,55 @@
     'TITLE_ABS:(visual comedy OR slapstick) AND OPEN_ACCESS:Y'
   ];
 
+  const DEFAULT_LEARNING_PROTOCOL = [
+  {
+    "id": "evidence-labels",
+    "rule": "Her iddiayı DOĞRULANMIŞ BİLGİ, İNCELENEN SAHNE, KURAMSAL AÇIKLAMA veya YARATICI HİPOTEZ olarak ayır. Kaynağın gerçekten gösterdiğinden fazlasını kesin bilgi diye yazma."
+  },
+  {
+    "id": "evidence-depth",
+    "rule": "Wikipedia arama snippet'i, biyografi, filmografi, katalog açıklaması, fotoğraf, yayın künyesi ve abstract aynı kanıt değildir. Arama snippet'i veya biyografi sahne çözümlemesi sayılmaz; tam metin/sahne incelenmediyse açıkça belirt."
+  },
+  {
+    "id": "master-analysis",
+    "rule": "Her usta için ülke/dönem, kaynak URL'si, gerçekten incelenen materyal türü, komedi mekanizması, karakter motivasyonu/seyirci psikolojisi, 10 saniyelik özgün kurguya aktarılabilir soyut teknik ve kopyalanmaması gereken özgün sahne/ifade öğesini kaydet. Kanıt yoksa araştırılacak olarak bırak."
+  },
+  {
+    "id": "multiple-theories",
+    "rule": "Uyumsuzluk, statü/üstünlük, benign violation ve gerilim-boşalma yaklaşımlarını ayrı açıklama mercekleri olarak kullan. Her birinin neyi açıkladığını ve sınırını belirt; tek teoriyi bütün mizahın zorunlu veya yeterli açıklaması yapma."
+  },
+  {
+    "id": "causal-comedy",
+    "rule": "Özgün sahnede karakterin anlaşılır bir amacı olsun. Bir karar, alışkanlık veya yanlış varsayım eylemi başlatsın; her hareket bir sonrakine neden olsun; final önceki davranışın somut, şaşırtıcı ama anlaşılır sonucu olsun."
+  },
+  {
+    "id": "visual-readability",
+    "rule": "İlk yaklaşık 0,3 saniyede görsel olarak okunabilir bir kanca kurmayı hedefle. İzleyici olayı açıklama yazısı veya diyalog olmadan takip edebilsin; yalnızca tuhaflık/sürpriz komedi kanıtı sayılmaz."
+  },
+  {
+    "id": "originality",
+    "rule": "Ustanın ayırt edici karakterini, özgün ifadesini, koreografisini, sahne dizisini veya finalini kopyalama. Soyut mekanizmayı yeni amaç, davranış ve sonuçla yeniden kur; nedensiz rastgelelik ve yalnızca nesneyi değiştirerek tekrar üretme."
+  },
+  {
+    "id": "format-and-ending",
+    "rule": "Her video görevi tam 10 saniye, dikey 9:16, diyalogsuz ve doğal ASMR odaklı ses koşullarını korusun. Sahne somut tamamlanmış bir sonuçla bitsin; sonucu açıklama yazısı ile anlatmaya veya sonuçsuz loop'a güvenme."
+  },
+  {
+    "id": "judge-and-measure",
+    "rule": "Tek aday seçmeden önce kendi içinde zayıf, nedensiz veya kopya hissi veren yönleri eleştir; kullanıcıya tek güçlü aday ver. Sabit puan eşiği ya da tek bir mizah mekanizmasını zorunlu kılma. Sonucu test edilmemiş hipotez olarak kaydet ve yayından sonra gerçek metriklerle sınamadan nedensellik iddia etme."
+  },
+  {
+    "id": "output-contract",
+    "rule": "Araştırma çıktısında kaynak ve kanıt türünü göster; üretim çıktısında tek fikir, kısa komik mekanizma, 0-10 saniye akışı, doğrudan kullanılabilir İngilizce video promptu ve yayın sonrası sınanacak metrikleri ver."
+  }
+];
+
   function clean(value, max) {
     return String(value == null ? "" : value).replace(/\s+/g, " ").trim().slice(0, max || 500);
+  }
+  function getLearningProtocol(research) {
+    const supplied = research && research.baseLearning && research.baseLearning.learningProtocol;
+    return Array.isArray(supplied) && supplied.length ? supplied : DEFAULT_LEARNING_PROTOCOL;
   }
   function uniqueBy(items, keyFn) {
     const seen = new Set();
@@ -62,6 +109,7 @@
     return {
       title: clean(json.title || title, 180),
       summary: clean(json.extract, 360),
+      evidenceType: "Wikipedia REST page summary returned by API; summary/biography only, not a scene-level analysis",
       url: json.content_urls && json.content_urls.desktop && json.content_urls.desktop.page ||
         "https://en.wikipedia.org/wiki/" + encodeURIComponent(title.replace(/ /g, "_"))
     };
@@ -95,7 +143,7 @@
         title: newLeads[index].title,
         summary: newLeads[index].snippet || "Arama sonucu bulundu; makale özeti alınamadı.",
         url: newLeads[index].url,
-        evidenceType: "Wikipedia arama sonucu; derin inceleme doğrulanmadı"
+        evidenceType: "Wikipedia search snippet only; article summary unavailable; no scene analysis verified"
       });
     });
     return { leads: uniqueLeads, discoveries, failedQueries };
@@ -186,10 +234,12 @@
   }
   function shortBundle(bundle) {
     const masters = (bundle.masters && bundle.masters.ok || []).slice(0, 12).map(x => ({
-      title: clean(x.title, 120), summary: clean(x.summary, 260), url: x.url || ""
+      title: clean(x.title, 120), summary: clean(x.summary, 260), url: x.url || "",
+      evidenceType: clean(x.evidenceType || "Wikipedia REST summary only; not scene-level analysis", 150)
     }));
     const psychology = (bundle.psych && bundle.psych.ok || []).slice(0, 4).map(x => ({
-      title: clean(x.title, 120), summary: clean(x.summary, 300), url: x.url || ""
+      title: clean(x.title, 120), summary: clean(x.summary, 300), url: x.url || "",
+      evidenceType: clean(x.evidenceType || "Wikipedia REST summary only; not full theory review", 150)
     }));
     const knowledge = bundle.knowledge && bundle.knowledge.findings || [];
     return {
@@ -198,7 +248,12 @@
       learnedFindings: knowledge.slice(0, 8).map(x => ({
         source: clean(x.source, 150), finding: clean(x.finding, 300), url: x.url || ""
       })),
-      failedStaticLookups: (bundle.masters && bundle.masters.failed || []).concat(bundle.psych && bundle.psych.failed || []).slice(0, 18)
+      failedStaticLookups: (bundle.masters && bundle.masters.failed || []).concat(bundle.psych && bundle.psych.failed || []).slice(0, 18),
+      learningProtocol: getLearningProtocol({baseLearning: {learningProtocol: bundle.knowledge && bundle.knowledge.learningProtocol}}),
+      artistResearchCandidates: ((bundle.knowledge && bundle.knowledge.artistResearchCandidates) || []).slice(0, 12).map(x => ({
+        title: clean(x.title, 120), evidenceStatus: clean(x.evidenceStatus, 220),
+        researchLead: clean(x.researchLead, 260), sourceUrls: Array.isArray(x.sourceUrls) ? x.sourceUrls.slice(0, 3) : []
+      }))
     };
   }
   async function performLiveResearch() {
@@ -288,6 +343,7 @@
   }
   function scenarioPrompt(research) {
     const notes = learningNotes();
+    const protocol = getLearningProtocol(research);
     const past = ideaHistory();
     const manualAvoid = clean($("#avoidIdeas") && $("#avoidIdeas").value, 2400);
     return [
@@ -295,10 +351,18 @@
       "AMAÇ: Her seferinde kendi başına yeni bir konu keşfet ve tek bir güçlü 10 saniyelik ASMR video senaryosu üret. Bu, trend videosu uyarlama aracı değildir.",
       "BAĞIMSIZLIK: Bir YouTube trend videosu, kullanıcının kanal istatistikleri, rakip başlığı, kaynak sahne, popüler nesne, sabit konu ailesi veya önceden tanımlanmış başarı formülü seçmek zorunda değilsin. Bunlardan hiçbiri konu kaynağı değildir. Araştırma verileri yalnızca komedinin nasıl çalıştığını öğrenmek içindir; konuyu kendi yaratıcı yargınla seç.",
       "TEK ZORUNLU FORMAT: Tam 10 saniye; dikey 9:16; diyalog ve konuşma yok; doğal ASMR odaklı ses. Başka tür, konu, oyunculuk, gerçekçilik, kurgu, fizik veya komedi mekanizması filtresi koyma. Gerçekçi, absürt, fiziksel, deadpan, karakter odaklı, nesne odaklı veya başka herhangi bir yaratıcı biçim serbesttir.",
-      "ARAŞTIRMA VERİSİNİ GERÇEKTEN KULLAN: Aşağıdaki canlı Wikipedia keşiflerini, psikoloji/komedi sayfası özetlerini ve erişilebilen akademik özetleri incele. Kaynak URL'siyle desteklenmeyen teknik iddiasını doğrulanmış diye sunma. Metadata/künye ile okunan abstract'ı birbirinden ayır. Araştırma başarısızsa bunu açıkça belirt; fikir üretimini durdurma.",
-      "ÖĞRENME → YENİ MEKANİZMA: Kaynaklardaki yöntemleri karakter motivasyonu, beklenti, statü, ritim, görsel okunurluk, nesne/ortam kullanımı, sürpriz, absürtlük veya başka bir üretken ilke olarak çıkar. Ustanın karakterini, bilinen sahnesini veya bitişini kopyalama. Tek bir mekanizmaya mahkûm olma; bu ilkeler sadece olası araçlardır.",
-      "KENDİ KARARIN: Önce kendi içinde farklı yaratıcı yönleri dene, klişe veya sıradan kalanları at ve en iyi tek sonucu seç. Alternatif fikir listesi kullanıcıya gösterme. Sabit puan eşiği ya da zorunlu checklist yüzünden yeni bir fikri otomatik reddetme.",
-      "SONUÇ: Bitmiş, çekilebilir ve tek başına anlaşılır bir senaryo üret. Tam 0–10 saniye akışı, görsel eylemler ve doğal ASMR seslerini yaz. Sonunda doğrudan video üretim aracına yapıştırılacak İngilizce prompt ver. Prompt 10 saniye, 9:16, diyalogsuz ve doğal ASMR ses koşullarını açıkça içersin.",
+      "KANIT ETİKETLERİ (zorunlu): Her iddiayı DOĞRULANMIŞ BİLGİ, İNCELENEN SAHNE, KURAMSAL AÇIKLAMA veya YARATICI HİPOTEZ olarak ayır. Wikipedia arama sonucu/snippet'i, biyografi, filmografi, katalog notu, yayın künyesi ve abstract aynı kanıt değildir. Abstract veya metaveri dönmüş olması tam metnin okunduğu anlamına gelmez; hiçbir sahne incelenmediyse sahne analiz edilmiş gibi anlatma.",
+      "USTA BAŞINA KAYIT: Ülke/dönem, kaynak URL, gerçekten incelenen materyal türü, komedi mekanizması, karakter motivasyonu/seyirci psikolojisi, özgün 10 saniyelik kurguya aktarılabilir soyut teknik ve kopyalanmaması gereken sahne/ifade öğesini yaz. Biyografi veya arama snippet'inden belirli sahne koreografisi çıkarma; kanıt yoksa araştırma adayı olarak bırak.",
+      "PSİKOLOJİYİ ÇOKLU MERCEKLE KULLAN: Uyumsuzluk, statü/üstünlük, benign violation ve gerilim-boşalma teorilerini olası açıklama araçları olarak ayrı tart. Her birinin açıkladığı şeyi ve kanıt sınırını belirt. Bir teorinin her komedide bulunmasını şart koşma; tek teoriyle bütün mizahı açıklama.",
+      "ÖĞRENME → ÖZGÜN NEDENSEL MEKANİZMA: Karakterin amacı veya gündelik arzusu görünür olsun; bir seçim, alışkanlık veya yanlış varsayım ilk eylemi başlatsın; her hareket sonraki sonucu doğursun; final hem beklenmedik hem önceki eylemlerin somut sonucu olsun. Salt tuhaflık, nedensiz rastgelelik, açıklama yazısına bağımlılık veya yalnızca nesne değiştirerek tekrar üretmek komediyi kanıtlamaz. Biçimi mekanizmaya göre seç; tek bir mizah türüne mahkûm olma.",
+      "10 SANİYELİK GÖRSEL UYGULAMA: İlk yaklaşık 0,3 saniyede okunabilir bir görsel kanca hedefle; karakterin amacı konuşma olmadan anlaşılmalı. Eylemler net ve nedensel ilerlesin; final tamamlanmış somut sonuçla bitsin. Kesin format: tam 10 saniye, dikey 9:16, diyalogsuz, doğal ASMR sesleri.",
+      "ACIMASIZ ÖZ-DENETİM: Son seçimi yapmadan önce zayıf/klişe/tekrara benzeyen alternatifleri kendi içinde karşılaştır. İzleyicinin amacı ilk anda okuyup okuyamadığını, hareketlerin birbirini doğurup doğurmadığını, finalin ana olaydan çıkıp çıkmadığını ve sahnenin gerçekten komik bir mekanizma taşıyıp taşımadığını kontrol et. Bu düşünme denetimi sabit puan kapısı değildir; tek bir güçlü aday üret, liste verme.",
+      "TEST SINIRI: Başarı tahmini garanti değildir. Fikri test edilmemiş yaratıcı hipotez olarak işaretle; yayın sonrası veriyi farklı metriklerle karşılaştır ama görüntülenme/izlenme oranından sahnenin neden komik olduğunu veya kesin nedenselliği çıkarsama.",
+      "KALICI MOTOR ÖĞRENME PROTOKOLÜ (knowledge.json; senaryo ve hakem görevlerine bağlanmıştır):",
+      JSON.stringify(protocol, null, 2),
+      "ÖNCEKİ USTALAR İÇİN ARAŞTIRMA ADAYLARI (doğrulanmış sahne bulguları değildir; kaynak ve materyal türü ayrıca doğrulanmalı):",
+      JSON.stringify(research && research.baseLearning && research.baseLearning.artistResearchCandidates || [], null, 2),
+      "ARAŞTIRMA VERİSİNİ GERÇEKTEN KULLAN: Aşağıdaki canlı Wikipedia keşiflerini, psikoloji/komedi sayfası özetlerini ve erişilebilen akademik özetleri incele. Araştırma başarısızsa bunu açıkça belirt; fikir üretimini durdurma.",
       "KAYNAK ARAŞTIRMA PAKETİ (bu çalıştırmada alınan; kaynağın durumu ve URL'si korunmalı):",
       JSON.stringify(research, null, 2),
       "ÖNCEKİ ÖĞRENME NOTLARI (varsa; mekanizma öğrenmek içindir, yeni konuyu kısıtlamak için değil):",
@@ -316,6 +380,8 @@
       "Aşağıdaki canlı kaynak paketini gerçekten kullan. Farklı ülkelerden/dönemlerden daha az tanınan görsel komedi ustalarını yeni kaynaklarla keşfet; önceki bilinen isimleri tekrar ederek alan doldurma. Psikoloji kaynaklarında uyumsuzluk, statü/üstünlük, benign violation ve gerilim-boşalma gibi teorilerin kanıt sınırını incele; tek teori bütün mizahı açıklıyor deme.",
       "Her usta için: ülke/dönem, kaynak, gerçek incelenen materyal türü, komedi mekanizması, karakter motivasyonu/seyirci psikolojisi, 10 saniyelik özgün kurguya aktarılabilecek soyut teknik ve kopyalanmaması gereken özgün ifade/sahne. En sonunda 5–8 uygulanabilir ders ve motorun öğrenme notlarına doğrudan eklenebilecek kısa madde listesi üret.",
       "Erişilmeyen sayfaları okunmuş gibi gösterme. Sadece arama sonucuyla görülen bilgiye derin analiz muamelesi yapma. Kaynak URL'lerini ekle.",
+      "KALICI MOTOR ÖĞRENME PROTOKOLÜ:\n" + JSON.stringify(getLearningProtocol(research), null, 2),
+      "KANIT STANDARDI: Arama snippet'i/biyografi/filmografi/katalog künyesi tam sahne analizi değildir. Her usta için materyal türünü, URL'yi ve kanıt düzeyini belirt; erişilmeyen sayfayı okunmuş gibi gösterme. Kaynakla desteklenmeyen mekanizma atfını hipotez olarak işaretle.",
       "CANLI ARAŞTIRMA PAKETİ:\n" + JSON.stringify(research, null, 2),
       "Mevcut özel öğrenme notları:\n" + (learningNotes() || "Yok.")
     ].join("\n\n");
@@ -439,12 +505,15 @@
         return;
       }
       const research = window.bosLiveComedyResearch || getCachedResearch();
+      const protocol = getLearningProtocol(research);
       const task = [
         "ROL: Acımasız ama yaratıcı görsel komedi dramaturgu; kalitesiz fikri savunma, kişisel zevki evrensel yasa gibi sunma.",
         "SADECE ŞU KOŞULLAR DEĞİŞMEZ: tam 10 saniye, dikey 9:16, diyalogsuz, doğal ASMR sesleri. Diğer bütün yaratıcı yaklaşımlar serbesttir. Sabit mizah tekniği, gerçekçilik, hook, tema, oyunculuk veya fizik kuralı dayatma.",
         "GÖREV: Aşağıdaki senaryoyu izleyicinin gözünden değerlendir. Komedi gerçekten olaydan mı doğuyor, yoksa sadece beklenmedik bir görüntü mü? Karakter/nesne/ortam eylemi kendiliğinden anlaşılır mı, ritim doğru mu, 10 saniyede tamamlanıyor mu, ses görüntüyü güçlendiriyor mu, fikir ezber/tekrar hissi veriyor mu? Bu sorular düşünme mercekleridir, mekanik puan listesi değil.",
         "ÖNCE KISA TEŞHİS: En fazla üç somut cümle; neresi işlemiyor veya neden çalışabilir? Sonra karar ver. Fikir zayıfsa aynı fikri yamamakla yetinme; gerektiğinde yeni bir yaratıcı mekanizma seçerek yalnızca bir daha güçlü nihai sürüm yaz. Fikir güçlüyse gereksiz yere değiştirme. Alternatif fikir listesi, yüzdelik başarı tahmini veya süslü övgü verme.",
         "NİHAİ ÇIKTI: Tek düzeltilmiş/korunmuş fikir, saniye saniye 10 saniyelik akış ve doğrudan kopyalanabilir tam İngilizce video promptu. Prompt exact 10 seconds, vertical 9:16, no dialogue, natural ASMR audio içermeli.",
+        "KANIT/MEKANİZMA DENETİMİ: Sahne gerçekten kaynakta incelenmiş gibi iddia ediliyor mu? Karakter amacı görünür mü? Eylemler birbirine neden oluyor mu? Final somut ve önceki olayın sonucu mu? Salt tuhaflık veya açıklama yazısı şakanın yerini alıyor mu? Psikoloji teorilerinden biri gereksiz yere zorunlu kılınıyor mu? Zayıfsa tek daha güçlü nihai sürümle değiştir; sabit puan eşiği uygulama.",
+        "KALICI MOTOR ÖĞRENME PROTOKOLÜ:\n" + JSON.stringify(protocol, null, 2),
         "Güncel öğrenme notları:\n" + learningNotes(),
         "İlgili canlı araştırma kaydı (varsa; desteklemediği iddiaları buradan çıkarma):\n" + JSON.stringify(research || {}),
         "DEĞERLENDİRİLECEK ADAY:\n" + candidate
