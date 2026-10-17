@@ -12,6 +12,14 @@ Her çalıştırmada global içerik ve global kaynak araştırmasından yararlan
 
 Bunun dışında sabit mizah türü, fizik/gerçekçilik şartı, oyunculuk stili, puan eşiği veya otomatik ret listesi yoktur.
 
+## Üç bölümlü komedi öğrenme ve konu sistemi
+
+1. **Komedi psikolojisi & ustalar:** Psikoloji ilkeleri ve uluslararası komedi repertuvarı; yeni ve daha az tanınan isimleri URL kaynaklarıyla araştıran bir istem.
+2. **Global konu motoru:** Kaydedilmiş komedi dersleri, global YouTube kaydı ve global arama örneklemiyle tek yeni fikir istemi. Kanal Analytics verisi bu yolu etkilemez.
+3. **Yayın sonrası ölçüm:** Yalnızca yayımlanmış videoları değerlendirir.
+
+Araştırma notları tarayıcıda yerel saklanır ve sonraki konu paketlerine dahil edilir. Bu, temel ilkelerin kodda tutulması ve araştırma derslerinin isteme bağlanmasıdır; panelin kendi başına model eğittiği veya filmleri otomatik izlediği anlamına gelmez. Web araştırmasını kopyalanan istemi verdiğin web erişimli sohbet asistanı gerçekleştirir.
+
 ## Kaynak kuralı: global, kendi kanalın değil
 - Yeni fikir için kaynaklar global YouTube araması ve global web araştırmasıdır.
 - Kendi kanalının ölçümleri yeni konuyu, sahneyi veya komedi mekanizmasını seçmez; yalnızca yayın sonrası kıyaslama içindir.
