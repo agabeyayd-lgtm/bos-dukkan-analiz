@@ -15,7 +15,7 @@ Bunun dışında sabit mizah türü, fizik/gerçekçilik şartı, oyunculuk stil
 ## Üç bölümlü komedi öğrenme ve konu sistemi
 
 1. **Komedi psikolojisi & ustalar:** Psikoloji ilkeleri ve uluslararası komedi repertuvarı; yeni ve daha az tanınan isimleri URL kaynaklarıyla araştıran bir istem.
-2. **Global konu motoru:** Kaydedilmiş komedi dersleri, global YouTube kaydı ve global arama örneklemiyle tek yeni fikir istemi. Kanal Analytics verisi bu yolu etkilemez.
+2. **Global konu motoru:** Global YouTube kaynak kaydı, komedi dersleri, önceki fikir geçmişi ve (varsa) telefonda/tarayıcıda saklanan gerçek kanal Analytics ölçümleriyle tek özgün fikir istemi. Kanal verisi kaynak videonun yerine geçmez; fikri yönlendiren ayrı performans bağlamıdır.
 3. **Yayın sonrası ölçüm:** Yalnızca yayımlanmış videoları değerlendirir.
 
 Kaynaklı başlangıç dersleri — Pierre Étaix'in görsel gag ilkeleri, Keaton'ın fiziksel nedenselliği, Tati'nin mekân/ses komedisi, Stephen Chow'un farce-pathos birlikteliği, Kishore Kumar'ın fiziksel ritmi ve Totò'nun mimik/survival farcesi — not eklenmemiş olsa bile her global fikir istemine varsayılan olarak dahil edilir. Kaydedilen kişisel komedi araştırma notları bunlara eklenir; temel derslerin yerini almaz.
@@ -24,9 +24,10 @@ Komedi öğrenme katmanı canlı Wikipedia özetlerini, `knowledge.json` içinde
 
 Önceki fikirleri tekrar etmeme kontrolü, yalnızca `knowledge.json` içinde (varsa) ve bu telefonda/tarayıcıda yerel saklanan konu geçmişinde bulunan kayıtları kapsar. Yerel geçmiş açık depoda yayımlanmaz. Kaydedilmemiş eski konuların otomatik olarak bilindiği varsayılmamalıdır.
 
-## Kaynak kuralı: global, kendi kanalın değil
+## Kaynak ve öğrenme verisini ayrı tutma
 - Yeni fikir için kaynaklar global YouTube araması ve global web araştırmasıdır.
-- Kendi kanalının ölçümleri yeni konuyu, sahneyi veya komedi mekanizmasını seçmez; yalnızca yayın sonrası kıyaslama içindir.
+- Kendi kanal Analytics verileri, global kaynağın yerine geçmeden geçmiş performansı anlamak ve yeni fikri yönlendirmek için ayrı bağlam olarak kullanılabilir. Bunlar kopyalanacak şablon veya neden-sonuç kanıtı değildir.
+- Panel, ölçümlü video başlıklarını ve ayrı ayrı ölçülen metrikleri kompakt bir özet halinde yalnızca bu tarayıcıda saklar. Özet repoya yüklenmez; yeni konu paketi oluşturulunca isteme eklenir. OAuth erişim jetonu ve yorum metinleri bu öğrenme önbelleğine kaydedilmez.
 - Global YouTube arama örneklemi en fazla 50 video gibi arama/sıralama sınırlamalarına sahiptir; tüm Shorts evrenini temsil etmez.
 - Her kaynak tam video ID'si ve resmi YouTube URL'si ile sabitlenir.
 
@@ -48,7 +49,7 @@ Storyboard otomatik görsel kontrol için bir alternatiftir; bağımsız web ara
 ## Ayrı iş akışları: global fikir / yayın sonrası ölçüm
 - **Global fikir paketi** yalnızca `Trend keşfi` bölümündeki global YouTube araştırma kaydını ve otomatik storyboard/Web doğrulama alternatifini taşır.
 - **Yayın sonrası ölçüm raporu** yalnızca kendi kanalının yayımlanmış videolarının ölçümlerini dışa aktarır; komedi fikri, global kaynak veya video promptu oluşturmaz.
-- Eski birleştirilmiş “Konu Motoru” paket yolu kaldırıldı; kanal metrikleri artık fikir üretimi paketine bağlanmaz.
+- Yayın sonrası rapor kendi başına fikir üretmez; ancak gerçek ölçümler alındığında oluşturulan yerel metrik özeti sonraki global konu paketine performans bağlamı sağlar.
 
 ## Otomatik kontroller ve dağıtım
 
@@ -64,10 +65,10 @@ Kontrol, kaynak atfının yapısını doğrular; videonun sahnesinin gerçekten 
 ## Kullanım akışı
 1. Panelde **Trend keşfi** bölümüne YouTube Data API anahtarını gir.
 2. Global odaklı bir arama yap ve sonuçları getir.
-3. **Global konu paketini oluştur ve kopyala** düğmesine bas. Kendi kanalına OAuth ile bağlanmak gerekmez.
+3. **Global konu paketini oluştur ve kopyala** düğmesine bas. Global kaynak araması OAuth gerektirmez. Daha önce 3. bölümde kanal Analytics ölçümlerini getirdiysen, tarayıcıda saklanan kompakt özet otomatik eklenir.
 4. Kopyalanan istemi web erişimi olan sohbet asistanına yapıştır. Asistanın aynı global kaydı aramasını, bağımsız yazılı kaynak bulamazsa bunu söylemesini ve tek tam prompt üretmesini iste.
 5. Dönen yanıtı paneldeki global kaynak izi kontrolüne yapıştırıp alanları denetle.
-6. Video yayınlandıktan sonra ayrı kanal analiziyle gerçek performansı değerlendir; bu performansı yeni fikrin global kaynağıymış gibi kullanma.
+6. Video yayınlandıktan sonra ayrı kanal analiziyle gerçek performansı değerlendir. Bu veriler sonraki fikri yönlendirebilir, ancak global kaynak yerine geçmez ve tek başına başarı nedeni kanıtlamaz.
 
 Panelin kendisi bir yapay zekâ modeli çalıştırmaz; global paket üretir ve kaynak izi denetler. İçerik üretimi/bağımsız web araştırması, paketi yapıştırdığın web erişimli sohbet asistanında gerçekleşir.
 
