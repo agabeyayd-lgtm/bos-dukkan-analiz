@@ -47,7 +47,7 @@ Storyboard otomatik görsel kontrol için bir alternatiftir; bağımsız web ara
 - Eksik veri sıfır değildir; metrikler ve ölçüm dönemleri birbirine karıştırılmaz.
 
 ## Ayrı iş akışları: global fikir / yayın sonrası ölçüm
-- **Global fikir paketi** yalnızca `Trend keşfi` bölümündeki global YouTube araştırma kaydını ve otomatik storyboard/Web doğrulama alternatifini taşır.
+- **Global fikir paketi** dış YouTube kaynak kaydını ve otomatik storyboard/Web doğrulama alternatifini taşır. Daha önce alınmış kanal Analytics özetini, yalnızca performans bağlamı olarak ayrıca içerir.
 - **Yayın sonrası ölçüm raporu** yalnızca kendi kanalının yayımlanmış videolarının ölçümlerini dışa aktarır; komedi fikri, global kaynak veya video promptu oluşturmaz.
 - Yayın sonrası rapor kendi başına fikir üretmez; ancak gerçek ölçümler alındığında oluşturulan yerel metrik özeti sonraki global konu paketine performans bağlamı sağlar.
 
