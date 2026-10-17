@@ -18,6 +18,141 @@
       finding: "Keaton'da hareketler nedensellik zinciri gibi birbirini doğurur; yüz ifadesiz kalır."}
   ];
   const HISTORY_KEY = 'bd_topic_history';
+  const OWN_ANALYTICS_KEY = 'bd_own_analytics_snapshot_v1';
+
+  function finiteNumber(value) {
+    if (value === null || value === undefined || value === '') return null;
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  // Keep only compact metrics and public video metadata; never cache OAuth tokens or comment text.
+  function compactOwnSnapshot(snapshot) {
+    if (!snapshot || typeof snapshot !== 'object' || !Array.isArray(snapshot.videos)) return null;
+    const videos = snapshot.videos.map(v => {
+      const analyticsAvailable = Boolean(v && (v.analyticsAvailable !== undefined ? v.analyticsAvailable : v.hasAnalytics));
+      return {
+        id: String(v && v.id || ''),
+        title: String(v && v.title || '').slice(0, 180),
+        publishedAt: v && (v.publishedAt || v.published) || null,
+        durationSeconds: finiteNumber(v && (v.durationSeconds !== undefined ? v.durationSeconds : v.seconds !== undefined ? v.seconds : v.sec)),
+        analyticsAvailable,
+        analyticsWindowDays: finiteNumber(v && v.analyticsWindowDays),
+        viewsInWindow: analyticsAvailable ? finiteNumber(v && (v.viewsInWindow !== undefined ? v.viewsInWindow : v.views)) : null,
+        averageViewSeconds: analyticsAvailable ? finiteNumber(v && (v.averageViewSeconds !== undefined ? v.averageViewSeconds : v.avgSec)) : null,
+        averageViewedPercent: analyticsAvailable ? finiteNumber(v && (v.averageViewedPercent !== undefined ? v.averageViewedPercent : v.pct)) : null,
+        likesInWindow: analyticsAvailable ? finiteNumber(v && (v.likesInWindow !== undefined ? v.likesInWindow : v.likes)) : null,
+        subscribersGainedInWindow: analyticsAvailable ? finiteNumber(v && (v.subscribersGainedInWindow !== undefined ? v.subscribersGainedInWindow : v.subs)) : null,
+        publicLifetimeViews: finiteNumber(v && (v.publicLifetimeViews !== undefined ? v.publicLifetimeViews : v.publicViews)),
+        publicLifetimeLikes: finiteNumber(v && v.publicLifetimeLikes),
+        publicLifetimeComments: finiteNumber(v && v.publicLifetimeComments),
+        viewsPerObservedDay: finiteNumber(v && v.viewsPerObservedDay),
+        subscribersGainedPer1000WindowViews: finiteNumber(v && v.subscribersGainedPer1000WindowViews),
+        likeRateInWindow: finiteNumber(v && v.likeRateInWindow)
+      };
+    }).filter(v => v.id || v.title).slice(0, 250);
+
+    return {
+      source: 'YouTube Analytics API v2 + YouTube Data API v3 metadata',
+      reportingWindowDays: finiteNumber(snapshot.reportingWindowDays),
+      requestedAt: snapshot.requestedAt || null,
+      channelSubscriberCount: finiteNumber(snapshot.channelSubscriberCount),
+      totalVideoRows: finiteNumber(snapshot.totalVideoRows) ?? videos.length,
+      analyticsVideoRows: finiteNumber(snapshot.analyticsVideoRows) ?? videos.filter(v => v.analyticsAvailable).length,
+      videos
+    };
+  }
+
+  function saveOwnAnalyticsSnapshot(snapshot) {
+    const compact = compactOwnSnapshot(snapshot);
+    if (!compact) return {ok: false, reason: 'Geçerli kanal ölçümü bulunamadı.'};
+    try {
+      localStorage.setItem(OWN_ANALYTICS_KEY, JSON.stringify(compact));
+      return {ok: true, videos: compact.videos.length, measuredVideos: compact.videos.filter(v => v.analyticsAvailable).length};
+    } catch (e) {
+      return {ok: false, reason: 'Tarayıcı depolaması kullanılamıyor.'};
+    }
+  }
+
+  function readOwnAnalyticsSnapshot() {
+    try {
+      const live = compactOwnSnapshot(window.bosOwnAnalyticsSnapshot);
+      if (live && live.videos.length) return live;
+    } catch (e) {}
+    try {
+      return compactOwnSnapshot(JSON.parse(localStorage.getItem(OWN_ANALYTICS_KEY) || 'null'));
+    } catch (e) { return null; }
+  }
+
+  function readPreviousIdeaNotes() {
+    const field = $('#ideaHistory');
+    try {
+      const live = field && String(field.value || '').trim();
+      const saved = String(localStorage.getItem('bd_idea_history') || '').trim();
+      return (live || saved).slice(0, 7000);
+    } catch (e) {
+      return String(field && field.value || '').trim().slice(0, 7000);
+    }
+  }
+
+  function metricRecord(v) {
+    return {
+      title: v.title,
+      publishedAt: v.publishedAt,
+      durationSeconds: v.durationSeconds,
+      analyticsWindowDays: v.analyticsWindowDays,
+      viewsInWindow: v.viewsInWindow,
+      averageViewSeconds: v.averageViewSeconds,
+      averageViewedPercent: v.averageViewedPercent,
+      likesInWindow: v.likesInWindow,
+      subscribersGainedInWindow: v.subscribersGainedInWindow,
+      subscribersGainedPer1000WindowViews: v.subscribersGainedPer1000WindowViews,
+      viewsPerObservedDay: v.viewsPerObservedDay,
+      publicLifetimeViews: v.publicLifetimeViews
+    };
+  }
+
+  function buildOwnAnalyticsLearning() {
+    const snapshot = readOwnAnalyticsSnapshot();
+    if (!snapshot) {
+      return {
+        available: false,
+        reason: 'Bu tarayıcıda kaydedilmiş YouTube Analytics ölçümü yok. Kullanıcı kanal ölçümünü henüz getirmemiş veya yerel önbelleği temizlemiş.',
+        rule: 'Kanal verisi yok diye metrik uydurma veya fikir üretimini durdurma.'
+      };
+    }
+    const measured = snapshot.videos.filter(v => v.analyticsAvailable);
+    const ranking = (key, valid = () => true) => measured
+      .filter(v => finiteNumber(v[key]) !== null && valid(v))
+      .sort((a, b) => Number(b[key]) - Number(a[key]))
+      .slice(0, 4)
+      .map(metricRecord);
+
+    return {
+      available: measured.length > 0,
+      source: snapshot.source,
+      requestedAt: snapshot.requestedAt,
+      reportingWindowDays: snapshot.reportingWindowDays,
+      channelSubscriberCount: snapshot.channelSubscriberCount,
+      totalVideoRows: snapshot.totalVideoRows,
+      analyticsMeasuredVideos: measured.length,
+      metricRules: [
+        'Dönem izlenmesi, ortalama izleme saniyesi, ortalama izlenen yüzde, beğeni ve kazanılan abone yalnızca belirtilen Analytics dönemine aittir.',
+        'Kamusal toplam izlenme ayrı ömür boyu sayacıdır; dönem izlenmesiyle karıştırma.',
+        'Eksik ölçüm null/veri yoktur; sıfır değildir. Farklı metrikler tek puana birleştirilmez.',
+        'Kanal verisi global kaynak değildir; yalnızca hangi sonuçların yeniden düşünülmeye değer olduğuna ilişkin bağlamdır. Korelasyon neden-sonuç kanıtı değildir.'
+      ],
+      leaders: {
+        highestAverageViewedPercent: ranking('averageViewedPercent'),
+        highestAverageViewSeconds: ranking('averageViewSeconds'),
+        highestViewsInWindow: ranking('viewsInWindow'),
+        highestSubscribersGainedPer1000Views: ranking('subscribersGainedPer1000WindowViews', v => Number(v.viewsInWindow) > 0),
+        highestLikesInWindow: ranking('likesInWindow')
+      },
+      recentMeasuredVideos: measured.slice(0, 25).map(metricRecord),
+      limitations: 'Kendi kanalındaki ölçümler yalnızca sağlanan Analytics dönemi ve dönen video satırlarını kapsar. İzlenen yüzde, görüntülenme ve abone kazanımı farklı sonuçlardır; kısa video döngüleri %100 üstü izlenen yüzde üretebilir fakat tek başına neden göstermez.'
+    };
+  }
 
   async function wikiSummary(title) {
     const controller = new AbortController();
@@ -199,6 +334,8 @@
       const knowledge = bundle.knowledge || {ok: false, updated: null, findings: FALLBACK_FINDINGS, topics: []};
       const previousTopics = uniqueTopics((knowledge.topics || []).concat(readHistory()));
       const userNotes = readNotes();
+      const ownAnalyticsLearning = buildOwnAnalyticsLearning();
+      const priorIdeaNotes = readPreviousIdeaNotes();
       const additions = [
         "KOMEDİ USTALARI — CANLI WIKIPEDIA ÖZETLERİ (" + bundle.masters.ok.length + "/" + MASTER_PAGES.length + "): " + JSON.stringify(bundle.masters.ok),
         "MİZAH PSİKOLOJİSİ VE GÖRSEL KOMEDİ BİÇİMLERİ (" + bundle.psych.ok.length + "/" + PSYCH_PAGES.length + "): " + JSON.stringify(bundle.psych.ok),
@@ -206,7 +343,9 @@
         "TEKRAR ETME — ÖNCEKİ KONULAR (yalnızca kaydedilmiş kayıtlar; bunları ve çok benzerlerini önerme): " + JSON.stringify(previousTopics),
         "ARAŞTIRMA KURALI: Global kaynak listesinden örneklenen gerçek videoların yanında, güncel global web aramasıyla bağımsız kaynakları da araştır. Kaynak başlığı veya izlenme sayısından görünmeyen sahneler uydurma. Kaynağın mekanizmasını kopyalama; yalnızca desteklediği geniş ilkeyi çıkar ve özgün yeni bir olay kur. Birden fazla fikir üretme; iç değerlendirmeden sonra yalnızca en güçlü, somut finali olan bir fikir ve tam üretim promptu ver.",
         "KANAL MARKASI: Boş Dükkân yalnızca kanal adıdır; sahne markette veya dükkânda geçmek zorunda değildir.",
-        "VİDEO KOŞULLARI: Tam 10 saniye, dikey 9:16, diyalogsuz, doğal ASMR sesleri. İlk 0,3 saniyede anlaşılır görsel kanca ve somut tamamlanmış final olmalı."
+        "VİDEO KOŞULLARI: Tam 10 saniye, dikey 9:16, diyalogsuz, doğal ASMR sesleri. İlk 0,3 saniyede anlaşılır görsel kanca ve somut tamamlanmış final olmalı.",
+        "KENDİ KANAL ANALYTICS ÖĞRENME BAĞLAMI (yalnızca tarayıcıda kaydedilmiş gerçek ölçümler; global kaynak yerine geçmez): " + JSON.stringify(ownAnalyticsLearning),
+        "ÖNCEKİ FİKİR NOTLARI — TEKRAR ETME VE SADECE NESNEYİ DEĞİŞTİREREK KOPYALAMA: " + JSON.stringify(priorIdeaNotes || "Kayıtlı ek fikir notu yok.")
       ];
       if (userNotes) additions.push("KULLANICININ KAYITLI ARAŞTIRMA NOTLARI:\n" + userNotes);
       const failed = (bundle.masters.failed || []).concat(bundle.psych.failed || []);
@@ -231,11 +370,28 @@
     };
   }
 
+  const cachedAnalytics = readOwnAnalyticsSnapshot();
+  const analyticsStatus = $('#ownAnalyticsLearningStatus');
+  if (analyticsStatus && cachedAnalytics) {
+    analyticsStatus.textContent = 'Bu cihazda yerel öğrenme önbelleği var: ' +
+      cachedAnalytics.videos.filter(v => v.analyticsAvailable).length +
+      ' ölçümlü video. Global konu paketi, yalnızca sen paketi oluşturup kopyaladığında bu özeti içerir.';
+  }
+  const clearAnalyticsCache = $('#clearOwnAnalyticsLearning');
+  if (clearAnalyticsCache) clearAnalyticsCache.addEventListener('click', () => {
+    try { localStorage.removeItem(OWN_ANALYTICS_KEY); } catch (e) {}
+    try { window.bosOwnAnalyticsSnapshot = null; } catch (e) {}
+    if (analyticsStatus) analyticsStatus.textContent = 'Yerel kanal ölçümü önbelleği temizlendi.';
+  });
+
   window.BosDukkanComedyLearning = {
-    version: 2,
+    version: 3,
     loadKnowledge,
     loadResearchBundle: getResearchBundle,
     readHistory,
-    writeHistory
+    writeHistory,
+    saveOwnAnalyticsSnapshot,
+    readOwnAnalyticsSnapshot,
+    buildOwnAnalyticsLearning
   };
 })();
