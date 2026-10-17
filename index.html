@@ -121,9 +121,9 @@ a{color:var(--acc)}
   </details>
   <div id="outGen"></div>
   <div class="msg" id="globalIdeaPanel">
-    <h2 style="margin-top:0">Global kaynak → tek yeni komedi fikri</h2>
-    <p class="note">Global YouTube aramasını yaptıktan sonra bu düğme kaynak kaydını sabitler ve aynı global sonuçlardan otomatik storyboard karelerini dener. Bulursa görsel kanıt paketini isteme ekler; bulamazsa bağımsız web çapraz kontrolüne geçer. Hiçbir durumda video oynatma, ekran kaydı veya manuel kare çıkarma zorunlu değildir.</p>
-    <p><button type="button" id="createGlobalIdeaPrompt">Global konu paketini oluştur ve kopyala</button></p>
+    <h2 style="margin-top:0">Web araştırması → komedi öğrenmesi → tek senaryo</h2>
+    <p class="note">Önce Trend keşfi bölümünde global YouTube araması yap. Bu düğme gerçek kaynak kaydını sabitler ve varsa storyboard karelerini dener; ardından web erişimli asistan için komedi ustaları, mizah psikolojisi, kaynak doğrulaması ve özgün 10 saniyelik senaryo aşamalarını tek araştırma paketine bağlar. Video oynatma veya ekran kaydı gerekmez; panelin kendisi yapay zekâ modeli çalıştırmaz.</p>
+    <p><button type="button" id="createGlobalIdeaPrompt">Araştırma ve tek senaryo paketini oluştur ve kopyala</button></p>
     <p id="globalIdeaSourceSummary" class="note">Global kaynak henüz seçilmedi. Önce Trend keşfi bölümünde arama yap.</p>
     <p id="globalIdeaPromptStatus" class="note" aria-live="polite"></p>
     <textarea id="globalIdeaPrompt" rows="10" readonly style="display:none;width:100%;max-width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
@@ -133,7 +133,7 @@ a{color:var(--acc)}
     <h3 style="margin:0 0 6px">Global Kaynak İzi Kontrolü (izleme gerektirmez)</h3>
     <p class="note">Yanıtı buraya yapıştır. Panel, sabitlenen global YouTube video ID’sini, başlığını, kanalını, tarihini, izlenme sayısını ve kaynak URL’sini kontrol eder; video oynatma veya ekran kaydı istemez. Gerçek sahne doğrulanamıyorsa bu ayrıca yazılmalıdır.</p>
     <p id="globalIdeaTraceAnchorSummary" class="note">Global kaynak araması yapılmadı.</p>
-    <textarea id="globalIdeaOutputForValidation" rows="7" placeholder="Yanıtın global kaynak izi ve video promptu..." style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
+    <textarea id="globalIdeaOutputForValidation" rows="7" placeholder="Web kaynakları, kaynak izi, öğrenilen teknikler ve tam video promptu..." style="width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
     <p><button type="button" id="validateGlobalIdeaTrace">Global kaynak izini kontrol et</button></p>
     <div id="globalIdeaTraceValidationResult" aria-live="polite"></div>
   </div>
@@ -578,7 +578,10 @@ function buildGlobalIdeaPrompt(research, anchor, visual) {
     "SAYAÇ SINIRI: Kamusal toplam izlenme ömür boyu birikimli sayıdır; belirli bir dönemin izlenmesi değildir. Yaklaşık izlenme/gün yalnızca toplam izlenmenin video yaşına bölünmesiyle elde edilen kaba vekildir; tarihsel grafik veya başarı nedeni kanıtı değildir.",
     "SABİTLENMİŞ GLOBAL KAYNAK (değiştirme): " + JSON.stringify(anchor || null),
     "GLOBAL YOUTUBE ARAMA ÖRNEKLEMİ (en fazla 20 sonuç; evreni temsil etmez): " + JSON.stringify(rows),
-    "GÖREV: Global kaynaktan geniş bir öncül çıkar ama kaynak videosunu sahne sahne kopyalama. Tek yeni ve en güçlü komedi fikri seç; fikir listesi verme. Görsel kaynağa erişilememesi fikir üretimini durduramaz.",
+    "WEB ARAŞTIRMASI → KOMEDİ ÖĞRENMESİ → SENARYO: Sabit global kaynağı kontrol ettikten sonra webde mizah psikolojisi ve görsel komedi dramaturjisi üzerine güvenilir kaynakları gerçekten araştır. Farklı ülkeler ve dönemlerden en az iki komedi ustasını/ekolünü, en az bir akademik veya kurumsal psikoloji kaynağını incele. Sadece Wikipedia özetlerini tekrar etme; erişilen kaynak URL’lerini ve her kaynağın desteklediği somut tekniği belirt. Kaynakların gerçekten açılmadığı durumda okumuş gibi davranma; bunu açıkla ve mevcut kaynaklı bulgularla devam et.",
+    "YARATICI SENTEZ: Araştırmadan karakterin hedefi/alışkanlığı/yanlış kararı, sosyal davranış, beklenti, statü veya gerilimle ilgili uygulanabilir mekanizmalar çıkar; kaynak sahnesini taklit etme. Birbirinden farklı birkaç olası mekanizmayı kendi içinde karşılaştır ama kullanıcıya fikir listesi verme; yalnızca en güçlü ve özgün olanı seç.",
+    "ACIMASIZ FİZİKSEL VE KOMEDİ KONTROLÜ: Eylemler gerçek dünyada mümkün mü? İzleyici karakterin amacını ilk kareden anlayabilir mi? Her hareket görünür bir sonraki sonuca neden oluyor mu? Final, önceki seçimden doğal ama şaşırtıcı biçimde doğuyor mu? Yalnızca sıradan aksilik, rastgele sakarlık, yapay yapışma, inandırıcı olmayan fizik, nesne değiştirerek tekrarlama veya şaşkın bakış şaka yerine geçiyorsa fikri değiştir.",
+    "GÖREV: Global kaynaktan geniş bir öncül ve webde doğrulanmış komedi ilkelerinden öğrenme çıkar; kaynak videosunu sahne sahne kopyalama. Tek yeni ve en güçlü komedi fikri seç; fikir listesi verme. Görsel kaynağa erişilememesi fikir üretimini durduramaz.",
     "ÇIKTI ŞABLONU — her alan ayrı satırda:",
     "GLOBAL KAYNAK: video ID, tam başlık, kanal, yayın tarihi, Kamusal toplam izlenme, ölçüm zamanı ve resmi YouTube URL'si.",
     "GLOBAL WEB KONTROLÜ: bağımsız yazılı kaynak URL'si veya bağımsız metinsel kaynak bulunamadığına dair açık ifade.",
