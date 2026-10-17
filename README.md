@@ -18,6 +18,8 @@ Bunun dışında sabit mizah türü, fizik/gerçekçilik şartı, oyunculuk stil
 2. **Global konu motoru:** Kaydedilmiş komedi dersleri, global YouTube kaydı ve global arama örneklemiyle tek yeni fikir istemi. Kanal Analytics verisi bu yolu etkilemez.
 3. **Yayın sonrası ölçüm:** Yalnızca yayımlanmış videoları değerlendirir.
 
+Kaynaklı başlangıç dersleri — Pierre Étaix'in görsel gag ilkeleri, Keaton'ın fiziksel nedenselliği, Tati'nin mekân/ses komedisi, Stephen Chow'un farce-pathos birlikteliği, Kishore Kumar'ın fiziksel ritmi ve Totò'nun mimik/survival farcesi — not eklenmemiş olsa bile her global fikir istemine varsayılan olarak dahil edilir. Kaydedilen kişisel komedi araştırma notları bunlara eklenir; temel derslerin yerini almaz.
+
 Araştırma notları tarayıcıda yerel saklanır ve sonraki konu paketlerine dahil edilir. Bu, temel ilkelerin kodda tutulması ve araştırma derslerinin isteme bağlanmasıdır; panelin kendi başına model eğittiği veya filmleri otomatik izlediği anlamına gelmez. Web araştırmasını kopyalanan istemi verdiğin web erişimli sohbet asistanı gerçekleştirir.
 
 ## Kaynak kuralı: global, kendi kanalın değil
