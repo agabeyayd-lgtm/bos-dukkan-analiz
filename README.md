@@ -1,9 +1,9 @@
-# Boş Dükkân Global Komedi Motoru ve Veri Analizi
+# Boş Dükkân — Bağımsız Komedi Senaryo Motoru + Veri Analizi
 
 **Canlı panel:** https://agabeyayd-lgtm.github.io/bos-dukkan-analiz/
 
 ## Amaç
-Her çalıştırmada global içerik ve global kaynak araştırmasından yararlanarak tek, yeni komedi fikri ve doğrudan kullanılabilir tam video promptu üretmek. Video izleme veya ekran kaydı mümkün olmadığında fikir üretimi durmamalı.
+Her çalıştırmada canlı komedi ustası ve mizah psikolojisi araştırmasından öğrenerek tek yeni 10 saniyelik senaryo ve doğrudan kullanılabilir video promptu hazırlamak. Varsayılan motor bağımsızdır: YouTube trendi, kaynak video, kanal Analytics verisi veya konu tohumu gerektirmez.
 
 ## Tek zorunlu video koşulları
 - Tam 10 saniye.
@@ -31,7 +31,7 @@ Komedi öğrenme katmanı bilinen ustaların canlı Wikipedia özetlerini, farkl
 - Global YouTube arama örneklemi en fazla 50 video gibi arama/sıralama sınırlamalarına sahiptir; tüm Shorts evrenini temsil etmez.
 - Her kaynak tam video ID'si ve resmi YouTube URL'si ile sabitlenir.
 
-## Video oynatmaya alternatif doğrulama
+## İsteğe bağlı trend kipinde video oynatmaya alternatif doğrulama
 1. Global konu paketini oluşturduğunda panel aynı global arama içinden ilk üç uygun kayıtta otomatik storyboard/kare sayfası arar. Bulursa kare sayfalarının URL'lerini prompta ekler ve önizlemesini gösterir.
 2. Bu bağlantılar, web erişimli görsel asistanın kaynak videoyu oynatmadan kareleri incelemesi için hazırlanır. Kullanıcının videoyu açması, izlemesi veya ekran kaydı alması gerekmez.
 3. Storyboard bulunamazsa panel yine tam global kaynak paketini üretir. Asistan aynı video ID'sini/tam başlığını global webde çapraz kontrol etmeli; mümkünse YouTube dışı bağımsız yazılı kaynak vermelidir.
@@ -46,9 +46,10 @@ Storyboard otomatik görsel kontrol için bir alternatiftir; bağımsız web ara
 - Başlık ve metaveri konu ipucudur; sahnenin ne olduğunu veya neden izlendiğini kanıtlamaz.
 - Eksik veri sıfır değildir; metrikler ve ölçüm dönemleri birbirine karıştırılmaz.
 
-## Ayrı iş akışları: global fikir / yayın sonrası ölçüm
-- **Global fikir paketi** dış YouTube kaynak kaydını ve otomatik storyboard/Web doğrulama alternatifini taşır. Daha önce alınmış kanal Analytics özetini, yalnızca performans bağlamı olarak ayrıca içerir.
-- **Yayın sonrası ölçüm raporu** yalnızca kendi kanalının yayımlanmış videolarının ölçümlerini dışa aktarır; komedi fikri, global kaynak veya video promptu oluşturmaz.
+## Ayrı iş akışları: bağımsız senaryo / trend / yayın sonrası ölçüm
+- **Bağımsız senaryo paketi** canlı komedi/psikoloji kaynaklarını ve kayıtlı dersleri taşır; trend videosuna veya kullanıcı kanal ölçümlerine bağlı değildir.
+- **İsteğe bağlı trend paketi** dış YouTube kaydını ve otomatik storyboard/bağımsız yazılı kontrol alternatifini taşır; bağımsız senaryo üretimi için gerekli değildir.
+- **Yayın sonrası ölçüm raporu** yalnızca kendi kanalının yayımlanmış videolarının ölçümlerini dışa aktarır; kendi başına komedi fikri veya prompt oluşturmaz.
 - Yayın sonrası rapor kendi başına fikir üretmez; ancak gerçek ölçümler alındığında oluşturulan yerel metrik özeti sonraki global konu paketine performans bağlamı sağlar.
 
 ## Otomatik kontroller ve dağıtım
@@ -57,7 +58,7 @@ Storyboard otomatik görsel kontrol için bir alternatiftir; bağımsız web ara
 - Site yayını, GitHub Pages'in mevcut ana dal yayımlama mekanizmasına bırakılır. Böylece ikinci bir özel yayın akışı aynı anda deploy başlatıp hata oluşturmaz.
 - `.github/workflows/deploy-pages.yml` kaldırıldı; önceki “deployment in progress” hataları birden fazla yayın akışının çakışmasından kaynaklanıyordu.
 
-## Global kaynak izi kontrolü
+## İsteğe bağlı global trend kaynak izi kontrolü
 Konu Motoru paketi, global YouTube aramasından seçilmiş kaydı sabitler. Yanıt geri yapıştırıldığında **Global Kaynak İzi Kontrolü** video ID'si, tam başlık, kanal, yayın tarihi, kamusal toplam izlenme, ölçüm zamanı ve resmi URL'nin aynı kaynakla eşleşmesini; global web çapraz kontrolünün URL'sini veya bulunamadığı bilgisini; görsel sahnenin doğrulanmadığı sınırını ve özgün yaratıcı geçiş alanlarını denetler.
 
 Kontrol, kaynak atfının yapısını doğrular; videonun sahnesinin gerçekten izlenmiş olduğunu veya fikrin başarılı olacağını kanıtlamaz.
