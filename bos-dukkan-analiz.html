@@ -806,7 +806,7 @@ $('#goOwn').onclick=async()=>{
       source: 'YouTube Analytics API v2 + YouTube Data API v3 metadata',
       reportingWindowDays: learningWindowDays,
       requestedAt: new Date().toISOString(),
-      channelSubscriberCount: Number(cj.items?.[0]?.statistics?.subscriberCount || 0),
+      channelSubscriberCount: cj.items?.[0]?.statistics?.subscriberCount != null ? Number(cj.items[0].statistics.subscriberCount) : null,
       totalVideoRows: learningRows.length,
       analyticsVideoRows: learningRows.filter(v => v.analyticsAvailable).length,
       videos: learningRows
