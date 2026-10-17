@@ -12,25 +12,24 @@ Her çalıştırmada global Shorts keşfi, kaynak doğrulaması, web tabanlı ko
 
 Bunların dışında sabit yaratıcı kural yoktur.
 
-## Birleşik web araştırması ve senaryo üretimi
+## Varsayılan bağımsız araştırma → senaryo → hakem akışı
 
-Artık ayrı bir bağımsız senaryo modu yoktur. Her yeni senaryo akışı global YouTube keşfiyle başlar; sabit kaynak kaydı, web çapraz kontrolü, kaynaklı mizah psikolojisi/komedi ustası araştırması ve özgün senaryo üretimi tek paket içinde birleşir.
+Bağımsız senaryo motoru varsayılandır. **YouTube trendi, kaynak video, kanal Analytics verisi veya kullanıcı tarafından önceden seçilmiş konu gerektirmez.** Bunlar yalnızca isteğe bağlı ayrı trend/ölçüm iş akışlarıdır.
 
-- YouTube arama örneklemi fikir seçimine bir başlangıç işareti verir; izlenme sayısı sahneyi veya başarının sebebini kanıtlamaz.
-- Web erişimli sohbet asistanı, farklı ülkeler ve dönemlerden görsel komedi ustalarını ve güvenilir mizah psikolojisi kaynaklarını araştırır; gerçek açılan kaynakların URL'lerini ve destekledikleri uygulanabilir teknikleri belirtir.
-- Sadece yerleşik isimleri ezberden sıralamak veya yalnızca Wikipedia özetlerine dayanmak yeterli değildir. Ulaşılamayan kaynaklar okunmuş gibi sunulmaz.
-- Öğrenilen mekanizmalar kopyalanacak sahne olarak değil; karakter amacı, davranış, beklenti, statü, zamanlama ve fiziksel neden-sonuç ilkeleri olarak kullanılır.
-- Nihai çıktı tek bir özgün fikir, kısa mizah mantığı, tam 10 saniyelik zaman çizelgesi ve üretim aracına doğrudan verilecek İngilizce video promptudur.
-- İlk 0,0–0,3 saniye anlaşılır görsel kanca taşımalı; sonuca giden eylemler fiziksel olarak inandırıcı ve nedensel olmalı; final 10. saniyede tamamlanmalıdır. Yapay fizik, sıradan bir aksilikten ibaret fikir, yalnızca nesne değiştirerek tekrar ve şaşkın bakıştan ibaret final elenip yeniden düşünülmelidir.
-- Panel statik GitHub Pages JavaScript uygulamasıdır; kendi içinde bir dil modeli çalıştırmaz. Global paket gerçek arama kayıtlarını ve kaynaklı öğrenme bağlamını hazırlar; canlı web araştırmasını ve senaryo yazımını paketi kullanan web erişimli sohbet asistanı yapar.
+- Tarayıcı, ücretsiz Wikipedia API'sinden farklı ülkeler/dönemlerden komedi ustası adaylarını; Europe PMC'den mizah psikolojisi ve görsel komedi konulu yayın kayıtlarını ve sunuluyorsa özetlerini canlı arar. Gerekirse Crossref yayın metaverisini yedek olarak arar.
+- Kaynak bağlantısı ve kanıt türü korunur: tam abstract, kısa Wikipedia özeti, arama sonucu veya yalnızca yayın künyesi birbirinden ayrılır. Başarısız istekler açıkça yazılır; kaynağın açılmadığı durumda okunmuş gibi davranılmaz.
+- İlk panel bölümü canlı komedi araştırması ve öğrenme notları içindir. İkinci bölüm bu malzemeyi kullanarak kanal/trend verisinden bağımsız tek senaryo görevi hazırlar. Üçüncü bölüm aday senaryoyu acımasızca eleştirme ve gerekiyorsa tek bir daha güçlü nihai sürüm oluşturma görevini hazırlar; aynı bölümde yayın sonrası Analytics aracı da korunur.
+- Tek zorunlu çıktı koşulları: **tam 10 saniye, dikey 9:16, diyalogsuz, doğal ASMR odaklı ses**. Diğer tüm mizah türleri ve yaratıcı yaklaşımlar serbesttir; sabit mekanizma, gerçekçilik, oyunculuk, konu veya puan eşiği dayatılmaz.
+- Motor kullanıcıya fikir listesi değil bir tek yeni senaryo, tam 0–10 saniye akışı ve üretim aracına doğrudan verilecek İngilizce promptu hazırlayan bir görev verir. Çıktının komik olup olmadığı garanti edilmez; yayın sonrası gerçek verilerle test edilmelidir.
+- GitHub Pages statik bir JavaScript sayfasıdır: açık kaynak araştırması gerçekten tarayıcıdan yapılır, ancak sayfanın içinde dil modeli çalışmaz. Kopyalanan görev web erişimli ChatGPT'ye gönderildiğinde senaryo üretimi ve hakemlik dil modeli tarafından yapılır.
 
 ## Komedi psikolojisi ve usta öğrenme çekirdeği
 
 Panel üç bölüme ayrılmıştır:
 
-1. **Komedi psikolojisi & ustalar:** Beklenti uyumsuzluğu, statü, karakter hedefi, yüzünü kurtarma, nedensel tırmanış, zamanlama, görsel okunurluk ve somut final gibi mercekleri gösterir. Başlangıç atlasında Chaplin, Keaton, Harold Lloyd, Laurel & Hardy, Tati, Mr Bean, Lucille Ball, Peter Sellers, Jerry Lewis, Louis de Funès, Cantinflas, Norman Wisdom, Jackie Chan, Marx Kardeşler, Mel Brooks, Sacha Baron Cohen, Chespirito ve Roberto Benigni bulunur. Ayrıca yeni dünya komedi ustalarını araştıracak bir istem üretir.
-2. **Global araştırma ve konu motoru:** Global YouTube örneklemini ve sabit dış kaynak kaydını kullanır; web erişimli asistan aynı akışta farklı ülke/dönem komedi ustaları ile güvenilir mizah psikolojisi kaynaklarını araştırır. Usta özetleri, kaynaklı bulgular, kaydedilmiş dersler, önceki fikir geçmişi ve (varsa) kompakt yerel kanal Analytics özeti senaryo istemine eklenir. Kanal metrikleri kaynak video olarak gösterilmez.
-3. **Yayın sonrası ölçüm:** Yayımlanmış videoları ayrı raporlar; rapor düğmesi fikir üretmez. Gerçek ölçümler alındığında, sade bir yerel kopya sonraki fikir paketinde performans bağlamı olarak kullanılabilir.
+1. **Canlı komedi araştırması:** Bilinen ustaların kaynaklı özetlerine ek olarak yeni dünya komedisi adaylarını ve akademik mizah psikolojisi yayınlarını arar.
+2. **Bağımsız senaryo:** Araştırma bulguları ile kayıtlı öğrenme notlarından yararlanıp YouTube trend videosu veya kendi kanal verisi olmadan tek yeni senaryo görevi hazırlar.
+3. **Acımasız hakem + yayın sonrası ölçüm:** Senaryoyu değerlendirir, gerekirse tek güçlü nihai sürüm ister; gerçek kanal ölçümlerini aynı sekmede ayrı bir özellik olarak korur. Gerçek ölçümler alındığında, sade bir yerel kopya sonraki fikir paketinde performans bağlamı olarak kullanılabilir.
 
 ### Öğrenme nasıl kalıcı olur?
 
@@ -124,4 +123,4 @@ Fikirden önce aşağıdaki alanları ayrı satırlarda yaz:
 
 ## Panelin teknik sınırı
 
-Panel YouTube Data API ile global arama sonuçlarını ve kamusal metaveriyi getirir ve web araştırması için kopyalanabilir bir istem hazırlar; sayfanın kendisi bir yapay zekâ modeli değildir. Bağımsız web doğrulaması, paketi web erişimi olan sohbet asistanında çalıştırarak yapılır. Kaynak izi denetleyicisi alanların varlığını ve kaynak kayıtla eşleşmesini denetler; görsel sahnenin gerçekten görülmüş olduğunu veya fikrin başarılı olacağını kanıtlamaz.
+Varsayılan bağımsız senaryo düğmesi tarayıcıdan ücretsiz Wikipedia ve Europe PMC/Crossref API'lerine gerçek istek yapar ve araştırma paketini hazırlar; YouTube API anahtarı gerekmez. Sayfanın kendisi bir dil modeli çalıştırmaz: kopyalanan senaryo/hakem görevi bu ChatGPT sohbetine gönderildiğinde dil modeli tarafından işlenir. Global YouTube kaynak izi ayrı ve isteğe bağlı trend kipidir. Kaynak izi denetleyicisi alanların varlığını ve kaynak kayıtla eşleşmesini denetler; görsel sahnenin gerçekten görülmüş olduğunu veya fikrin başarılı olacağını kanıtlamaz.
