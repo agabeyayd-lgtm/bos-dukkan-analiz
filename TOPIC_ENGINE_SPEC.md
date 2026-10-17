@@ -17,14 +17,16 @@ Bunların dışında sabit yaratıcı kural yoktur.
 Panel üç bölüme ayrılmıştır:
 
 1. **Komedi psikolojisi & ustalar:** Beklenti uyumsuzluğu, statü, karakter hedefi, yüzünü kurtarma, nedensel tırmanış, zamanlama, görsel okunurluk ve somut final gibi mercekleri gösterir. Başlangıç atlasında Chaplin, Keaton, Harold Lloyd, Laurel & Hardy, Tati, Mr Bean, Lucille Ball, Peter Sellers, Jerry Lewis, Louis de Funès, Cantinflas, Norman Wisdom, Jackie Chan, Marx Kardeşler, Mel Brooks, Sacha Baron Cohen, Chespirito ve Roberto Benigni bulunur. Ayrıca yeni dünya komedi ustalarını araştıracak bir istem üretir.
-2. **Global konu motoru:** Global YouTube arama örneklemini ve sabit kaynağı kullanır. Usta atlası, psikoloji ilkeleri ve tarayıcıya kaydedilmiş dersler fikir istemine eklenir. Kanal metrikleri bu yola girmez.
-3. **Yayın sonrası ölçüm:** Yalnızca yayımlanmış videoları değerlendirir; yeni konu seçmez ve öğrenme notlarını değiştirmez.
+2. **Global konu motoru:** Global YouTube örneklemini ve sabit dış kaynak kaydını kullanır. Usta atlası, psikoloji ilkeleri, kaydedilmiş dersler, önceki fikir geçmişi ve (varsa) kompakt yerel kanal Analytics özeti fikir istemine eklenir. Kanal metrikleri kaynak video olarak gösterilmez.
+3. **Yayın sonrası ölçüm:** Yayımlanmış videoları ayrı raporlar; rapor düğmesi fikir üretmez. Gerçek ölçümler alındığında, sade bir yerel kopya sonraki fikir paketinde performans bağlamı olarak kullanılabilir.
 
 ### Öğrenme nasıl kalıcı olur?
 
 Panel kendi başına bir yapay zekâ modeli eğitmez. Kullanıcı **Trend keşfi** bölümünde YouTube Data API anahtarıyla global arama yapar; panel bu gerçek arama örneklemini ve sabitlenen video kaydını global konu paketine bağlar. Komedi öğrenme katmanı Wikipedia'dan seçilmiş usta ve mizah türü özetlerini, `knowledge.json` içindeki kaynaklı bulguları ve bu telefonda kaydedilen araştırma notlarını aynı pakete ekler. Paket ayrıca web erişimli sohbet asistanından aynı video ID'sini bağımsız web kaynaklarıyla çapraz kontrol etmesini ister; bu bağımsız web araştırması panelin kendi yaptığı bir işlem gibi gösterilmez. Panel filmi otomatik baştan sona izlemez; storyboard karelerini erişilebildiğinde dener ve görünmeyen sahneler konusunda kesinlik iddia etmez. 
 
-Önceki konu tekrarı yalnızca `knowledge.json` içinde (varsa) veya bu tarayıcının yerel konu geçmişine kaydedilen kayıtlar için yapılabilir. Yerel geçmiş telefona/tarayıcıya özeldir; depoda tutulmaz. Kaydedilmemiş eski konuların kendiliğinden hatırlandığı varsayılmamalıdır.
+Önceki konu tekrarı yalnızca bu telefondaki/tarayıcıdaki kayıtlar ve kullanıcı tarafından açıkça sağlanan önceki fikir notları için yapılabilir. Yerel geçmiş ve Analytics özeti depoda tutulmaz. Kaydedilmemiş eski konuların kendiliğinden hatırlandığı varsayılmamalıdır.
+
+Kanal sahibi OAuth ile ölçümleri getirdiğinde panel, yorum metinlerini ve erişim jetonunu önbelleğe almadan video başlığı/süresi ile seçili dönemin izlenme, ortalama izleme, ortalama izlenen yüzde, beğeni ve kazanılan abone alanlarının kompakt bir özetini tarayıcı depolamasına yazar. Global konu paketi oluşturulduğunda bu özet dış kaynak kaydını değiştirmez; yalnızca yeni hipotezi yönlendirmeye yardım eder. Eksik metrikler `null` kalır, ömür boyu kamusal sayaçlar dönem Analytics metriklerinden ayrı tutulur.
 
 ### Kaynakla desteklenmiş başlangıç dersleri
 
@@ -49,7 +51,7 @@ Kaynaklar teknikleri araştırmak içindir; birebir sahne, karakter veya bitiş 
 
 ## Fikrin kaynağı
 
-**Fikir seçiminin kaynağı global olmalıdır.** YouTube'da global arama sonuçları ve web'deki bağımsız kaynaklar kullanılır. Kullanıcının kendi kanal istatistikleri yeni fikri, konuyu, sahneyi veya komedi mekanizmasını seçmek için kullanılmaz. Kanal istatistikleri sadece video yayınlandıktan sonra sonuçları kıyaslamak için kullanılabilir.
+**Fikrin dış kaynak kaydı global olmalıdır.** YouTube'da global arama sonuçları ve web'deki bağımsız kaynaklar sabitlenir ve doğrulanır. Kendi kanal istatistikleri dış kaynağın yerine geçmez; yeni fikrin yönünü belirlemeye yardım eden ayrı performans bağlamı olarak kullanılabilir. Bu veriler kopyalanacak şablon veya nedensel başarı formülü değildir.
 
 ## Video oynatmaya alternatif doğrulama
 
@@ -80,7 +82,7 @@ Storyboard kareleri görsel kontrol için bir alternatiftir; bağımsız web kay
 4. Global webde aynı ID ve başlıkla kaynak çapraz kontrolü ara; bulunamazsa yokluğunu söyle.
 5. Video görüntüsü doğrulanmadıysa görsel sahne mekanizmasını bilinmiyor kabul et. Yine de kaynak ilkesinden bağımsız ve özgün yeni bir komedi mekanizması geliştir.
 6. Birkaç farklı yaklaşımı iç değerlendirmede karşılaştırabilirsin; kullanıcıya sadece kazananı sun. Katı puan kapısı veya otomatik ret kullanma.
-7. Yayın sonrası kendi kanal verileri ayrı bir analizde kullanılabilir; bu veriler önceki fikir seçiminde global kaynak yerine geçmez.
+7. Kanal verilerini ayrı performans raporunda ölç; kompakt yerel Analytics özeti sonraki konu paketine yönlendirici bağlam olarak eklenebilir, ancak hiçbir zaman global kaynak yerine geçmez.
 
 ## Zorunlu kaynak izi
 
