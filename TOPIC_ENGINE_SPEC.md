@@ -1,8 +1,8 @@
-# Boş Dükkân — Global Komedi Konu Motoru
+# Boş Dükkân — Bağımsız Komedi Senaryo Motoru
 
 ## Ana amaç
 
-Her çalıştırmada global Shorts keşfi, kaynak doğrulaması, web tabanlı komedi öğrenmesi ve davranış psikolojisi sentezi üzerinden **tek güçlü, özgün komedi fikri ve tam video üretim promptu** teslim et. Fikir listesi dökme; kaynak veya veri eksikliği yüzünden üretimi durdurma.
+Her çalıştırmada canlı komedi araştırması ve davranış psikolojisi öğrenmesinden yararlanarak **tek özgün 10 saniyelik senaryo ve tam video promptu** hazırla. Varsayılan mod bağımsızdır: trend videosuna, kullanıcı kanalına veya önceden verilmiş konuya bağlanma. Fikir listesi dökme; kaynak eksikliği yüzünden üretimi durdurma.
 
 ## Tek zorunlu video koşulları
 
@@ -62,9 +62,11 @@ Kaynaklar teknikleri araştırmak içindir; birebir sahne, karakter veya bitiş 
 
 ## Fikrin kaynağı
 
-**Fikrin dış kaynak kaydı global olmalıdır.** YouTube'da global arama sonuçları ve web'deki bağımsız kaynaklar sabitlenir ve doğrulanır. Kendi kanal istatistikleri dış kaynağın yerine geçmez; yeni fikrin yönünü belirlemeye yardım eden ayrı performans bağlamı olarak kullanılabilir. Bu veriler kopyalanacak şablon veya nedensel başarı formülü değildir.
+Varsayılan bağımsız modda konu, motorun yaratıcı kararından doğar; belirli bir YouTube videosu, trend, kanal metriği veya kaynak sahne konu tohumu değildir. Canlı web araştırması, komedi mekanizması öğrenmek içindir. Kullanıcının kendi kanal istatistikleri de bağımsız fikrin önkoşulu değildir.
 
-## Video oynatmaya alternatif doğrulama
+Global YouTube örneklemi ve kaynak izi yalnızca kullanıcı isteğe bağlı trend modunu çalıştırdığında kullanılır. Bu kipte video başlığı, sayaç veya yorum görünmeyen sahnelerin kanıtı olarak kullanılmaz.
+
+## İsteğe bağlı trend kipinde video oynatmaya alternatif doğrulama
 
 Kullanıcının videoyu açması, izlemesi, ekran kaydı alması veya manuel kare çıkarması **zorunlu değildir**. Global kaynak paketi oluşturulurken panel, bulunan adaylardan en fazla üçü için herkese açık storyboard/kare sayfasını otomatik arar.
 
@@ -88,17 +90,15 @@ Storyboard kareleri görsel kontrol için bir alternatiftir; bağımsız web kay
 
 ## Karar protokolü
 
-1. Paketin dışındaki eski sohbetlerden fikir taşıma. Yalnız güncel global örneklem ve kullanıcı tarafından açıkça sağlanan kaçınılacak fikirleri kullan.
-2. Önce global YouTube aramasından gelen veri ve sabit global kaynak kaydını kontrol et.
-3. Kaynak videodan geniş bir konu/öncül ipucu çıkar; kaynak sahnesini kopyalama.
-4. Mizah psikolojisi ve farklı komedi ustaları hakkında webde doğrulanabilir, kaynaklı araştırma yap; erişilen kaynak URL’lerini ve uygulanabilir teknikleri raporla.
-5. Araştırma tekniklerini karakterin amacı ve fiziksel neden-sonuç üzerinden yeni bir olaya dönüştür. İnandırıcı olmayan bir fiziksel bağlantı veya sıradan aksilik varsa fikri değiştir.
-6. Global webde aynı ID ve başlıkla kaynak çapraz kontrolü ara; bulunamazsa yokluğunu söyle.
-7. Video görüntüsü doğrulanmadıysa görsel sahne mekanizmasını bilinmiyor kabul et. Yine de kaynak ilkesinden bağımsız ve özgün yeni bir komedi mekanizması geliştir.
-8. Birkaç farklı yaklaşımı iç değerlendirmede karşılaştırabilirsin; kullanıcıya sadece kazananı sun. Katı puan kapısı veya otomatik ret kullanma.
-9. Kanal verilerini ayrı performans raporunda ölç; kompakt yerel Analytics özeti sonraki konu paketine yönlendirici bağlam olarak eklenebilir, ancak hiçbir zaman global kaynak yerine geçmez.
+1. Üç teknik koşulu koru: tam 10 saniye, dikey 9:16, diyalogsuz ve doğal ASMR odaklı ses.
+2. Canlı komedi ustası keşiflerini, araştırma özetlerini ve akademik yayınları gerçekten gelen kanıt türüne göre incele; salt arama sonucu ile okunan makaleyi eşit tutma.
+3. Öğrenilen teknikleri kopyalanacak sahne olarak değil, yeni bir olay veya davranış tasarlamada kullan.
+4. YouTube trendi, kendi kanal Analytics verisi veya sabit konu kalıbını bağımsız senaryo için zorunlu girdi yapma.
+5. Kendi içinde alternatif yönleri karşılaştır; kullanıcıya tek bir kazanan ve tam prompt ver. Sabit puan kapısı veya otomatik ret formülü uygulama.
+6. Kaynaklar başarısızsa bunu söyle ama yine de tek senaryo üretim görevini hazırla.
+7. Yayın sonrası metrikleri ayrı değerlendir; korelasyonu nedensellik gibi sunma.
 
-## Zorunlu kaynak izi
+## İsteğe bağlı trend kipinde zorunlu kaynak izi
 
 Fikirden önce aşağıdaki alanları ayrı satırlarda yaz:
 
@@ -112,7 +112,7 @@ Fikirden önce aşağıdaki alanları ayrı satırlarda yaz:
 - **KANIT SINIRI:** İzlenme sayısı/başlık sahneyi veya başarı nedenini kanıtlamaz.
 - **TEST DURUMU:** “test edilmemiş yaratıcı hipotez”.
 
-## Nihai çıktı sırası
+## Çıktı sırası
 
 1. Global kaynak izi.
 2. Tek komedi fikri.
