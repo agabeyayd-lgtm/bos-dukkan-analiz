@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "updated": "2026-10-17",
+  "note": "Panel her paket oluşturmada bu dosyayı okur. Yeni kaynaklı bulgular ve üretilen konular buraya eklenir.",
+  "findings": [
+    {"added": "2026-10-17", "source": "Kinema / Waterloo — Notes on Buster Keaton's Motion", "url": "https://openjournals.uwaterloo.ca/index.php/kinema/article/download/1250/1589", "finding": "Keaton'da hareketler bir nedensellik zinciri gibi birbirini doğurur; karakter kaçmak yerine fiziksel imkânı yeniden tanımlar; spektaküler olaylar karşısında yüzü ifadesiz kalır."},
+    {"added": "2026-10-17", "source": "Filmmaker Magazine — Keaton'ın simetrisi", "url": "https://filmmakermagazine.com/?p=93184", "finding": "Ortalanmış kadraj, şakanın nesne ve mekânla baştan ayağa görünmesini sağlar."},
+    {"added": "2026-10-17", "source": "Stanley Nolan — Keaton", "url": "https://stanleynolan.substack.com/p/keaton", "finding": "Keaton'a göre seyirci başkasının başına gelene güler; ifadesiz beden ile kaotik dünya arasındaki uyumsuzluk komik etkiyi taşır."},
+    {"added": "2026-10-17", "source": "McGraw & Warren 2010 — Benign Violations", "url": "https://leeds-faculty.colorado.edu/mcgrawp/pdf/mcgraw.warren.2010.pdf", "finding": "Mizah, bir durum aynı anda hem ihlal hem zararsız algılandığında doğar. Zararsızlık: alternatif norm, ihlal edilen kurala zayıf bağlılık veya psikolojik mesafeyle gelir."},
+    {"added": "2026-10-17", "source": "McGraw ve ark. 2012 — Distant tragedies, close mishaps", "url": "https://leeds-faculty.colorado.edu/mcgrawp/pdf/mcgraw.warren.williams.leonard.2012.pdf", "finding": "Küçük aksilikler yakınken, felaketler uzakken komiktir; mesafe tehdidi azaltır."},
+    {"added": "2026-10-17", "source": "Humor Research Lab — Benign Violation Theory", "url": "https://leeds-faculty.colorado.edu/mcgrawp/pdf/Benign_Violation_Theory.html", "finding": "Oyun kavgası saldırı durunca (ihlal yok) ya da fazla saldırgan olunca (zararsız değil) komikliğini kaybeder."},
+    {"added": "2026-10-17", "source": "Univ. of Catania çalışması", "url": "https://www.iris.unict.it/handle/20.500.11769/642974", "finding": "Benign-ihlal kuramı yalnızca kısmen desteklendi; tek bir teori bütün mizahı açıklamaz."}
+  ],
+  "topics": [
+    {"added": "2026-10-17", "title": "Asansör İneği", "summary": "İnek asansöre girmeyen absürt komedi", "status": "bırakıldı"},
+    {"added": "2026-10-17", "title": "Dev Çorap", "summary": "Küvette çorap balıkçısı, arka planda uyuyan dev kedi", "status": "seçildi"},
+    {"added": "2026-10-17", "title": "Sanayi ustası taziyesi", "summary": "Usta, motor için müşteriye taziye verir gibi omuz sıvazlar", "status": "seçildi"},
+    {"added": "2026-10-17", "title": "Kurdele Tabure", "summary": "Tek plastik tabure için mahalle çay bahçesinde kurdele kesme töreni", "status": "üretildi"},
+    {"added": "2026-10-17", "title": "What's Mine Is Mine", "summary": "Baba oğlunun patatesini çalar, oğul tabakları takas edip dolu tabağı korur", "status": "seçildi"},
+    {"added": "2026-10-17", "title": "Uçan arabayı kementle durdurmaya çalışan Türk", "summary": "Kullanıcının kendi fikri", "status": "fikir"},
+    {"added": "2026-10-17", "title": "Bayram Harçlığı", "summary": "Dede katlı banknot diye eski tramvay bileti verir, torun bileti saklar, kumbarası aynı biletlerle doludur", "status": "önerildi"},
+    {"added": "2026-10-17", "title": "Balkon Asansörü", "summary": "Yaşlı adam balkon sepetiyle ekmek alır, sepet her seferinde ağırlaşır", "status": "önerildi"},
+    {"added": "2026-10-17", "title": "Sessiz Hapşırık", "summary": "Kütüphanede ifadesiz adam hapşırığını ansiklopedinin içine gömer, toz ve kâğıtlar havalanır, yaşlı kadın mendil uzatır", "status": "beğenildi"}
+  ]
+}
