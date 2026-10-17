@@ -12,6 +12,17 @@ Her çalıştırmada global Shorts keşfi ve kaynak doğrulaması üzerinden **t
 
 Bunların dışında sabit yaratıcı kural yoktur.
 
+## Bağımsız senaryo yazarı modu
+
+Panele, global konu keşfinden ayrı çalışan bir **bağımsız senaryo yazarı istemi** eklendi. Bu modda yeni senaryonun girdisi global YouTube örneklemi, rakip videolar, bağımsız web kaynakları, kendi kanal Analytics'i, görüntülenme sayıları veya API anahtarı değildir. Model, genel görsel komedi dramaturjisi ve davranış psikolojisi ilkelerini kullanarak konuyu kendi başına kurar.
+
+- Tek çıktı: bir özgün fikir, kısa komedi mantığı, tam 10 saniyelik zaman çizelgesi ve doğrudan üretim aracına verilecek eksiksiz İngilizce video promptu.
+- Sabit teknik koşullar: tam 10 saniye, dikey 9:16, fotogerçekçi, diyalogsuz, müziksiz, doğal ASMR sesi.
+- 0–0,3 saniyede görsel kanca; davranış ve fiziksel neden-sonuç zinciri; 10 saniyeye kadar somut ve tamamlanmış final.
+- Model, birkaç yaklaşımı kendi içinde değerlendirebilir ancak kullanıcıya yalnızca en güçlü olanı verir; puan eşiği koymaz ve üretimi durdurmaz.
+- Bu GitHub Pages paneli statik JavaScript'tir ve kendi içinde bir dil modeli barındırmaz. Düğme yalnızca bağımsız yazar talimatını hazırlar/kopyalar; senaryonun kendisini üretmek için bu talimat ChatGPT gibi bir dil modeline gönderilmelidir.
+- Global araştırma modu ayrı olarak korunur. Kullanıcı bağımsız senaryo modu seçtiğinde global kaynak izi veya Analytics özeti senaryo talimatına eklenmez.
+
 ## Komedi psikolojisi ve usta öğrenme çekirdeği
 
 Panel üç bölüme ayrılmıştır:
