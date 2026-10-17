@@ -31,6 +31,16 @@ Panel üç bölüme ayrılmıştır:
 2. **Bağımsız senaryo:** Araştırma bulguları ile kayıtlı öğrenme notlarından yararlanıp YouTube trend videosu veya kendi kanal verisi olmadan tek yeni senaryo görevi hazırlar.
 3. **Acımasız hakem + yayın sonrası ölçüm:** Senaryoyu değerlendirir, gerekirse tek güçlü nihai sürüm ister; gerçek kanal ölçümlerini aynı sekmede ayrı bir özellik olarak korur. Gerçek ölçümler alındığında, sade bir yerel kopya sonraki fikir paketinde performans bağlamı olarak kullanılabilir.
 
+### Kalıcı motor öğrenme protokolü — çalışan sözleşme
+
+- `knowledge.json` içindeki `learningProtocol`, yalnızca arşiv notu değildir: `comedy-learning.js` bunu canlı pakete ekler; bağımsız senaryo motoru, komedi araştırma görevi, trend tabanlı üretim görevi ve hakem görevi aynı kuralları kullanır.
+- `artistResearchCandidates` alanı daha az tanınan ustaları yeniden araştırmak için saklar. Her adayın kanıt durumu korunur; aday, sahne tekniği doğrulanmış kişi gibi sunulmaz.
+- Kanıt etiketleri: `DOĞRULANMIŞ BİLGİ`, `İNCELENEN SAHNE`, `KURAMSAL AÇIKLAMA`, `YARATICI HİPOTEZ`. Wikipedia snippet'i/özeti, filmografi/katalog tanıtımı, akademik künye ve erişilen abstract farklı kanıt derinlikleridir.
+- Komedi mekanizması karakter amacı → karar/varsayım → nedensel eylemler → somut ve tamamlanmış final zinciriyle tasarlanır. İlk yaklaşık 0,3 saniyede okunabilir görsel kanca hedeflenir; bu bir garanti veya evrensel mizah yasası değildir.
+- Uyumsuzluk, statü/üstünlük, benign violation ve gerilim-boşalma ayrı psikolojik merceklerdir. Hiçbiri her sahnede zorunlu kılınmaz; tek teori bütün mizahı açıklıyor diye sunulmaz.
+- Kalite hakemi aynı protokolü kullanır ancak sabit puan eşiğiyle yaratıcı üretimi kilitlemez. Tek güçlü öneri seçilir; yayın sonrası metrikler hipotezi sınar, fakat neden-sonuç ispatı sayılmaz.
+- Kaynaklar ulaşılamadığında sistem başarısızlığı açıklar ve üretime devam eder. Tam 10 saniye, 9:16, diyalogsuz ve doğal ASMR ses şartları korunur.
+
 ### Öğrenme nasıl kalıcı olur?
 
 Panel kendi başına bir yapay zekâ modeli eğitmez. Kullanıcı **Trend keşfi** bölümünde YouTube Data API anahtarıyla global arama yapar; panel bu gerçek arama örneklemini ve sabitlenen video kaydını global konu paketine bağlar. Komedi öğrenme katmanı Wikipedia'dan seçilmiş usta ve mizah türü özetlerini, `knowledge.json` içindeki kaynaklı bulguları ve bu telefonda kaydedilen araştırma notlarını aynı pakete ekler. Paket ayrıca web erişimli sohbet asistanından aynı video ID'sini bağımsız web kaynaklarıyla çapraz kontrol etmesini ister; bu bağımsız web araştırması panelin kendi yaptığı bir işlem gibi gösterilmez. Panel filmi otomatik baştan sona izlemez; storyboard karelerini erişilebildiğinde dener ve görünmeyen sahneler konusunda kesinlik iddia etmez. 
