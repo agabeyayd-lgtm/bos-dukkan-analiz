@@ -34,8 +34,30 @@
     {name:"Mel Brooks",region:"ABD",study:"tür parodisi ve beklenti tersine çevirme"},
     {name:"Sacha Baron Cohen",region:"Britanya",study:"persona, sosyal normlar, satir"},
     {name:"Chespirito / El Chavo del Ocho",region:"Meksika",study:"karakter zaafı ve mahalle sosyal dinamiği"},
-    {name:"Roberto Benigni",region:"İtalya",study:"bedensel ifade ve duygusal yatırım"}
+    {name:"Roberto Benigni",region:"İtalya",study:"bedensel ifade ve duygusal yatırım"},
+    {name:"Pierre Étaix",region:"Fransa",study:"kadrajda okunurluk, zarif görsel gag ve mantıklı sürpriz"},
+    {name:"Stephen Chow",region:"Hong Kong",study:"farce, görsel şaka, absürtlük ve duygusal hedefin birlikteliği"},
+    {name:"Kishore Kumar",region:"Hindistan",study:"yüksek fiziksel enerji, karaktere özgü davranış ve komik zamanlama"},
+    {name:"Totò",region:"İtalya",study:"mimik, yüz/beden ifadesi, kıtlık ve hayatta kalma farcesi"},
+    {name:"Mehmood",region:"Hindistan",study:"yüksek enerjili fiziksel komedi"}
   ];
+  const BASELINE_COMEDY_LESSONS = [
+    "Pierre Étaix / Criterion: Görsel şaka kadrajda net okunmalı; eylemin boyutu ve çevresindeki boşluk önemlidir. Şaka karakter ve durumdan çıkar; sürpriz dramatik durumdan mantıklı biçimde doğmalıdır. https://www.criterion.com/current/posts/2746-the-return-of-etaix",
+    "Buster Keaton / BFI: Karakterin amacı açık kalırken fiziksel hareketler okunur ve nedensel olmalı; komedi ile gerilim birlikte çalışabilir. https://www.bfi.org.uk/film/136a6211-90d9-5d18-b047-7967deac8bab/the-general",
+    "Jacques Tati / BFI: Mimari, mekân, kalabalık hareketleri, küçük jestler ve çevresel sesler komedinin parçası olabilir. https://www.bfi.org.uk/film/a27e52ca-e6b6-5cd4-a2e0-1e1a30456e56/playtime",
+    "Stephen Chow / akademik çalışma: Farce ve absürtlük, karakterin duygusal hedefi veya pathos ile birleştiğinde daha katmanlı olabilir; absürtlüğü tek başına hedef sayma. https://scholar.nycu.edu.tw/en/publications/farce-pathos-and-absurdity-in-stephen-chows-film-comedies-from-be/",
+    "Stephen Chow / Film Comment: Mo lei tau komedisi görsel gag, kelime oyunu ve kültürel referansları karıştırabilir; diyalogsuz kısa videoya yalnızca görsel beklenti kırılması ve fiziksel zamanlama aktarılmalıdır. https://www.filmcomment.com/wp-content/uploads/2025/12/2010s2014VOLUME-50-NUMBER-03-MAY-JUNE-2014.pdf",
+    "Kishore Kumar / Indian Express: Komik performansta kendine özgü fiziksel enerji ve sıra dışı davranış ritmi bir araçtır; hareket dili kişiliği taşımalı. https://indianexpress.com/article/entertainment/bollywood/kishore-kumar-actor-birth-anniversary-ashok-kumar-pretended-to-be-crazy-8876600/",
+    "Totò / Cinémathèque française: Mimik ve fiziksel ifade, kıtlık ve gündelik hayatta ayakta kalma çabalarını farce'e dönüştürebilir. https://www.cinematheque.fr/article/1959.html",
+    "Mizah psikolojisi / Hewer, Smith ve Fergie: Uyumsuzluk, üstünlük ve gerilim-boşalma farklı açıklama mercekleridir; hiçbiri tek başına tüm mizah biçimlerini açıklamaz. https://pmc.ncbi.nlm.nih.gov/articles/PMC6350176/",
+    "Yaratıcı kontrol: İzleyici hedefi, engeli, karakterin seçimini ve sonucun nedenini sözsüz anlayabiliyor mu? Bu, ezber bir formül değil, anlaşılabilirlik kontrolüdür.",
+    "Nedensellik kontrolü: Sonuç karakterin tercihi veya inancından doğuyor mu? Rastgele kaza da kullanılabilir, ancak sahnenin okunur bir nedeni ve karşılığı olmalı.",
+    "Kadraj kontrolü: Önemli hareket tek bakışta görünüyor mu; eylem için yeterli alan var mı? Kaynaktaki hareket dizisini değil, okunurluk ilkesini al.",
+    "Final kontrolü: Son kare yeni bilgi, durum değişimi veya karakter kararıyla olayı tamamlıyor mu? Şaşırmış yüze kesmek zorunlu bir final değildir."
+  ];
+  function compiledLessons() {
+    return BASELINE_COMEDY_LESSONS.join("\n") + (readNotes() ? "\n\nKULLANICININ EKLEDİĞİ ARAŞTIRMA NOTLARI:\n" + readNotes() : "");
+  }
   function readNotes() {
     try { return localStorage.getItem('bd_comedy_research_notes') || ''; } catch (e) { return ''; }
   }
@@ -51,7 +73,7 @@
       "ÖNEMLİ: Meşhur sahne, karakter veya final kopyalama. Rastgele absürtlüğü otomatik komedi sayma; ama mizah biçimlerini de baştan yasaklama. Karakter hedefini, seçimini, nedenselliği ve finalin anlaşılabilirliğini değerlendir.",
       "KALICI NOT FORMATI: 10-20 kısa ve uygulanabilir ders ile yeni keşfedilen ustaların listesini hazırla. Kullanıcı sonuçları paneldeki Öğrenilen dersleri sakla alanına yapıştıracak.",
       "BAŞLANGIÇ KAYNAKLARI: BFI Keaton https://www.bfi.org.uk/features/general-greatest-comedy-all-time ; BFI Jacques Tati https://www.bfi.org.uk/film/a27e52ca-e6b6-5cd4-a2e0-1e1a30456e56/playtime ; BFI Harold Lloyd https://www.bfi.org.uk/lists/10-great-films-1923 ; mizah psikolojisi https://pmc.ncbi.nlm.nih.gov/articles/PMC6350176/ ; PBS Mr Bean https://www.pbs.org/video/happy-birthday-mr-bean-juuuwu/ ; Şahan Gökbakar röportajı https://www.cinedergi.com/2009/03/18/sahan-gokbakar-bana-ivediklestin-diyorlar/",
-      "KAYITLI NOTLAR (düzelt veya derinleştir): " + (readNotes() || "Henüz özel ders kaydedilmedi."),
+      "ARAŞTIRMA ÇEKİRDEĞİ VE KAYITLI NOTLAR (düzelt veya derinleştir): " + compiledLessons(),
       "SONUÇ: Kaynaklı araştırma özeti, listede olmayan en az 10 yeni isim, farklı mekanizmaları karşılaştıran tablo, uygulama egzersizleri ve araştırma sınırları."
     ].join("\n");
   }
@@ -90,7 +112,7 @@
       const block = [
         "KOMEDİ PSİKOLOJİSİ ÇEKİRDEĞİ (mekanik şablon değil, yaratıcı araçlar): " + JSON.stringify(COMEDY_CORE_PRINCIPLES),
         "USTALARIN TEKNİK ATLASI (karakter/sahne taklidi yok; yüksek seviye dersler): " + JSON.stringify(COMEDY_MASTERS),
-        "KULLANICININ BU TARAYICIDA KAYDETTİĞİ KOMEDİ DERSLERİ: " + (readNotes() || "Eklenmiş özel ders yok; çekirdek prensiplerden başla."),
+        "KAYNAKLI BAŞLANGIÇ DERSLERİ + KULLANICININ BU TARAYICIDA KAYDETTİĞİ KOMEDİ DERSLERİ: " + compiledLessons(),
         "ÖĞRENME SINIRI: Saklanan notlar yalnızca komedi tekniği bağlamıdır; kanal Analytics sayıları konu veya kaynak seçimine katılmasın. Global kaynak yalnızca global YouTube/web araştırmasından gelsin.",
         "KALİTE İÇ DENETİMİ: Taslak yalnızca jenerik nesne arızası veya rastgele kaza dizisine dayanıyorsa karakterin somut isteğini/inancını, kendi kararını, nedensel gelişmeyi ve final karşılığını güçlendir. Tek bir komedi motorunu derinleştir; farklı mizah biçimlerini baştan yasaklama."
       ].join("\n");

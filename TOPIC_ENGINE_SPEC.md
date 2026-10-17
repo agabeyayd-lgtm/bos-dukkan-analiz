@@ -24,6 +24,16 @@ Panel üç bölüme ayrılmıştır:
 
 Panel kendi başına model eğitmez, film izlemez veya dışarıda web araması yapmaz. İlk bölüm kaynaklı araştırma istemi üretir; web erişimli sohbet asistanı araştırmayı yürütür. Araştırmadan elde edilen kısa dersler **Öğrenilen dersleri sakla** alanına yapıştırılır ve tarayıcının yerel depolamasında saklanır. Sonraki global konu paketine otomatik eklenir. Temel psikoloji ilkeleri ve usta atlası kodun parçasıdır.
 
+### Kaynakla desteklenmiş başlangıç dersleri
+
+- Pierre Étaix / Criterion: görsel gag kadrajda açık ve yeterli boşlukla görünmeli; gag karakter ve durumdan çıkmalı, sürpriz sahnenin mantığından doğmalıdır. https://www.criterion.com/current/posts/2746-the-return-of-etaix
+- Buster Keaton / BFI: karakterin hedefi ve fiziksel eylemin nedenselliği komedi ile gerilimi birlikte taşıyabilir. https://www.bfi.org.uk/film/136a6211-90d9-5d18-b047-7967deac8bab/the-general
+- Jacques Tati / BFI: mekân, mimari, kalabalık ve ses komedi mekanizmasının parçası olabilir. https://www.bfi.org.uk/film/a27e52ca-e6b6-5cd4-a2e0-1e1a30456e56/playtime
+- Stephen Chow / hakemli akademik çalışma: farce ve absürtlük duygusal yatırım ve karakter hedefiyle birlikte kurulabilir. https://scholar.nycu.edu.tw/en/publications/farce-pathos-and-absurdity-in-stephen-chows-film-comedies-from-be/
+- Kishore Kumar / Indian Express: fiziksel enerji ve karaktere özgü davranış ritmi komik performansın parçasıdır. https://indianexpress.com/article/entertainment/bollywood/kishore-kumar-actor-birth-anniversary-ashok-kumar-pretended-to-be-crazy-8876600/
+- Totò / Cinémathèque française: mimik ve gündelik hayatta ayakta kalma farcenin malzemesi olabilir. https://www.cinematheque.fr/article/1959.html
+- Mizah psikolojisi / Hewer, Smith ve Fergie: uyumsuzluk, üstünlük ve gerilim-boşalma teorilerini farklı mercekler olarak kullan; tek bir teori bütün mizahı açıklamaz. https://pmc.ncbi.nlm.nih.gov/articles/PMC6350176/
+
 ### Başlangıç kaynakları
 
 - BFI, Buster Keaton ve *The General*: https://www.bfi.org.uk/features/general-greatest-comedy-all-time
