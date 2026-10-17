@@ -14,13 +14,13 @@ Bunun dışında sabit mizah türü, fizik/gerçekçilik şartı, oyunculuk stil
 
 ## Üç bölümlü komedi öğrenme ve konu sistemi
 
-1. **Komedi psikolojisi & ustalar:** Psikoloji ilkeleri ve uluslararası komedi repertuvarı; yeni ve daha az tanınan isimleri URL kaynaklarıyla araştıran bir istem.
-2. **Global konu motoru:** Global YouTube kaynak kaydı, komedi dersleri, önceki fikir geçmişi ve (varsa) telefonda/tarayıcıda saklanan gerçek kanal Analytics ölçümleriyle tek özgün fikir istemi. Kanal verisi kaynak videonun yerine geçmez; fikri yönlendiren ayrı performans bağlamıdır.
-3. **Yayın sonrası ölçüm:** Yalnızca yayımlanmış videoları değerlendirir.
+1. **Canlı komedi araştırması:** Ücretsiz Wikipedia araması ve Europe PMC akademik literatür API'si üzerinden farklı ülke/dönem komedi ustaları, mizah psikolojisi yayınları ve erişilebilen özetler URL'leriyle toplanır.
+2. **Bağımsız senaryo motoru:** YouTube API anahtarı, trend videosu veya kanal istatistiği gerektirmeden araştırma verisinden komedi teknikleri öğrenme paketi oluşturur ve tek 10 saniyelik senaryo görevine bağlar. Trend akışı isteğe bağlıdır.
+3. **Acımasız hakem + yayın sonrası ölçüm:** Aday senaryoyu gerekçeli biçimde değerlendirir ve gerekirse bir güçlü nihai sürüm yazma görevi oluşturur; ayrı bölümde yayımlanan videoların gerçek Analytics ölçümleri korunur.
 
 Kaynaklı başlangıç dersleri — Pierre Étaix'in görsel gag ilkeleri, Keaton'ın fiziksel nedenselliği, Tati'nin mekân/ses komedisi, Stephen Chow'un farce-pathos birlikteliği, Kishore Kumar'ın fiziksel ritmi ve Totò'nun mimik/survival farcesi — not eklenmemiş olsa bile her global fikir istemine varsayılan olarak dahil edilir. Kaydedilen kişisel komedi araştırma notları bunlara eklenir; temel derslerin yerini almaz.
 
-Komedi öğrenme katmanı canlı Wikipedia özetlerini, `knowledge.json` içindeki URL'li bulguları ve araştırma notlarını global fikir paketine ekler. Ana panelin **Trend keşfi** araması, kullanıcının YouTube Data API anahtarıyla getirdiği gerçek global video örneklemini kullanır; paket sabit kaynak videosunu ve erişilebilen storyboard karelerini ilişkilendirir. Bağımsız web çapraz kontrolünü paketin yapıştırıldığı web erişimli sohbet asistanı yürütür; panel bunu kendisi yapmış gibi göstermez. Panel bir yapay zekâ modeli eğitmez ve videoyu baştan sona otomatik izlemez.
+Komedi öğrenme katmanı bilinen ustaların canlı Wikipedia özetlerini, farklı ülke/dönem komedi ustaları için yapılan yeni Wikipedia aramalarını, Europe PMC akademik yayın kayıtlarını/erişilebilen özetlerini, knowledge.json bulgularını ve telefonda kaydedilen öğrenme notlarını birleştirir. Kaynak alınamazsa başarısızlık açıkça yazılır; erişilmiş gibi gösterilmez. Bağımsız motor YouTube Data API anahtarı, global trend videosu veya kanal Analytics verisi istemez. Panel kaynakları gerçekten getirir ama dil modeli çalıştırmaz; senaryoyu paketi yapıştırdığın ChatGPT yazar.
 
 Önceki fikirleri tekrar etmeme kontrolü, yalnızca `knowledge.json` içinde (varsa) ve bu telefonda/tarayıcıda yerel saklanan konu geçmişinde bulunan kayıtları kapsar. Yerel geçmiş açık depoda yayımlanmaz. Kaydedilmemiş eski konuların otomatik olarak bilindiği varsayılmamalıdır.
 
@@ -63,12 +63,11 @@ Konu Motoru paketi, global YouTube aramasından seçilmiş kaydı sabitler. Yan�
 Kontrol, kaynak atfının yapısını doğrular; videonun sahnesinin gerçekten izlenmiş olduğunu veya fikrin başarılı olacağını kanıtlamaz.
 
 ## Kullanım akışı
-1. Panelde **Trend keşfi** bölümüne YouTube Data API anahtarını gir.
-2. Global odaklı bir arama yap ve sonuçları getir.
-3. **Global konu paketini oluştur ve kopyala** düğmesine bas. Global kaynak araması OAuth gerektirmez. Daha önce 3. bölümde kanal Analytics ölçümlerini getirdiysen, tarayıcıda saklanan kompakt özet otomatik eklenir.
-4. Kopyalanan istemi web erişimi olan sohbet asistanına yapıştır. Asistanın aynı global kaydı aramasını, bağımsız yazılı kaynak bulamazsa bunu söylemesini ve tek tam prompt üretmesini iste.
-5. Dönen yanıtı paneldeki global kaynak izi kontrolüne yapıştırıp alanları denetle.
-6. Video yayınlandıktan sonra ayrı kanal analiziyle gerçek performansı değerlendir. Bu veriler sonraki fikri yönlendirebilir, ancak global kaynak yerine geçmez ve tek başına başarı nedeni kanıtlamaz.
+1. **Komedi araştırması** sekmesinde “Usta araştırma paketini oluştur ve kopyala” düğmesiyle canlı kaynakları tara; işe yarayan dersleri öğrenme notlarına kaydedebilirsin.
+2. **Bağımsız senaryo** sekmesinde “Canlı araştır + tek senaryo paketini oluştur ve kopyala” düğmesine bas. YouTube API anahtarı, trend araması ve kanal girişi gerekmez.
+3. Kopyalanan paketi bu ChatGPT sohbetine yapıştırıp gönder. Tek fikir, tam 10 saniyelik akış ve İngilizce video üretim promptu görevde yer alır.
+4. **Hakem + ölçüm** sekmesinde üretilen senaryoyu yapıştırıp hakem görevini kopyala. Aynı sekmede kanalın yayın sonrası Analytics raporu da ayrı işlev olarak kalır.
+5. Global YouTube araştırma/kaynak izi akışı istenirse ayrıca kullanılabilir; bağımsız motor için zorunlu değildir.
 
 Panelin kendisi bir yapay zekâ modeli çalıştırmaz; global paket üretir ve kaynak izi denetler. İçerik üretimi/bağımsız web araştırması, paketi yapıştırdığın web erişimli sohbet asistanında gerçekleşir.
 
