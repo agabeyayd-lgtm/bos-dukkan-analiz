@@ -7,6 +7,7 @@ on:
       - feat/data-driven-topic-engine
     paths:
       - index.html
+      - comedy-learning.js
       - bos-dukkan-analiz.html
       - source-trace-guard.js
       - tests/source-trace-guard.test.cjs
@@ -17,6 +18,7 @@ on:
       - main
     paths:
       - index.html
+      - comedy-learning.js
       - bos-dukkan-analiz.html
       - source-trace-guard.js
       - tests/source-trace-guard.test.cjs
@@ -80,11 +82,17 @@ jobs:
               assert "window.bosOwnAnalyticsSnapshot" in source, f"{filename}: own-channel metrics panel was unexpectedly removed"
               assert "KOPYALANMAYAN UNSURLAR" in source, f"{filename}: originality/source-difference rule is missing"
               assert "Video oynatma" in source, f"{filename}: no-playback verification alternative is missing"
-              assert "Kendi kanal verisi yalnızca yayın sonrası karşılaştırma içindir" in source, f"{filename}: channel separation rule is missing"
+              assert "Kendi kanal ölçümleri global kaynak yerine geçmez; yalnızca gerçek performans bağlamı" in source, f"{filename}: global source and channel learning roles are not separated"
+              assert "ownAnalyticsLearningStatus" in source, f"{filename}: local analytics-learning status is missing"
+              assert "clearOwnAnalyticsLearning" in source, f"{filename}: local analytics cache clear control is missing"
               assert "Yayın sonrası ölçüm raporunu oluştur ve kopyala" in source, f"{filename}: separate analytics report action is missing"
+              learning_module = Path("comedy-learning.js").read_text(encoding="utf-8")
+              for contract in ("OWN_ANALYTICS_KEY", "saveOwnAnalyticsSnapshot", "buildOwnAnalyticsLearning", "KENDİ KANAL ANALYTICS ÖĞRENME BAĞLAMI"):
+                  assert contract in learning_module, f"comedy-learning.js: missing contract {contract}"
               for stale in ("ownDataForPrompt", "creativeEvidenceForPrompt", "ideaEvidenceTrace", "validateIdeaTrace"):
                   assert stale not in source, f"{filename}: legacy mixed channel-data path remains: {stale}"
           PY
           for file in /tmp/index.js /tmp/bos-dukkan-analiz.js; do node --check "$file"; done
+          node --check comedy-learning.js
           node --check source-trace-guard.js
           node --test tests/source-trace-guard.test.cjs
