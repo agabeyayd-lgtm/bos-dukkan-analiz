@@ -27,6 +27,7 @@ jobs:
       - name: Validate comedy learning module
         run: |
           node --check comedy-learning.js
+          node --check independent-scenario-engine.js
           node <<'NODE'
           const fs = require('fs');
           const js = fs.readFileSync('comedy-learning.js', 'utf8');
