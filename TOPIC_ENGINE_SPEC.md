@@ -70,6 +70,28 @@ Kanal sahibi OAuth ile ölçümleri getirdiğinde panel, yorum metinlerini ve er
 
 Kaynaklar teknikleri araştırmak içindir; birebir sahne, karakter veya bitiş kopyalanmaz. Psikoloji teorileri kesin ve evrensel komedi formülleri olarak sunulmaz.
 
+## Kanal gözlemleri (YARATICI HİPOTEZ — kural değil)
+
+Bu bölüm zorunlu mekanizma dayatmaz; senaryo motoru bunlardan yalnızca ilham olarak yararlanabilir. Kanıt türü: kanalın kendi Analytics görüntüleme ve izlemeye devam edenler verisi; videoların içerik tarifi kanal sahibinden. Abone sayısı kanal sahibinin kendi çevresinden geldiği için sinyal olarak kullanılmaz.
+
+### Gen: Tek Dürtü + Ölçek Finali
+
+- Kaynak: kanalın ilk haftasında en çok izlenen üç video (dondurma kabından yemek çıkması, market arabasıyla dükkânı toplayan adam, dedelerin inşaatı takip edip sonunda içine girmesi). Bu üçünde izlemeye devam edenler oranı yaklaşık %64–74 aralığındaydı.
+- Yapı: tek bir insani dürtü (merak, toplama, takip) sonuna kadar götürülür; aynı kural tekrar eder ve her tekrarda büyür; final "tamamen oldu" karesini gösterir (dolu buzdolabı, boş dükkân, kendini içinde bulan izleyici).
+- Süzgeç sorusu: İlk karede kural açıklama gerektirmeden anlaşılıyor mu?
+- Durum: test edilmemiş yaratıcı hipotez. Örnek sayısı azdır; neden-sonuç kanıtı değildir. Her senaryo bu yapıda olmak zorunda değildir.
+
+### Gözlem: Dedeler motifi
+
+- En çok izlenen dört videonun ikisinde yaşlı figürler var (construction videosundaki dedeler, kurdele tabure videosundaki yaşlı kalabalık).
+- Kullanım kuralı: devamlı olmayacak; aralıklı kullanılır ve art arda iki videoda tekrar edilmez.
+- Durum: örnek sayısı az; kesin kural değil.
+
+### Karşı örnekler (genin sınırı)
+
+- Sanayi ustası videoları tek bir an içerir, tekrar/ölçek yoktur; performansı düşük kaldı.
+- Halay videosunda tekrar var (altı kişi tek tek düşüyor) ama ilk 5,5 saatte izlemeye devam edenler oranı yaklaşık %32,5'ti; tekrar tek başına yetmiyor olabilir, ilk kare de belirleyici olabilir. 24–48 saat sonra yeniden ölçülmeli.
+
 ## Fikrin kaynağı
 
 Varsayılan bağımsız modda konu, motorun yaratıcı kararından doğar; belirli bir YouTube videosu, trend, kanal metriği veya kaynak sahne konu tohumu değildir. Canlı web araştırması, komedi mekanizması öğrenmek içindir. Kullanıcının kendi kanal istatistikleri de bağımsız fikrin önkoşulu değildir.
