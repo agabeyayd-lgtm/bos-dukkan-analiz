@@ -1,25 +1,80 @@
-/* Boş Dükkân comedy learning module.
-   Hazır (ezber) promptlar, ilke listeleri ve usta atlası kaldırıldı.
-   Bu dosya ayrıca ana sayfadaki hazır içerikleri devre dışı bırakır:
-   - Global konu paketi artık yalnızca veriden oluşur (kaynak, arama örneklemi, durum, storyboard, kullanıcı notları).
-   - Eski "rakip keşif / ön analiz istemi" bölümü her analizde kaldırılır.
-   - 1. sekmedeki sabit ilke kartları, usta atlası ve psikoloji çekirdeği metni kaldırılır.
-   Bu modül model eğitmez. */
+/* Boş Dükkân — konu motoru (YouTube aramasız).
+   Paket artık otomatik oluşur: Wikipedia özetleri (ustalar + mizah teorileri, canlı çekilir)
+   + kaynak URL'li araştırma bulguları. YouTube araması, trend verisi veya kullanıcı notu gerekmez.
+   Bu sayfa model eğitmez; çıktı paketi web erişimli sohbete yapıştırılır. */
 (function () {
   'use strict';
   const $ = (selector) => document.querySelector(selector);
+
+  // Wikipedia sayfa başlıkları (yalnızca veri işaretçisi; içerik canlı çekilir).
+  const MASTER_PAGES = ["Buster_Keaton", "Charlie_Chaplin", "Harold_Lloyd", "Jacques_Tati", "Laurel_and_Hardy", "Rowan_Atkinson", "Lucille_Ball", "Peter_Sellers", "Pierre_Étaix", "Stephen_Chow", "Max_Linder", "Roscoe_Arbuckle", "Harry_Langdon", "Louis_de_Funès", "Totò", "Cantinflas", "Kishore_Kumar", "Alberto_Sordi"];
+  const PSYCH_PAGES = ["Benign_violation_theory", "Incongruity_theory", "Superiority_theory_of_humor", "Relief_theory", "Physical_comedy", "Slapstick", "Deadpan"];
+
+  // Kaynaklı araştırma bulguları (özetlenmiş; her biri URL'li).
+  const SOURCED_FINDINGS = [
+    {source: "Kinema / Waterloo — Notes on Buster Keaton's Motion", url: "https://openjournals.uwaterloo.ca/index.php/kinema/article/download/1250/1589",
+      finding: "Keaton'da hareketler bir nedensellik zinciri gibi birbirini doğurur; karakter kaçmak yerine fiziksel imkânı yeniden tanımlar; spektaküler olaylar karşısında yüzü ifadesiz kalır."},
+    {source: "Filmmaker Magazine — Keaton'ın simetrisi", url: "https://filmmakermagazine.com/?p=93184",
+      finding: "Ortalanmış kadraj, şakanın nesne ve mekânla baştan ayağa görünmesini sağlar."},
+    {source: "Stanley Nolan — Keaton", url: "https://stanleynolan.substack.com/p/keaton",
+      finding: "Keaton'a göre seyirci başkasının başına gelene güler; ifadesiz beden ile kaotik dünya arasındaki uyumsuzluk komik etkiyi taşır."},
+    {source: "McGraw & Warren 2010 — Benign Violations", url: "https://leeds-faculty.colorado.edu/mcgrawp/pdf/mcgraw.warren.2010.pdf",
+      finding: "Mizah, bir durum aynı anda hem ihlal hem zararsız algılandığında doğar. Zararsızlık: alternatif norm, ihlal edilen kurala zayıf bağlılık veya psikolojik mesafeyle gelir."},
+    {source: "McGraw ve ark. 2012 — Distant tragedies, close mishaps", url: "https://leeds-faculty.colorado.edu/mcgrawp/pdf/mcgraw.warren.williams.leonard.2012.pdf",
+      finding: "Küçük aksilikler yakınken, felaketler uzakken komiktir; mesafe tehdidi azaltır."},
+    {source: "Humor Research Lab — Benign Violation Theory", url: "https://leeds-faculty.colorado.edu/mcgrawp/pdf/Benign_Violation_Theory.html",
+      finding: "Oyun kavgası saldırı durunca (ihlal yok) ya da fazla saldırgan olunca (zararsız değil) komikliğini kaybeder."},
+    {source: "Univ. of Catania çalışması", url: "https://www.iris.unict.it/handle/20.500.11769/642974",
+      finding: "Benign-ihlal kuramı yalnızca kısmen desteklendi; tek bir teori bütün mizahı açıklamaz."}
+  ];
+
+  async function wikiSummary(title) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 7000);
+    try {
+      const r = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(title) + '?redirect=true', {headers: {Accept: 'application/json'}, signal: controller.signal});
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      return {
+        title: j.title || title.replace(/_/g, ' '),
+        url: j.content_urls && j.content_urls.desktop && j.content_urls.desktop.page || null,
+        summary: String(j.extract || '').slice(0, 500)
+      };
+    } finally { clearTimeout(timer); }
+  }
+  async function fetchAll(titles) {
+    const results = await Promise.allSettled(titles.map(wikiSummary));
+    const ok = [], failed = [];
+    results.forEach((res, i) => {
+      if (res.status === 'fulfilled' && res.value.summary) ok.push(res.value); else failed.push(titles[i].replace(/_/g, ' '));
+    });
+    return {ok, failed};
+  }
+
   function readNotes() {
     try { return localStorage.getItem('bd_comedy_research_notes') || ''; } catch (e) { return ''; }
   }
-  function readSceneNotes() {
-    const el = $('#sceneNotes');
-    return el ? String(el.value || '').trim() : '';
-  }
-  // Hazır usta araştırma istemi kaldırıldı: butonu ve alanını gizle.
-  ['#createComedyStudyPrompt', '#comedyStudyPrompt', '#comedyStudyPromptStatus'].forEach((sel) => {
-    const el = $(sel);
-    if (el) el.style.display = 'none';
-  });
+
+  // Eski YouTube aramasına dayalı arayüzü gizle ve metinleri güncelle.
+  (function reshapeGenSection() {
+    const gen = $('#gen');
+    if (!gen) return;
+    const searchBar = gen.querySelector('.bar');
+    if (searchBar) searchBar.style.display = 'none';
+    ['#outGen', '#globalIdeaTraceGate'].forEach((sel) => { const el = $(sel); if (el) el.style.display = 'none'; });
+    const intro = gen.querySelector(':scope > p.note');
+    if (intro) intro.textContent = 'Konu paketi otomatik oluşur: ustalar ve mizah teorileri canlı kaynaktan çekilir, kaynaklı araştırma bulguları eklenir. YouTube araması, trend verisi veya izleme gerekmez.';
+    const panel = $('#globalIdeaPanel');
+    if (panel) {
+      const h = panel.querySelector('h2');
+      if (h) h.textContent = 'Ustalar + mizah psikolojisi → tek yeni komedi konusu';
+      const p = panel.querySelector('p.note');
+      if (p) p.textContent = 'Düğme ustalar ve mizah teorileri için kaynak özetlerini otomatik çeker, paketi hazırlar ve kopyalar. Paketi sohbete yapıştırınca 10 sn, 9:16, ASMR, diyalogsuz konu üretilir.';
+    }
+    const summary = $('#globalIdeaSourceSummary');
+    if (summary) summary.textContent = 'Kaynak: Wikipedia özetleri (canlı) + kaynaklı araştırma bulguları. YouTube araması yok.';
+  })();
+
   // 1. sekmedeki sabit ezber içerik: ilke kartları, usta atlası ve psikoloji çekirdeği metni.
   (function stripStaticLearnContent() {
     const learn = $('#learn');
@@ -35,13 +90,19 @@
       }
     });
   })();
+  // Hazır usta araştırma istemi kaldırıldı: butonu ve alanını gizle.
+  ['#createComedyStudyPrompt', '#comedyStudyPrompt', '#comedyStudyPromptStatus'].forEach((sel) => {
+    const el = $(sel);
+    if (el) el.style.display = 'none';
+  });
+
   const notes = $('#comedyResearchNotes');
   if (notes) {
     notes.value = readNotes();
     notes.addEventListener('input', () => {
       try { localStorage.setItem('bd_comedy_research_notes', notes.value); } catch (e) {}
       const status = $('#comedyResearchNotesStatus');
-      if (status) status.textContent = 'Notlar bu tarayıcıya otomatik kaydedildi; sonraki global konu paketine eklenir.';
+      if (status) status.textContent = 'Notlar bu tarayıcıya kaydedildi (isteğe bağlı; pakete eklenir).';
     });
     const save = $('#saveComedyResearchNotes');
     if (save) save.addEventListener('click', () => {
@@ -58,58 +119,43 @@
     });
   }
 
-  // Global konu paketi: yalnızca veri. Rol, görev, çıktı şablonu veya hazır komedi talimatı yok.
-  window.buildGlobalIdeaPrompt = function (research, anchor, visual) {
-    const videos = research && Array.isArray(research.videos) ? research.videos : [];
-    const rows = videos
-      .filter((v) => v && v.id && v.title).slice()
-      .sort((a, b) => (Number(b.viewsPerDay ?? b.vpd) || 0) - (Number(a.viewsPerDay ?? a.vpd) || 0)).slice(0, 20)
-      .map((v) => ({
-        videoId: v.id, title: v.title, channel: v.channel || null, channelId: v.channelId || null,
-        publishedAt: v.publishedAt || (v.date instanceof Date ? v.date.toISOString() : v.date) || null,
-        publicLifetimeViews: Number.isFinite(Number(v.views)) ? Number(v.views) : null,
-        ageDays: Number.isFinite(Number(v.ageDays)) ? Number(v.ageDays) : null,
-        approximateViewsPerDay: Number.isFinite(Number(v.viewsPerDay ?? v.vpd)) ? Number(v.viewsPerDay ?? v.vpd) : null,
-        durationSeconds: Number.isFinite(Number(v.seconds ?? v.sec)) ? Number(v.seconds ?? v.sec) : null,
-        officialUrl: 'https://www.youtube.com/watch?v=' + v.id
-      }));
-    let state = null;
-    try { if (typeof currentStateSnapshot === 'function') state = currentStateSnapshot(videos); } catch (e) { state = null; }
-    const parts = [
-      "ARAMA: " + JSON.stringify({
-        query: research && research.query || null,
-        windowDays: research && research.searchDays || null,
-        requestedOrder: research && research.requestedOrder || null,
-        windowStart: research && research.searchStartedAt || null,
-        windowEnd: research && research.searchEndedAt || null,
-        returnedVideoCount: videos.length,
-        source: research && research.source || null
-      }),
-      "SABİTLENMİŞ GLOBAL KAYNAK: " + JSON.stringify(anchor || null),
-      "GLOBAL YOUTUBE ARAMA ÖRNEKLEMİ (en fazla 20 sonuç): " + JSON.stringify(rows),
-      "ÖRNEKLEMDE İZLENEN / İZLENMEYEN (yaşa göre düzeltilmiş günlük izlenme): " + JSON.stringify(state),
-      "STORYBOARD / GÖRSEL PAKET: " + JSON.stringify(visual || { available: false }),
-      "ALAN TANIMLARI: publicLifetimeViews = yayından ölçüm zamanına kadar biriken toplam izlenme; approximateViewsPerDay = toplam izlenme ÷ video yaşı (kaba vekil, tarihsel grafik değil)."
-    ];
-    const sceneNotes = readSceneNotes();
-    if (sceneNotes) parts.push("KULLANICININ GERÇEK SAHNE NOTLARI: " + sceneNotes);
-    const userNotes = readNotes();
-    if (userNotes) parts.push("KULLANICININ KAYDETTİĞİ ARAŞTIRMA NOTLARI:\n" + userNotes);
-    return parts.join("\n");
-  };
-
-  // Eski hazır "ön analiz istemi" artık hiçbir şey üretmez.
-  window.askClaude = function () {};
-
-  // Eski rakip keşif / ön analiz bölümü (hazır talimatlar içerir) her analizde kaldırılır.
-  const out = $('#outGen');
-  if (out && typeof MutationObserver === 'function') {
-    const strip = () => {
-      const legacy = $('#legacyResearchTools');
-      if (legacy) legacy.remove();
+  // Otomatik konu paketi (YouTube'suz).
+  const btn = $('#createGlobalIdeaPrompt');
+  if (btn) {
+    btn.textContent = 'Konu paketini otomatik oluştur ve kopyala';
+    btn.onclick = async () => {
+      const status = $('#globalIdeaPromptStatus'), area = $('#globalIdeaPrompt');
+      btn.disabled = true;
+      status.textContent = 'Ustalar ve mizah teorileri için kaynak özetleri çekiliyor…';
+      try {
+        const [masters, psych] = await Promise.all([fetchAll(MASTER_PAGES), fetchAll(PSYCH_PAGES)]);
+        const parts = [
+          "ÜRETİLECEK: 10 saniyelik, dikey 9:16, ASMR odaklı doğal sesli, diyalogsuz bir komedi videosu için tek konu ve tam video promptu. Mevcut videolara, trendlere veya izlenme verilerine bakma; dünyadaki ilk komedi videosunu üretiyormuşuz gibi, aşağıdaki ustaların yaptıklarından ve mizah psikolojisinden yola çıkarak sıfırdan düşün.",
+          "USTALAR (Wikipedia özetleri, otomatik çekildi, " + masters.ok.length + "/" + MASTER_PAGES.length + "): " + JSON.stringify(masters.ok),
+          "MİZAH PSİKOLOJİSİ VE TÜRLER (Wikipedia özetleri, otomatik çekildi, " + psych.ok.length + "/" + PSYCH_PAGES.length + "): " + JSON.stringify(psych.ok),
+          "KAYNAKLI ARAŞTIRMA BULGULARI (URL'li): " + JSON.stringify(SOURCED_FINDINGS)
+        ];
+        const failed = masters.failed.concat(psych.failed);
+        if (failed.length) parts.push("ÇEKİLEMEYEN KAYNAKLAR: " + failed.join(", "));
+        const userNotes = readNotes();
+        if (userNotes) parts.push("KULLANICININ EK NOTLARI:\n" + userNotes);
+        area.value = parts.join("\n");
+        area.style.display = 'block';
+        area.focus(); area.select();
+        const summary = $('#globalIdeaSourceSummary');
+        if (summary) summary.textContent = 'Paket hazır: ' + masters.ok.length + ' usta + ' + psych.ok.length + ' teori/tür özeti + ' + SOURCED_FINDINGS.length + ' kaynaklı bulgu. YouTube araması yok.';
+        try {
+          await navigator.clipboard.writeText(area.value);
+          status.textContent = 'Paket kopyalandı. Sohbete yapıştır.' + (failed.length ? ' (' + failed.length + ' kaynak çekilemedi.)' : '');
+        } catch (e) {
+          status.textContent = 'Paket aşağıda hazır ve seçili; Kopyala ile al.' + (failed.length ? ' (' + failed.length + ' kaynak çekilemedi.)' : '');
+        }
+      } catch (e) {
+        status.textContent = 'Paket oluşturulamadı: ' + (e && e.message || e);
+      } finally {
+        btn.disabled = false;
+      }
     };
-    new MutationObserver(strip).observe(out, { childList: true, subtree: true });
-    strip();
   }
 
   // Eski kodun hata vermemesi için boş uyumluluk nesnesi.
