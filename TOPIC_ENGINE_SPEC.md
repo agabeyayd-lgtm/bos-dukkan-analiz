@@ -70,6 +70,7 @@ Storyboard kareleri görsel kontrol için bir alternatiftir; bağımsız web kay
 
 - Kamusal toplam izlenme, yayımdan ölçüm zamanına kadar birikmiş sayıdır; seçili dönem YouTube Analytics verisi gibi gösterilmez.
 - Görüntülenme / video yaşı hesabı yalnızca kaba bir yaklaşık hız vekilidir; tarihsel günlük grafik veya nedensel kanıt değildir.
+- Kendi kanalının `viewsInWindow`, ortalama izleme, ortalama izlenen yüzde, beğeni ve kazanılan abone ölçümleri seçili Analytics dönemine aittir. `viewsPerObservedDay` kaba ortalamadır; günlük API grafiği değildir. Eksik değerler sıfır olarak doldurulmaz.
 - YouTube arama sonuçları sınırlı ve sıralamadan etkilenmiş bir örneklemdir; bütün global Shorts evrenini temsil etmez.
 - Metaveri kaydıyla bağımsız yazılı kaynak birbirinden farklı kanıt türleridir.
 - Görüntülenme sayısı, bir videonun hangi sahne yüzünden başarı kazandığını kanıtlamaz.
