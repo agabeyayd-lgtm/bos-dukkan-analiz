@@ -2,7 +2,7 @@
 
 ## Ana amaç
 
-Her çalıştırmada global Shorts keşfi ve kaynak doğrulaması üzerinden **tek güçlü, özgün komedi fikri ve tam video üretim promptu** teslim et. Fikir listesi dökme; kaynak veya veri eksikliği yüzünden üretimi durdurma.
+Her çalıştırmada global Shorts keşfi, kaynak doğrulaması, web tabanlı komedi öğrenmesi ve davranış psikolojisi sentezi üzerinden **tek güçlü, özgün komedi fikri ve tam video üretim promptu** teslim et. Fikir listesi dökme; kaynak veya veri eksikliği yüzünden üretimi durdurma.
 
 ## Tek zorunlu video koşulları
 
@@ -12,23 +12,24 @@ Her çalıştırmada global Shorts keşfi ve kaynak doğrulaması üzerinden **t
 
 Bunların dışında sabit yaratıcı kural yoktur.
 
-## Bağımsız senaryo yazarı modu
+## Birleşik web araştırması ve senaryo üretimi
 
-Panele, global konu keşfinden ayrı çalışan bir **bağımsız senaryo yazarı istemi** eklendi. Bu modda yeni senaryonun girdisi global YouTube örneklemi, rakip videolar, bağımsız web kaynakları, kendi kanal Analytics'i, görüntülenme sayıları veya API anahtarı değildir. Model, genel görsel komedi dramaturjisi ve davranış psikolojisi ilkelerini kullanarak konuyu kendi başına kurar.
+Artık ayrı bir bağımsız senaryo modu yoktur. Her yeni senaryo akışı global YouTube keşfiyle başlar; sabit kaynak kaydı, web çapraz kontrolü, kaynaklı mizah psikolojisi/komedi ustası araştırması ve özgün senaryo üretimi tek paket içinde birleşir.
 
-- Tek çıktı: bir özgün fikir, kısa komedi mantığı, tam 10 saniyelik zaman çizelgesi ve doğrudan üretim aracına verilecek eksiksiz İngilizce video promptu.
-- Sabit teknik koşullar: tam 10 saniye, dikey 9:16, fotogerçekçi, diyalogsuz, müziksiz, doğal ASMR sesi.
-- 0–0,3 saniyede görsel kanca; davranış ve fiziksel neden-sonuç zinciri; 10 saniyeye kadar somut ve tamamlanmış final.
-- Model, birkaç yaklaşımı kendi içinde değerlendirebilir ancak kullanıcıya yalnızca en güçlü olanı verir; puan eşiği koymaz ve üretimi durdurmaz.
-- Bu GitHub Pages paneli statik JavaScript'tir ve kendi içinde bir dil modeli barındırmaz. Düğme yalnızca bağımsız yazar talimatını hazırlar/kopyalar; senaryonun kendisini üretmek için bu talimat ChatGPT gibi bir dil modeline gönderilmelidir.
-- Global araştırma modu ayrı olarak korunur. Kullanıcı bağımsız senaryo modu seçtiğinde global kaynak izi veya Analytics özeti senaryo talimatına eklenmez.
+- YouTube arama örneklemi fikir seçimine bir başlangıç işareti verir; izlenme sayısı sahneyi veya başarının sebebini kanıtlamaz.
+- Web erişimli sohbet asistanı, farklı ülkeler ve dönemlerden görsel komedi ustalarını ve güvenilir mizah psikolojisi kaynaklarını araştırır; gerçek açılan kaynakların URL'lerini ve destekledikleri uygulanabilir teknikleri belirtir.
+- Sadece yerleşik isimleri ezberden sıralamak veya yalnızca Wikipedia özetlerine dayanmak yeterli değildir. Ulaşılamayan kaynaklar okunmuş gibi sunulmaz.
+- Öğrenilen mekanizmalar kopyalanacak sahne olarak değil; karakter amacı, davranış, beklenti, statü, zamanlama ve fiziksel neden-sonuç ilkeleri olarak kullanılır.
+- Nihai çıktı tek bir özgün fikir, kısa mizah mantığı, tam 10 saniyelik zaman çizelgesi ve üretim aracına doğrudan verilecek İngilizce video promptudur.
+- İlk 0,0–0,3 saniye anlaşılır görsel kanca taşımalı; sonuca giden eylemler fiziksel olarak inandırıcı ve nedensel olmalı; final 10. saniyede tamamlanmalıdır. Yapay fizik, sıradan bir aksilikten ibaret fikir, yalnızca nesne değiştirerek tekrar ve şaşkın bakıştan ibaret final elenip yeniden düşünülmelidir.
+- Panel statik GitHub Pages JavaScript uygulamasıdır; kendi içinde bir dil modeli çalıştırmaz. Global paket gerçek arama kayıtlarını ve kaynaklı öğrenme bağlamını hazırlar; canlı web araştırmasını ve senaryo yazımını paketi kullanan web erişimli sohbet asistanı yapar.
 
 ## Komedi psikolojisi ve usta öğrenme çekirdeği
 
 Panel üç bölüme ayrılmıştır:
 
 1. **Komedi psikolojisi & ustalar:** Beklenti uyumsuzluğu, statü, karakter hedefi, yüzünü kurtarma, nedensel tırmanış, zamanlama, görsel okunurluk ve somut final gibi mercekleri gösterir. Başlangıç atlasında Chaplin, Keaton, Harold Lloyd, Laurel & Hardy, Tati, Mr Bean, Lucille Ball, Peter Sellers, Jerry Lewis, Louis de Funès, Cantinflas, Norman Wisdom, Jackie Chan, Marx Kardeşler, Mel Brooks, Sacha Baron Cohen, Chespirito ve Roberto Benigni bulunur. Ayrıca yeni dünya komedi ustalarını araştıracak bir istem üretir.
-2. **Global konu motoru:** Global YouTube örneklemini ve sabit dış kaynak kaydını kullanır. Usta atlası, psikoloji ilkeleri, kaydedilmiş dersler, önceki fikir geçmişi ve (varsa) kompakt yerel kanal Analytics özeti fikir istemine eklenir. Kanal metrikleri kaynak video olarak gösterilmez.
+2. **Global araştırma ve konu motoru:** Global YouTube örneklemini ve sabit dış kaynak kaydını kullanır; web erişimli asistan aynı akışta farklı ülke/dönem komedi ustaları ile güvenilir mizah psikolojisi kaynaklarını araştırır. Usta özetleri, kaynaklı bulgular, kaydedilmiş dersler, önceki fikir geçmişi ve (varsa) kompakt yerel kanal Analytics özeti senaryo istemine eklenir. Kanal metrikleri kaynak video olarak gösterilmez.
 3. **Yayın sonrası ölçüm:** Yayımlanmış videoları ayrı raporlar; rapor düğmesi fikir üretmez. Gerçek ölçümler alındığında, sade bir yerel kopya sonraki fikir paketinde performans bağlamı olarak kullanılabilir.
 
 ### Öğrenme nasıl kalıcı olur?
@@ -91,10 +92,12 @@ Storyboard kareleri görsel kontrol için bir alternatiftir; bağımsız web kay
 1. Paketin dışındaki eski sohbetlerden fikir taşıma. Yalnız güncel global örneklem ve kullanıcı tarafından açıkça sağlanan kaçınılacak fikirleri kullan.
 2. Önce global YouTube aramasından gelen veri ve sabit global kaynak kaydını kontrol et.
 3. Kaynak videodan geniş bir konu/öncül ipucu çıkar; kaynak sahnesini kopyalama.
-4. Global webde aynı ID ve başlıkla kaynak çapraz kontrolü ara; bulunamazsa yokluğunu söyle.
-5. Video görüntüsü doğrulanmadıysa görsel sahne mekanizmasını bilinmiyor kabul et. Yine de kaynak ilkesinden bağımsız ve özgün yeni bir komedi mekanizması geliştir.
-6. Birkaç farklı yaklaşımı iç değerlendirmede karşılaştırabilirsin; kullanıcıya sadece kazananı sun. Katı puan kapısı veya otomatik ret kullanma.
-7. Kanal verilerini ayrı performans raporunda ölç; kompakt yerel Analytics özeti sonraki konu paketine yönlendirici bağlam olarak eklenebilir, ancak hiçbir zaman global kaynak yerine geçmez.
+4. Mizah psikolojisi ve farklı komedi ustaları hakkında webde doğrulanabilir, kaynaklı araştırma yap; erişilen kaynak URL’lerini ve uygulanabilir teknikleri raporla.
+5. Araştırma tekniklerini karakterin amacı ve fiziksel neden-sonuç üzerinden yeni bir olaya dönüştür. İnandırıcı olmayan bir fiziksel bağlantı veya sıradan aksilik varsa fikri değiştir.
+6. Global webde aynı ID ve başlıkla kaynak çapraz kontrolü ara; bulunamazsa yokluğunu söyle.
+7. Video görüntüsü doğrulanmadıysa görsel sahne mekanizmasını bilinmiyor kabul et. Yine de kaynak ilkesinden bağımsız ve özgün yeni bir komedi mekanizması geliştir.
+8. Birkaç farklı yaklaşımı iç değerlendirmede karşılaştırabilirsin; kullanıcıya sadece kazananı sun. Katı puan kapısı veya otomatik ret kullanma.
+9. Kanal verilerini ayrı performans raporunda ölç; kompakt yerel Analytics özeti sonraki konu paketine yönlendirici bağlam olarak eklenebilir, ancak hiçbir zaman global kaynak yerine geçmez.
 
 ## Zorunlu kaynak izi
 
