@@ -12,6 +12,29 @@ Her çalıştırmada global Shorts keşfi ve kaynak doğrulaması üzerinden **t
 
 Bunların dışında sabit yaratıcı kural yoktur.
 
+## Komedi psikolojisi ve usta öğrenme çekirdeği
+
+Panel üç bölüme ayrılmıştır:
+
+1. **Komedi psikolojisi & ustalar:** Beklenti uyumsuzluğu, statü, karakter hedefi, yüzünü kurtarma, nedensel tırmanış, zamanlama, görsel okunurluk ve somut final gibi mercekleri gösterir. Başlangıç atlasında Chaplin, Keaton, Harold Lloyd, Laurel & Hardy, Tati, Mr Bean, Lucille Ball, Peter Sellers, Jerry Lewis, Louis de Funès, Cantinflas, Norman Wisdom, Jackie Chan, Marx Kardeşler, Mel Brooks, Sacha Baron Cohen, Chespirito ve Roberto Benigni bulunur. Ayrıca yeni dünya komedi ustalarını araştıracak bir istem üretir.
+2. **Global konu motoru:** Global YouTube arama örneklemini ve sabit kaynağı kullanır. Usta atlası, psikoloji ilkeleri ve tarayıcıya kaydedilmiş dersler fikir istemine eklenir. Kanal metrikleri bu yola girmez.
+3. **Yayın sonrası ölçüm:** Yalnızca yayımlanmış videoları değerlendirir; yeni konu seçmez ve öğrenme notlarını değiştirmez.
+
+### Öğrenme nasıl kalıcı olur?
+
+Panel kendi başına model eğitmez, film izlemez veya dışarıda web araması yapmaz. İlk bölüm kaynaklı araştırma istemi üretir; web erişimli sohbet asistanı araştırmayı yürütür. Araştırmadan elde edilen kısa dersler **Öğrenilen dersleri sakla** alanına yapıştırılır ve tarayıcının yerel depolamasında saklanır. Sonraki global konu paketine otomatik eklenir. Temel psikoloji ilkeleri ve usta atlası kodun parçasıdır.
+
+### Başlangıç kaynakları
+
+- BFI, Buster Keaton ve *The General*: https://www.bfi.org.uk/features/general-greatest-comedy-all-time
+- BFI, Jacques Tati ve *Playtime*: https://www.bfi.org.uk/film/a27e52ca-e6b6-5cd4-a2e0-1e1a30456e56/playtime
+- BFI, Harold Lloyd: https://www.bfi.org.uk/lists/10-great-films-1923
+- Mizah psikolojisinin teorileri üzerine hakemli inceleme: https://pmc.ncbi.nlm.nih.gov/articles/PMC6350176/
+- PBS, Rowan Atkinson ve Mr Bean: https://www.pbs.org/video/happy-birthday-mr-bean-juuuwu/
+- Şahan Gökbakar röportajı: https://www.cinedergi.com/2009/03/18/sahan-gokbakar-bana-ivediklestin-diyorlar/
+
+Kaynaklar teknikleri araştırmak içindir; birebir sahne, karakter veya bitiş kopyalanmaz. Psikoloji teorileri kesin ve evrensel komedi formülleri olarak sunulmaz.
+
 ## Fikrin kaynağı
 
 **Fikir seçiminin kaynağı global olmalıdır.** YouTube'da global arama sonuçları ve web'deki bağımsız kaynaklar kullanılır. Kullanıcının kendi kanal istatistikleri yeni fikri, konuyu, sahneyi veya komedi mekanizmasını seçmek için kullanılmaz. Kanal istatistikleri sadece video yayınlandıktan sonra sonuçları kıyaslamak için kullanılabilir.
