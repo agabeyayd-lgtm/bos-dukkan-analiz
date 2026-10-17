@@ -3,13 +3,96 @@
   "updated": "2026-10-17",
   "note": "Panel her paket oluşturmada bu dosyayı okur. Yeni kaynaklı bulgular buraya eklenir. Üretilen konular bu açık dosyada tutulmaz.",
   "findings": [
-    {"added": "2026-10-17", "source": "Kinema / Waterloo — Notes on Buster Keaton's Motion", "url": "https://openjournals.uwaterloo.ca/index.php/kinema/article/download/1250/1589", "finding": "Keaton'da hareketler bir nedensellik zinciri gibi birbirini doğurur; karakter kaçmak yerine fiziksel imkânı yeniden tanımlar; spektaküler olaylar karşısında yüzü ifadesiz kalır."},
-    {"added": "2026-10-17", "source": "Filmmaker Magazine — Keaton'ın simetrisi", "url": "https://filmmakermagazine.com/?p=93184", "finding": "Ortalanmış kadraj, şakanın nesne ve mekânla baştan ayağa görünmesini sağlar."},
-    {"added": "2026-10-17", "source": "Stanley Nolan — Keaton", "url": "https://stanleynolan.substack.com/p/keaton", "finding": "Keaton'a göre seyirci başkasının başına gelene güler; ifadesiz beden ile kaotik dünya arasındaki uyumsuzluk komik etkiyi taşır."},
-    {"added": "2026-10-17", "source": "McGraw & Warren 2010 — Benign Violations", "url": "https://leeds-faculty.colorado.edu/mcgrawp/pdf/mcgraw.warren.2010.pdf", "finding": "Mizah, bir durum aynı anda hem ihlal hem zararsız algılandığında doğar. Zararsızlık: alternatif norm, ihlal edilen kurala zayıf bağlılık veya psikolojik mesafeyle gelir."},
-    {"added": "2026-10-17", "source": "McGraw ve ark. 2012 — Distant tragedies, close mishaps", "url": "https://leeds-faculty.colorado.edu/mcgrawp/pdf/mcgraw.warren.williams.leonard.2012.pdf", "finding": "Küçük aksilikler yakınken, felaketler uzakken komiktir; mesafe tehdidi azaltır."},
-    {"added": "2026-10-17", "source": "Humor Research Lab — Benign Violation Theory", "url": "https://leeds-faculty.colorado.edu/mcgrawp/pdf/Benign_Violation_Theory.html", "finding": "Oyun kavgası saldırı durunca (ihlal yok) ya da fazla saldırgan olunca (zararsız değil) komikliğini kaybeder."},
-    {"added": "2026-10-17", "source": "Univ. of Catania çalışması", "url": "https://www.iris.unict.it/handle/20.500.11769/642974", "finding": "Benign-ihlal kuramı yalnızca kısmen desteklendi; tek bir teori bütün mizahı açıklamaz."}
+    {
+      "added": "2026-10-17",
+      "source": "Kinema / Waterloo — Notes on Buster Keaton's Motion",
+      "url": "https://openjournals.uwaterloo.ca/index.php/kinema/article/download/1250/1589",
+      "finding": "Keaton'da hareketler bir nedensellik zinciri gibi birbirini doğurur; karakter kaçmak yerine fiziksel imkânı yeniden tanımlar; spektaküler olaylar karşısında yüzü ifadesiz kalır."
+    },
+    {
+      "added": "2026-10-17",
+      "source": "Filmmaker Magazine — Keaton'ın simetrisi",
+      "url": "https://filmmakermagazine.com/?p=93184",
+      "finding": "Ortalanmış kadraj, şakanın nesne ve mekânla baştan ayağa görünmesini sağlar."
+    },
+    {
+      "added": "2026-10-17",
+      "source": "Stanley Nolan — Keaton",
+      "url": "https://stanleynolan.substack.com/p/keaton",
+      "finding": "Keaton'a göre seyirci başkasının başına gelene güler; ifadesiz beden ile kaotik dünya arasındaki uyumsuzluk komik etkiyi taşır."
+    },
+    {
+      "added": "2026-10-17",
+      "source": "McGraw & Warren 2010 — Benign Violations",
+      "url": "https://leeds-faculty.colorado.edu/mcgrawp/pdf/mcgraw.warren.2010.pdf",
+      "finding": "Mizah, bir durum aynı anda hem ihlal hem zararsız algılandığında doğar. Zararsızlık: alternatif norm, ihlal edilen kurala zayıf bağlılık veya psikolojik mesafeyle gelir."
+    },
+    {
+      "added": "2026-10-17",
+      "source": "McGraw ve ark. 2012 — Distant tragedies, close mishaps",
+      "url": "https://leeds-faculty.colorado.edu/mcgrawp/pdf/mcgraw.warren.williams.leonard.2012.pdf",
+      "finding": "Küçük aksilikler yakınken, felaketler uzakken komiktir; mesafe tehdidi azaltır."
+    },
+    {
+      "added": "2026-10-17",
+      "source": "Humor Research Lab — Benign Violation Theory",
+      "url": "https://leeds-faculty.colorado.edu/mcgrawp/pdf/Benign_Violation_Theory.html",
+      "finding": "Oyun kavgası saldırı durunca (ihlal yok) ya da fazla saldırgan olunca (zararsız değil) komikliğini kaybeder."
+    },
+    {
+      "added": "2026-10-17",
+      "source": "Univ. of Catania çalışması",
+      "url": "https://www.iris.unict.it/handle/20.500.11769/642974",
+      "finding": "Benign-ihlal kuramı yalnızca kısmen desteklendi; tek bir teori bütün mizahı açıklamaz."
+    },
+    {
+      "added": "2026-10-17",
+      "source": "San Francisco Silent Film Festival — The Amazing Charley Bowers",
+      "url": "https://silentfilm.org/the-amazing-charley-bowers/",
+      "finding": "Arşiv açıklaması Bowers'ın optik/stop-motion numaralarını ve mantıkçı karakterin kaosa verdiği tepkileri anlatır. Aktarılabilir ilke: bir nesnenin işlevi veya çözüm, önceki sorunun nedensel sonucu olarak değişsin; yalnızca rastgele tuhaflık ekleme. Film kare kare izlenmiş sayılmaz."
+    },
+    {
+      "added": "2026-10-17",
+      "source": "National Film Preservation Foundation — Won in a Cupboard (1914)",
+      "url": "https://www.filmpreservation.org/dvds-and-books/clips/won-in-a-cupboard-audio-description",
+      "finding": "Arşiv açıklaması Mabel Normand'ın filminde yanlış varsayımların fiziksel karmaşaya dönüştüğünü ve beden davranışının durumla değiştiğini kaydeder. Aktarılabilir ilke: karakter yeni bilgi edindikçe hareket stratejisi değişsin. Bu not arşiv açıklamasına dayanır; film kare kare analiz edilmedi."
+    },
+    {
+      "added": "2026-10-17",
+      "source": "The Public Domain Review — The Cameraman’s Revenge (1912)",
+      "url": "https://publicdomainreview.org/collection/cameramans-revenge/",
+      "finding": "Starevich'in stop-motion böcek dünyası, gizli davranışın kaydedilip kamusal hâle gelmesiyle sosyal sonuç yaratır. Aktarılabilir ilke: karakterin kendi davranışı, saklamak istediği şeyi istemeden görünür kılabilir. Böcek aşk üçgeni ve sinema ifşası kopyalanmamalı."
+    },
+    {
+      "added": "2026-10-17",
+      "source": "Foro Histórico de las Telecomunicaciones — El hotel eléctrico",
+      "url": "https://forohistorico.coit.es/index.php/multimedia/filmoteca/item/el-hotel-electrico",
+      "finding": "Chomón'un otomasyon/trick-film anlatımı, kolaylık için tasarlanan sistemin eylem kontrolünü insandan almasına odaklanır. Aktarılabilir ilke: sıradan bir işi otomatikleştir; ardından kontrolün kimde kaldığını gösteren nedensel sonuç üret. Bu, kaynak açıklamasından çıkarımdır."
+    },
+    {
+      "added": "2026-10-17",
+      "source": "Undercrank Productions — The Alice Howell Collection",
+      "url": "https://undercrankproductions.com/dvds/alice-howell-collection/",
+      "finding": "Koleksiyon açıklaması Howell'ın narin/feminen persona ile sert fiziksel slapstick'i birleştirdiğini belirtir. Aktarılabilir ilke: karakterin kendisi hakkında kurduğu sosyal imaj ile bedeninin gerçek davranışı arasında okunabilir bir çatışma kur. Kaynak bir koleksiyon tanıtımıdır, ayrıntılı sahne incelemesi değildir."
+    },
+    {
+      "added": "2026-10-17",
+      "source": "Warren, Barsky & McGraw (2021) — What Makes Things Funny? An Integrative Review",
+      "url": "https://doi.org/10.1177/1088868320961909",
+      "finding": "Bütünleştirici derleme mizahla ilişkili beş olası öncülü tartışır: sürpriz, eşzamanlılık, üstünlük, ihlal değerlendirmesi ve zararsızlık değerlendirmesi. Sürpriz veya üstünlük tek başına mizahı ayırmaya yetmez; tek teoriye dayalı otomatik ret/üretim filtresi kurma."
+    },
+    {
+      "added": "2026-10-17",
+      "source": "Differentiating what is humorous from what is not (2016)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/26692355/",
+      "finding": "Çalışma, uyumsuzluğun tek başına yetersiz kalabildiğini ve benign-violation yaklaşımının bazı deneylerde mizahı ayırmada daha başarılı olduğunu bildirir. Bu sonuç her şakanın bu kurama uyması gerektiği anlamına gelmez."
+    },
+    {
+      "added": "2026-10-17",
+      "source": "Play-mirth theory: a cognitive appraisal theory of humor (2024)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11659645/",
+      "finding": "Kuram tartışması tek güdülü açıklamaların sınırlarını vurgular: üstünlük, rahatlama ve uyumsuzluk yaklaşımlarının her mizah türünü açıklamadığı örnekler vardır. Motor bir teoriyi zorunlu reçete değil, olası açıklama aracı olarak kullanmalı."
+    }
   ],
   "topics": []
 }
