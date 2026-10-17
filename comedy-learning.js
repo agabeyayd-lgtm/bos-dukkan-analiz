@@ -297,7 +297,7 @@
       "KENDİ KENDİNİ DÜZENLEME: İç değerlendirmende birkaç farklı yaklaşım düşünebilirsin ama bunları kullanıcıya listeleme. Seçtiğin fikri; ilk kare, anlaşılabilir hedef, neden-sonuç, davranıştan doğan mizah, doğal ASMR ve tamamlanmış final açısından sorgula. Zayıfsa yeniden yaz. Sayısal puan uydurma, puan eşiği koyma ve üretimi durdurma.",
       "ÇIKTI: Önce tek cümlelik fikir adı/açıklaması. Sonra neden komik olduğuna dair kısa açıklama. Ardından 0.0–10.0 saniyenin tamamını kapsayan net zaman çizelgesi. Son olarak doğrudan video üretim aracına yapıştırılabilecek eksiksiz İngilizce video promptu. İngilizce promptta bütün teknik koşulları, kancayı, eylemleri, doğal ASMR seslerini, kamera/kadrajı, sürekliliği ve tamamlanmış finali tekrar açıkça belirt.",
       "KURAL: Kullanıcıdan konu isteme. Kaynak, veri veya sahne referansı isteme. Tek en güçlü senaryoyu hemen üret. Dünya çapında başarılı olacağını garanti etme."
-    ].join("\\n");
+    ].join("\n");
   }
 
   (function mountIndependentScenarioPanel() {
