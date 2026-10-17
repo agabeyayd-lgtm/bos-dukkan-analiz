@@ -39,7 +39,21 @@
     {name:"Stephen Chow",region:"Hong Kong",study:"farce, görsel şaka, absürtlük ve duygusal hedefin birlikteliği"},
     {name:"Kishore Kumar",region:"Hindistan",study:"yüksek fiziksel enerji, karaktere özgü davranış ve komik zamanlama"},
     {name:"Totò",region:"İtalya",study:"mimik, yüz/beden ifadesi, kıtlık ve hayatta kalma farcesi"},
-    {name:"Mehmood",region:"Hindistan",study:"yüksek enerjili fiziksel komedi"}
+    {name:"Mehmood",region:"Hindistan",study:"yüksek enerjili fiziksel komedi"},
+    {name:"Max Linder",region:"Fransa",study:"zarif beyefendi maskesi, statü düşüşü, sessiz sinemanın erken gag yapısı (araştırmayla doğrula)"},
+    {name:"Roscoe 'Fatty' Arbuckle",region:"ABD",study:"iri bedenle zarif fiziksel hassasiyet, hızlı nesne ve mekân gag'i (araştırmayla doğrula)"},
+    {name:"Harry Langdon",region:"ABD",study:"masum karakter, yavaş algı ve gecikmiş tepki (araştırmayla doğrula)"},
+    {name:"Fernandel",region:"Fransa",study:"yüz mimiği ve taşralı halk karakteri (araştırmayla doğrula)"},
+    {name:"Alberto Sordi",region:"İtalya",study:"küçük adamın gururu, gündelik zaaflar ve yüzünü kurtarma (araştırmayla doğrula)"},
+    {name:"Bourvil",region:"Fransa",study:"saf mahalleli karakteri ve iyi niyetli beceriksizlik (araştırmayla doğrula)"},
+    {name:"Pierre Richard",region:"Fransa",study:"dalgın karakter ve fiziksel uyumsuzluk (araştırmayla doğrula)"},
+    {name:"Yuri Nikulin / Leonid Gaidai",region:"SSCB",study:"deadpan, hızlı görsel gag kurgusu, kısa nedensel gag zinciri (araştırmayla doğrula)"},
+    {name:"Michael Hui",region:"Hong Kong",study:"işçi sınıfı hayatta kalma komedisi ve gündelik düzenin bozulması (araştırmayla doğrula)"},
+    {name:"Kiyoshi Atsumi / Tora-san",region:"Japonya",study:"utangaçlık, gurur ve hüznün komediyle birlikteliği (araştırmayla doğrula)"},
+    {name:"Dolphy",region:"Filipinler",study:"mahalle hayatı, empati ve hüzünlü komedi (araştırmayla doğrula)"},
+    {name:"Mazzaropi",region:"Brezilya",study:"taşralı halk karakteri ve sıcak sosyal komedi (araştırmayla doğrula)"},
+    {name:"Eric Morecambe",region:"Britanya",study:"bakış, zamanlama ve sessiz tepki (araştırmayla doğrula)"},
+    {name:"Monty Python",region:"Britanya",study:"absürt mantığı ciddiyetle sürdürme ve beklenti kırma (araştırmayla doğrula)"}
   ];
   const BASELINE_COMEDY_LESSONS = [
     "Pierre Étaix / Criterion: Görsel şaka kadrajda net okunmalı; eylemin boyutu ve çevresindeki boşluk önemlidir. Şaka karakter ve durumdan çıkar; sürpriz dramatik durumdan mantıklı biçimde doğmalıdır. https://www.criterion.com/current/posts/2746-the-return-of-etaix",
