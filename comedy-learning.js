@@ -18,6 +18,48 @@
     {source: "Kinema / Waterloo — Notes on Buster Keaton's Motion", url: "https://openjournals.uwaterloo.ca/index.php/kinema/article/download/1250/1589",
       finding: "Keaton'da hareketler nedensellik zinciri gibi birbirini doğurur; yüz ifadesiz kalır."}
   ];
+  const FALLBACK_LEARNING_PROTOCOL = [
+  {
+    "id": "evidence-labels",
+    "rule": "Her iddiayı DOĞRULANMIŞ BİLGİ, İNCELENEN SAHNE, KURAMSAL AÇIKLAMA veya YARATICI HİPOTEZ olarak ayır. Kaynağın gerçekten gösterdiğinden fazlasını kesin bilgi diye yazma."
+  },
+  {
+    "id": "evidence-depth",
+    "rule": "Wikipedia arama snippet'i, biyografi, filmografi, katalog açıklaması, fotoğraf, yayın künyesi ve abstract aynı kanıt değildir. Arama snippet'i veya biyografi sahne çözümlemesi sayılmaz; tam metin/sahne incelenmediyse açıkça belirt."
+  },
+  {
+    "id": "master-analysis",
+    "rule": "Her usta için ülke/dönem, kaynak URL'si, gerçekten incelenen materyal türü, komedi mekanizması, karakter motivasyonu/seyirci psikolojisi, 10 saniyelik özgün kurguya aktarılabilir soyut teknik ve kopyalanmaması gereken özgün sahne/ifade öğesini kaydet. Kanıt yoksa 'araştırılacak' olarak bırak."
+  },
+  {
+    "id": "multiple-theories",
+    "rule": "Uyumsuzluk, statü/üstünlük, benign violation ve gerilim-boşalma yaklaşımlarını ayrı açıklama mercekleri olarak kullan. Her birinin neyi açıkladığını ve sınırını belirt; tek teoriyi bütün mizahın zorunlu veya yeterli açıklaması yapma."
+  },
+  {
+    "id": "causal-comedy",
+    "rule": "Özgün sahnede karakterin anlaşılır bir amacı olsun. Bir karar, alışkanlık veya yanlış varsayım eylemi başlatsın; her hareket bir sonrakine neden olsun; final önceki davranışın somut, şaşırtıcı ama anlaşılır sonucu olsun."
+  },
+  {
+    "id": "visual-readability",
+    "rule": "İlk yaklaşık 0,3 saniyede görsel olarak okunabilir bir kanca kurmayı hedefle. İzleyici olayı açıklama yazısı veya diyalog olmadan takip edebilsin; yalnızca tuhaflık/sürpriz komedi kanıtı sayılmaz."
+  },
+  {
+    "id": "originality",
+    "rule": "Ustanın ayırt edici karakterini, özgün ifadesini, koreografisini, sahne dizisini veya finalini kopyalama. Soyut mekanizmayı yeni amaç, davranış ve sonuçla yeniden kur; nedensiz rastgelelik ve yalnızca nesneyi değiştirerek tekrar üretme."
+  },
+  {
+    "id": "format-and-ending",
+    "rule": "Her video görevi tam 10 saniye, dikey 9:16, diyalogsuz ve doğal ASMR odaklı ses koşullarını korusun. Sahne somut tamamlanmış bir sonuçla bitsin; sonucu açıklama yazısı ile anlatmaya veya sonuçsuz loop'a güvenme."
+  },
+  {
+    "id": "judge-and-measure",
+    "rule": "Tek aday seçmeden önce kendi içinde zayıf, nedensiz veya kopya hissi veren yönleri eleştir; kullanıcıya tek güçlü aday ver. Sabit puan eşiği ya da tek bir mizah mekanizmasını zorunlu kılma. Sonucu test edilmemiş hipotez olarak kaydet ve yayından sonra gerçek metriklerle sınamadan nedensellik iddia etme."
+  },
+  {
+    "id": "output-contract",
+    "rule": "Araştırma çıktısında kaynak ve kanıt türünü göster; üretim çıktısında tek fikir, kısa komik mekanizma, 0-10 saniye akışı, doğrudan kullanılabilir İngilizce video promptu ve yayın sonrası sınanacak metrikleri ver."
+  }
+];
   const HISTORY_KEY = 'bd_topic_history';
   const OWN_ANALYTICS_KEY = 'bd_own_analytics_snapshot_v1';
 
@@ -186,9 +228,9 @@
       const r = await fetch('./knowledge.json?t=' + Date.now(), {cache: 'no-store'});
       if (!r.ok) throw new Error('HTTP ' + r.status);
       const j = await r.json();
-      return {ok: true, updated: j.updated || null, findings: Array.isArray(j.findings) ? j.findings : [], topics: Array.isArray(j.topics) ? j.topics : []};
+      return {ok: true, updated: j.updated || null, findings: Array.isArray(j.findings) ? j.findings : [], topics: Array.isArray(j.topics) ? j.topics : [], learningProtocol: Array.isArray(j.learningProtocol) && j.learningProtocol.length ? j.learningProtocol : FALLBACK_LEARNING_PROTOCOL, artistResearchCandidates: Array.isArray(j.artistResearchCandidates) ? j.artistResearchCandidates : []};
     } catch (e) {
-      return {ok: false, updated: null, findings: FALLBACK_FINDINGS, topics: []};
+      return {ok: false, updated: null, findings: FALLBACK_FINDINGS, topics: [], learningProtocol: FALLBACK_LEARNING_PROTOCOL, artistResearchCandidates: []};
     }
   }
   function readHistory() {
@@ -334,7 +376,7 @@
         psych: {ok: [], failed: PSYCH_PAGES.slice()},
         knowledge: {ok: false, updated: null, findings: FALLBACK_FINDINGS, topics: []}
       };
-      const knowledge = bundle.knowledge || {ok: false, updated: null, findings: FALLBACK_FINDINGS, topics: []};
+      const knowledge = bundle.knowledge || {ok: false, updated: null, findings: FALLBACK_FINDINGS, topics: [], learningProtocol: FALLBACK_LEARNING_PROTOCOL, artistResearchCandidates: []};
       const previousTopics = uniqueTopics((knowledge.topics || []).concat(readHistory()));
       const userNotes = readNotes();
       const ownAnalyticsLearning = buildOwnAnalyticsLearning();
@@ -348,7 +390,9 @@
         "KANAL MARKASI: Boş Dükkân yalnızca kanal adıdır; sahne markette veya dükkânda geçmek zorunda değildir.",
         "VİDEO KOŞULLARI: Tam 10 saniye, dikey 9:16, diyalogsuz, doğal ASMR sesleri. İlk 0,3 saniyede anlaşılır görsel kanca ve somut tamamlanmış final olmalı.",
         "KENDİ KANAL ANALYTICS ÖĞRENME BAĞLAMI (yalnızca tarayıcıda kaydedilmiş gerçek ölçümler; global kaynak yerine geçmez): " + JSON.stringify(ownAnalyticsLearning),
-        "ÖNCEKİ FİKİR NOTLARI — TEKRAR ETME VE SADECE NESNEYİ DEĞİŞTİREREK KOPYALAMA: " + JSON.stringify(priorIdeaNotes || "Kayıtlı ek fikir notu yok.")
+        "ÖNCEKİ FİKİR NOTLARI — TEKRAR ETME VE SADECE NESNEYİ DEĞİŞTİREREK KOPYALAMA: " + JSON.stringify(priorIdeaNotes || "Kayıtlı ek fikir notu yok."),
+        "MOTOR ÖĞRENME PROTOKOLÜ (knowledge.json; konu motoru ve hakem tarafından kullanılmalı): " + JSON.stringify(knowledge.learningProtocol || FALLBACK_LEARNING_PROTOCOL),
+        "YENİ USTA ARAŞTIRMA ADAYLARI (bunlar doğrulanmış sahne analizleri değildir; canlı araştırmada kaynak ve materyal türü ayrıca doğrulansın): " + JSON.stringify(knowledge.artistResearchCandidates || [])
       ];
       if (userNotes) additions.push("KULLANICININ KAYITLI ARAŞTIRMA NOTLARI:\n" + userNotes);
       const failed = (bundle.masters.failed || []).concat(bundle.psych.failed || []);
