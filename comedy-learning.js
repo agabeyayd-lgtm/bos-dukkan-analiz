@@ -139,6 +139,7 @@
       metricRules: [
         'Dönem izlenmesi, ortalama izleme saniyesi, ortalama izlenen yüzde, beğeni ve kazanılan abone yalnızca belirtilen Analytics dönemine aittir.',
         'Kamusal toplam izlenme ayrı ömür boyu sayacıdır; dönem izlenmesiyle karıştırma.',
+        'Görüntülenme/izlenen gün hesabı kaba ortalamadır; geçmiş günlük grafik veya nedensel açıklama değildir.',
         'Eksik ölçüm null/veri yoktur; sıfır değildir. Farklı metrikler tek puana birleştirilmez.',
         'Kanal verisi global kaynak değildir; yalnızca hangi sonuçların yeniden düşünülmeye değer olduğuna ilişkin bağlamdır. Korelasyon neden-sonuç kanıtı değildir.'
       ],
