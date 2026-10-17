@@ -42,6 +42,11 @@ jobs:
             'const originalGlobalIdeaPromptBuilder = window.buildGlobalIdeaPrompt;',
             'originalGlobalIdeaPromptBuilder.apply(this, arguments)',
             'await getResearchBundle();',
+            'OWN_ANALYTICS_KEY',
+            'function saveOwnAnalyticsSnapshot(snapshot)',
+            'function buildOwnAnalyticsLearning()',
+            'KENDİ KANAL ANALYTICS ÖĞRENME BAĞLAMI',
+            'ÖNCEKİ FİKİR NOTLARI',
             'originalGlobalIdeaClickHandler.call(this, event)',
             'KOMEDİ ÖĞRENME VE TEKRAR KONTROLÜ',
             'window.BosDukkanComedyLearning'
@@ -51,7 +56,7 @@ jobs:
           }
           for (const file of ['index.html', 'bos-dukkan-analiz.html']) {
             const html = fs.readFileSync(file, 'utf8');
-            for (const phrase of ['data-p="learn"', 'data-p="gen"', 'data-p="own"', 'comedy-learning.js', 'id="comedyResearchNotes"']) {
+            for (const phrase of ['data-p="learn"', 'data-p="gen"', 'data-p="own"', 'comedy-learning.js', 'id="comedyResearchNotes"', 'id="ownAnalyticsLearningStatus"', 'id="clearOwnAnalyticsLearning"']) {
               if (!html.includes(phrase)) throw new Error(file + ': missing three-part panel contract: ' + phrase);
             }
             console.log('PASS ' + file + ': dynamic learning and native global-research contracts present');
@@ -85,7 +90,7 @@ jobs:
             ['evidence boundary label', 'KANIT SINIRI'],
             ['unverified hypothesis label', 'test edilmemiş yaratıcı hipotez'],
             ['video playback not required', 'Video izleme/ekran kaydı fikir üretmek için zorunlu değildir'],
-            ['own-channel metrics are post-publication only', 'Kendi kanal verisi yalnızca yayın sonrası karşılaştırma içindir'],
+            ['global-source and analytics roles stay separate', 'Kendi kanal ölçümleri global kaynak yerine geçmez; yalnızca gerçek performans bağlamı'],
             ['three-part panel includes comedy learning', 'data-p="learn"'],
             ['global topic engine is separate', 'data-p="gen"'],
             ['post-publication analytics is the third tab', '3. Yayın sonrası ölçüm'],
