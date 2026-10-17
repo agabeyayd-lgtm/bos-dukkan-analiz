@@ -345,7 +345,9 @@
     });
     actionRow.appendChild(make);
     panel.append(heading, explanation, actionRow, status, output);
-    btn.parentElement.before(panel);
+    const globalPanel = $('#globalIdeaPanel');
+    if (globalPanel && globalPanel.parentElement) globalPanel.before(panel);
+    else btn.parentElement.before(panel);
   })();
 
   // Ana HTML içindeki global YouTube + storyboard konu üreticisini sar; asla ezme.
