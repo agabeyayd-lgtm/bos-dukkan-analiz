@@ -24,6 +24,32 @@ jobs:
             node --check "$output"
           done
 
+      - name: Validate comedy learning module
+        run: |
+          node --check comedy-learning.js
+          node <<'NODE'
+          const fs = require('fs');
+          const js = fs.readFileSync('comedy-learning.js', 'utf8');
+          const required = [
+            'COMEDY_CORE_PRINCIPLES',
+            'COMEDY_MASTERS',
+            'function buildComedyStudyPrompt',
+            'bd_comedy_research_notes',
+            'KULLANICININ BU TARAYICIDA KAYDETTİĞİ KOMEDİ DERSLERİ',
+            'window.buildGlobalIdeaPrompt'
+          ];
+          for (const phrase of required) {
+            if (!js.includes(phrase)) throw new Error('Missing comedy learning contract: ' + phrase);
+          }
+          for (const file of ['index.html', 'bos-dukkan-analiz.html']) {
+            const html = fs.readFileSync(file, 'utf8');
+            for (const phrase of ['data-p="learn"', 'data-p="gen"', 'data-p="own"', 'comedy-learning.js', 'id="comedyResearchNotes"']) {
+              if (!html.includes(phrase)) throw new Error(file + ': missing three-part panel contract: ' + phrase);
+            }
+          }
+          console.log('PASS comedy learning module and three-part panel contracts');
+          NODE
+
       - name: Check global-source workflow contract
         run: |
           node <<'NODE'
@@ -50,7 +76,11 @@ jobs:
             ['evidence boundary label', 'KANIT SINIRI'],
             ['unverified hypothesis label', 'test edilmemiş yaratıcı hipotez'],
             ['video playback not required', 'Video izleme/ekran kaydı fikir üretmek için zorunlu değildir'],
-            ['own-channel metrics are post-publication only', 'Kendi kanal verisi yalnızca yayın sonrası karşılaştırma içindir']
+            ['own-channel metrics are post-publication only', 'Kendi kanal verisi yalnızca yayın sonrası karşılaştırma içindir'],
+            ['three-part panel includes comedy learning', 'data-p="learn"'],
+            ['global topic engine is separate', 'data-p="gen"'],
+            ['post-publication analytics is the third tab', '3. Yayın sonrası ölçüm'],
+            ['learning module is loaded', 'comedy-learning.js']
           ];
           for (const file of ['index.html', 'bos-dukkan-analiz.html']) {
             const html = fs.readFileSync(file, 'utf8');

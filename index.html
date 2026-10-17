@@ -62,13 +62,51 @@ a{color:var(--acc)}
 <p class="note">Anahtar yalnızca bu tarayıcıda saklanır. Google Cloud'da "YouTube Data API v3" etkinleştirip ücretsiz anahtar alabilirsin.</p>
 
 <div class="tabs" role="tablist">
-  <button class="tab on" role="tab" data-p="gen">1. Trend keşfi</button>
-  <button class="tab" role="tab" data-p="own">2. Yayın sonrası ölçüm</button>
+  <button class="tab on" role="tab" aria-selected="true" data-p="learn">1. Komedi psikolojisi &amp; ustalar</button>
+  <button class="tab" role="tab" aria-selected="false" data-p="gen">2. Global konu motoru</button>
+  <button class="tab" role="tab" aria-selected="false" data-p="own">3. Yayın sonrası ölçüm</button>
 </div>
 
-<section id="gen" class="pane on">
+<section id="learn" class="pane on">
+  <h2 style="margin-top:0">1. Komedi psikolojisi ve usta laboratuvarı</h2>
+  <p class="note">Bu bölüm komedi tekniklerini araştırma ve öğrenme merkezidir. Panel kendi başına bir yapay zekâyı eğitmez veya filmleri otomatik izlemez. Araştırma istemi üretir; web erişimli sohbet asistanı kaynak araştırmasını yapar. Kaydettiğin dersler bu tarayıcıda saklanır ve sonraki global konu paketine eklenir.</p>
+  <div class="stats">
+    <div class="stat"><b>Beklenti</b><span>İzleyicinin beklediği sonuç ile gerçekten olan arasındaki anlamlı fark.</span></div>
+    <div class="stat"><b>Karakter</b><span>Arzu, gurur, korku veya yanlış varsayım; eylemleri karakterin seçimi başlatır.</span></div>
+    <div class="stat"><b>Nedensellik</b><span>Her hareket bir sonrakini doğurur; final önceki davranışın sonucudur.</span></div>
+    <div class="stat"><b>Zamanlama</b><span>Bakış, duraklama, hazırlık ve tepki için doğru boşluğu bırakmak.</span></div>
+    <div class="stat"><b>Statü</b><span>Kendini yetkin sanan kişinin kontrolü kaybetmesi veya güç ilişkisinin değişmesi.</span></div>
+    <div class="stat"><b>Görsel anlatım</b><span>Hedef, engel, seçim ve sonuç diyalogsuz anlaşılmalı; doğal sesler eylemi desteklemeli.</span></div>
+  </div>
+  <h2>Usta komedyen atlası — sahne değil, teknik öğren</h2>
+  <div class="msg">
+    <p><strong>Charlie Chaplin</strong> — insani sempati, onur ve statü çatışması; <strong>Buster Keaton</strong> — taş yüz, mekân geometrisi ve fiziksel neden-sonuç; <strong>Harold Lloyd</strong> — net hedef ve artan risk.</p>
+    <p><strong>Laurel &amp; Hardy</strong> — farklı mizaçların birbirinin sorununu büyütmesi; <strong>Jacques Tati</strong> — çevre, kalabalık ve ses; <strong>Rowan Atkinson / Mr Bean</strong> — kişisel hedef, sessiz beden dili ve gecikmiş tepki.</p>
+    <p><strong>Lucille Ball</strong> — kendinden emin karakterin fiziksel karmaşası; <strong>Peter Sellers</strong> — rol ve statü uyuşmazlığı; <strong>Jerry Lewis</strong> — beden ritmi ve mahcubiyet.</p>
+    <p><strong>Louis de Funès</strong> — kontrol arzusu ve sabırsızlık; <strong>Cantinflas</strong> — sosyal konum ve dolambaçlı mantık; <strong>Norman Wisdom</strong> — iyi niyet ile beceri arasındaki çatışma.</p>
+    <p><strong>Jackie Chan</strong> — mekân ve nesne koreografisi; <strong>Marx Kardeşler</strong> — kuralları/otoriteyi bozma; <strong>Mel Brooks</strong> — tür ve beklenti parodisi; <strong>Sacha Baron Cohen</strong> — persona ve sosyal norm sürtüşmesi.</p>
+    <p class="note">Bu isimler taklit edilecek karakterler veya kopyalanacak skeçler değil, farklı komedi motorlarını araştırmak için başlangıç atlasıdır. Sistem bu listenin dışından da farklı ülkeler ve dönemlerden yeni ustalar araştırmalıdır.</p>
+  </div>
+  <h2>Psikoloji çekirdeği</h2>
+  <p>Beklenti uyumsuzluğu, üstünlük/statü ve gerilim-boşalma yaklaşımlarını ayrı mercekler olarak değerlendir; bunlar her şakayı açıklayan kesin kanunlar değildir. Karakterin amacı, yüzünü kurtarma çabası, aşırı özgüveni, yanlış varsayımı, nedensel tırmanış, zamanlama ve net final karşılığını da incele.</p>
+  <p class="note">Başlangıç kaynakları: <a href="https://www.bfi.org.uk/features/general-greatest-comedy-all-time" target="_blank" rel="noopener">BFI — Keaton ve sinema komedisi</a> · <a href="https://www.bfi.org.uk/film/a27e52ca-e6b6-5cd4-a2e0-1e1a30456e56/playtime" target="_blank" rel="noopener">BFI — Jacques Tati</a> · <a href="https://www.bfi.org.uk/lists/10-great-films-1923" target="_blank" rel="noopener">BFI — Harold Lloyd</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6350176/" target="_blank" rel="noopener">Hakemli çalışma — mizah psikolojisi</a> · <a href="https://www.pbs.org/video/happy-birthday-mr-bean-juuuwu/" target="_blank" rel="noopener">PBS — Mr Bean</a> · <a href="https://www.cinedergi.com/2009/03/18/sahan-gokbakar-bana-ivediklestin-diyorlar/" target="_blank" rel="noopener">Şahan Gökbakar röportajı</a>.</p>
+  <h2>Ustaları derinlemesine araştır</h2>
+  <p class="note">Bu düğme çekirdek ustaları ve senin henüz tanımadığın başka dünya komedi ustalarını kaynaklarıyla araştıracak bir istem hazırlar. Tam filmleri izlemiş gibi davranılmaz; incelenen kaynak türü ve kanıt sınırı yazılır.</p>
+  <p><button type="button" id="createComedyStudyPrompt">Usta araştırma paketini oluştur ve kopyala</button></p>
+  <p id="comedyStudyPromptStatus" class="note" aria-live="polite"></p>
+  <textarea id="comedyStudyPrompt" rows="10" readonly style="display:none;width:100%;max-width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
+  <h2>Öğrenilen dersleri sakla</h2>
+  <p class="note">Araştırma yanıtından işe yarayan teknikleri ve yeni ustaları buraya yapıştır. Otomatik kaydedilir; sonraki global konu üretim istemine eklenir. Kendi kanal izlenmelerini buraya koyma.</p>
+  <textarea id="comedyResearchNotes" rows="7" placeholder="Usta / kaynak URL / komedi mekanizması / psikolojik etki / sahne kopyalamadan yeni fikre uyarlama yöntemi..." style="width:100%;max-width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
+  <p><button type="button" id="saveComedyResearchNotes">Öğrenme notlarını kaydet</button> <button type="button" class="ghost" id="clearComedyResearchNotes">Notları temizle</button></p>
+  <p id="comedyResearchNotesStatus" class="note" aria-live="polite">Kayıtlı ders yoksa temel komedi çekirdeği yine kullanılacaktır.</p>
+</section>
+
+<section id="gen" class="pane">
+  <h2 style="margin-top:0">2. Global konu motoru</h2>
+  <p class="note">Fikir kaynağı yalnızca global YouTube ve global web araştırmasıdır. Kaydettiğin komedi dersleri isteme eklenir; kendi kanal Analytics verisi burada kullanılmaz.</p>
   <div class="bar">
-    <input id="q" placeholder="Trend konusu / arama terimi (örn. visual comedy, everyday behavior)">
+    <input id="q" placeholder="Global arama terimi (örn. visual comedy, everyday behavior)">
     <select id="days"><option value="7">Son 7 gün</option><option value="30" selected>Son 30 gün</option><option value="90">Son 90 gün</option></select>
     <select id="ord"><option value="viewCount">En çok izlenen</option><option value="date" selected>En yeni</option><option value="relevance">Alakalı</option></select>
     <select id="srt"><option value="brk" selected>Fırlamaya göre</option><option value="vpd">Günlük izlenmeye göre</option></select>
@@ -109,6 +147,8 @@ a{color:var(--acc)}
 </section>
 
 <section id="own" class="pane">
+  <h2 style="margin-top:0">3. Yayın sonrası ölçüm</h2>
+  <p class="note">Bu alan yalnızca yayımlanmış videoların performansını ölçer; usta öğrenme notlarına veya global konu seçimine veri göndermez.</p>
   <div class="bar">
     <input id="cid" placeholder="OAuth istemci kimliği (...apps.googleusercontent.com)">
     <select id="odays"><option value="28" selected>Son 28 gün</option><option value="90">Son 90 gün</option><option value="365">Son 365 gün</option></select>
@@ -1366,5 +1406,6 @@ extractFramesBtn.addEventListener('click', async () => {
 });
 
 </script>
+<script src="./comedy-learning.js"></script>
 </body>
 </html>
