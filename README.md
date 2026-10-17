@@ -20,7 +20,9 @@ Bunun dışında sabit mizah türü, fizik/gerçekçilik şartı, oyunculuk stil
 
 Kaynaklı başlangıç dersleri — Pierre Étaix'in görsel gag ilkeleri, Keaton'ın fiziksel nedenselliği, Tati'nin mekân/ses komedisi, Stephen Chow'un farce-pathos birlikteliği, Kishore Kumar'ın fiziksel ritmi ve Totò'nun mimik/survival farcesi — not eklenmemiş olsa bile her global fikir istemine varsayılan olarak dahil edilir. Kaydedilen kişisel komedi araştırma notları bunlara eklenir; temel derslerin yerini almaz.
 
-Araştırma notları tarayıcıda yerel saklanır ve sonraki konu paketlerine dahil edilir. Bu, temel ilkelerin kodda tutulması ve araştırma derslerinin isteme bağlanmasıdır; panelin kendi başına model eğittiği veya filmleri otomatik izlediği anlamına gelmez. Web araştırmasını kopyalanan istemi verdiğin web erişimli sohbet asistanı gerçekleştirir.
+Komedi öğrenme katmanı canlı Wikipedia özetlerini, `knowledge.json` içindeki URL'li bulguları ve araştırma notlarını global fikir paketine ekler. Ana panelin **Trend keşfi** araması, kullanıcının YouTube Data API anahtarıyla getirdiği gerçek global video örneklemini kullanır; paket sabit kaynak videosunu ve erişilebilen storyboard karelerini ilişkilendirir. Bağımsız web çapraz kontrolünü paketin yapıştırıldığı web erişimli sohbet asistanı yürütür; panel bunu kendisi yapmış gibi göstermez. Panel bir yapay zekâ modeli eğitmez ve videoyu baştan sona otomatik izlemez.
+
+Önceki fikirleri tekrar etmeme kontrolü, yalnızca `knowledge.json` içinde (varsa) ve bu telefonda/tarayıcıda yerel saklanan konu geçmişinde bulunan kayıtları kapsar. Yerel geçmiş açık depoda yayımlanmaz. Kaydedilmemiş eski konuların otomatik olarak bilindiği varsayılmamalıdır.
 
 ## Kaynak kuralı: global, kendi kanalın değil
 - Yeni fikir için kaynaklar global YouTube araması ve global web araştırmasıdır.
