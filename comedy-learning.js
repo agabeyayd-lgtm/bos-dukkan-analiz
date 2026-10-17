@@ -398,3 +398,12 @@
     buildOwnAnalyticsLearning
   };
 })();
+
+
+/* Load the independent research → scenario → judge workflow. */
+(function () {
+  var script = document.createElement('script');
+  script.src = './independent-scenario-engine.js?v=20261017-1';
+  script.async = false;
+  document.head.appendChild(script);
+})();
