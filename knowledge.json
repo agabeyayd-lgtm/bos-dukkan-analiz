@@ -1,7 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
   "updated": "2026-10-17",
-  "note": "Panel her paket oluşturmada bu dosyayı okur. Yeni kaynaklı bulgular buraya eklenir. Üretilen konular bu açık dosyada tutulmaz.",
+  "note": "Panel her paket oluşturmada bu dosyayı okur. findings kaynaklı bulguları, learningProtocol kalıcı üretim/hakem kurallarını ve artistResearchCandidates henüz sahne düzeyinde doğrulanmamış araştırma adaylarını içerir. Üretilen konular bu açık dosyada tutulmaz.",
   "findings": [
     {
       "added": "2026-10-17",
@@ -94,5 +94,117 @@
       "finding": "Kuram tartışması tek güdülü açıklamaların sınırlarını vurgular: üstünlük, rahatlama ve uyumsuzluk yaklaşımlarının her mizah türünü açıklamadığı örnekler vardır. Motor bir teoriyi zorunlu reçete değil, olası açıklama aracı olarak kullanmalı."
     }
   ],
-  "topics": []
+  "topics": [],
+  "learningProtocol": [
+    {
+      "id": "evidence-labels",
+      "rule": "Her iddiayı DOĞRULANMIŞ BİLGİ, İNCELENEN SAHNE, KURAMSAL AÇIKLAMA veya YARATICI HİPOTEZ olarak ayır. Kaynağın gerçekten gösterdiğinden fazlasını kesin bilgi diye yazma."
+    },
+    {
+      "id": "evidence-depth",
+      "rule": "Wikipedia arama snippet'i, biyografi, filmografi, katalog açıklaması, fotoğraf, yayın künyesi ve abstract aynı kanıt değildir. Arama snippet'i veya biyografi sahne çözümlemesi sayılmaz; tam metin/sahne incelenmediyse açıkça belirt."
+    },
+    {
+      "id": "master-analysis",
+      "rule": "Her usta için ülke/dönem, kaynak URL'si, gerçekten incelenen materyal türü, komedi mekanizması, karakter motivasyonu/seyirci psikolojisi, 10 saniyelik özgün kurguya aktarılabilir soyut teknik ve kopyalanmaması gereken özgün sahne/ifade öğesini kaydet. Kanıt yoksa 'araştırılacak' olarak bırak."
+    },
+    {
+      "id": "multiple-theories",
+      "rule": "Uyumsuzluk, statü/üstünlük, benign violation ve gerilim-boşalma yaklaşımlarını ayrı açıklama mercekleri olarak kullan. Her birinin neyi açıkladığını ve sınırını belirt; tek teoriyi bütün mizahın zorunlu veya yeterli açıklaması yapma."
+    },
+    {
+      "id": "causal-comedy",
+      "rule": "Özgün sahnede karakterin anlaşılır bir amacı olsun. Bir karar, alışkanlık veya yanlış varsayım eylemi başlatsın; her hareket bir sonrakine neden olsun; final önceki davranışın somut, şaşırtıcı ama anlaşılır sonucu olsun."
+    },
+    {
+      "id": "visual-readability",
+      "rule": "İlk yaklaşık 0,3 saniyede görsel olarak okunabilir bir kanca kurmayı hedefle. İzleyici olayı açıklama yazısı veya diyalog olmadan takip edebilsin; yalnızca tuhaflık/sürpriz komedi kanıtı sayılmaz."
+    },
+    {
+      "id": "originality",
+      "rule": "Ustanın ayırt edici karakterini, özgün ifadesini, koreografisini, sahne dizisini veya finalini kopyalama. Soyut mekanizmayı yeni amaç, davranış ve sonuçla yeniden kur; nedensiz rastgelelik ve yalnızca nesneyi değiştirerek tekrar üretme."
+    },
+    {
+      "id": "format-and-ending",
+      "rule": "Her video görevi tam 10 saniye, dikey 9:16, diyalogsuz ve doğal ASMR odaklı ses koşullarını korusun. Sahne somut tamamlanmış bir sonuçla bitsin; sonucu açıklama yazısı ile anlatmaya veya sonuçsuz loop'a güvenme."
+    },
+    {
+      "id": "judge-and-measure",
+      "rule": "Tek aday seçmeden önce kendi içinde zayıf, nedensiz veya kopya hissi veren yönleri eleştir; kullanıcıya tek güçlü aday ver. Sabit puan eşiği ya da tek bir mizah mekanizmasını zorunlu kılma. Sonucu test edilmemiş hipotez olarak kaydet ve yayından sonra gerçek metriklerle sınamadan nedensellik iddia etme."
+    },
+    {
+      "id": "output-contract",
+      "rule": "Araştırma çıktısında kaynak ve kanıt türünü göster; üretim çıktısında tek fikir, kısa komik mekanizma, 0-10 saniye akışı, doğrudan kullanılabilir İngilizce video promptu ve yayın sonrası sınanacak metrikleri ver."
+    }
+  ],
+  "artistResearchCandidates": [
+    {
+      "title": "Charley Bowers",
+      "evidenceStatus": "Arşiv tanıtımı ve genel teknik ipucu var; film kare kare incelenmiş değil.",
+      "researchLead": "Optik/stop-motion yöntemi ve mantıkçı karakterin kaosa tepkisi; nedensel sonuç zinciri araştırılmalı.",
+      "sourceUrls": [
+        "https://silentfilm.org/the-amazing-charley-bowers/"
+      ]
+    },
+    {
+      "title": "Alice Howell",
+      "evidenceStatus": "Koleksiyon tanıtımı var; belirli sahne çözümlemesi olarak değerlendirilmemeli.",
+      "researchLead": "Persona ile fiziksel slapstick arasındaki çatışmayı somut bir sahne kaynağıyla doğrula.",
+      "sourceUrls": [
+        "https://undercrankproductions.com/dvds/alice-howell-collection/"
+      ]
+    },
+    {
+      "title": "Lupino Lane",
+      "evidenceStatus": "Araştırma adayı; mevcut notta BFI/Silent Era işaretleri var, belirli sahne doğrulaması gerekli.",
+      "researchLead": "Hareket repertuvarı, fiziksel zamanlama ve tekrarın sınırları; doğrudan sahne kaydı ekle.",
+      "sourceUrls": []
+    },
+    {
+      "title": "Marcel Pérez",
+      "evidenceStatus": "Biyografi/filmografi düzeyi; belirli sahne mekanizması doğrulanmış sayılmamalı.",
+      "researchLead": "Tekrarlanan karakterin farklı durumlarda yeniden kullanılması; sahne örnekleri bul.",
+      "sourceUrls": []
+    },
+    {
+      "title": "Gale Henry",
+      "evidenceStatus": "Tarihsel araştırma ipucu mevcut; sahne düzeyinde çıkarım henüz ayrı doğrulanmalı.",
+      "researchLead": "Toplumsal rol tersine çevrilmesi ve fiziksel komedi; Her First Flame için birincil materyal ara.",
+      "sourceUrls": []
+    },
+    {
+      "title": "Louise Fazenda",
+      "evidenceStatus": "Arşiv/filmografi araştırma adayı; özel teknik atfetmek için yeterli sahne kanıtı yok.",
+      "researchLead": "Korunmuş kısa film veya güvenilir sahne açıklaması bul.",
+      "sourceUrls": []
+    },
+    {
+      "title": "Gertrude Astor",
+      "evidenceStatus": "Arşiv/filmografi araştırma adayı; özel teknik atfetmek için yeterli sahne kanıtı yok.",
+      "researchLead": "Korunmuş komedi materyali ve karakter eylemini açıklayan kaynak ara.",
+      "sourceUrls": []
+    },
+    {
+      "title": "Florence Vidor",
+      "evidenceStatus": "Arşiv/filmografi araştırma adayı; komedi tekniği ayrıca doğrulanmalı.",
+      "researchLead": "Komedi odaklı rol veya sahne örneği bulmadan genel biyografiden teknik çıkarma.",
+      "sourceUrls": []
+    },
+    {
+      "title": "Vengal Rao",
+      "evidenceStatus": "Tamil sinemasında ikili komedi ilişkisi araştırma adayı; belirli sahne analizi doğrulanmış değil.",
+      "researchLead": "İkili eylem çatışması için sahne kaydı veya ayrıntılı eleştirel kaynak ara.",
+      "sourceUrls": [
+        "https://en.wikipedia.org/wiki/Vengal_Rao"
+      ]
+    },
+    {
+      "title": "Ruth Hiatt",
+      "evidenceStatus": "Filmografi ve arama sonucu düzeyinde araştırma adayı; sahne tekniği doğrulanmış değil.",
+      "researchLead": "1920'ler kısa komedilerinden gerçekten erişilebilen bir örnek ve kaynak bul.",
+      "sourceUrls": [
+        "https://en.wikipedia.org/wiki/Ruth_Hiatt"
+      ]
+    }
+  ]
 }
