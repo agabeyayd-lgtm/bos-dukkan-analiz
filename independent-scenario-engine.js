@@ -459,6 +459,7 @@
       button.disabled = true;
       const status = $("#comedyStudyPromptStatus");
       const area = $("#comedyStudyPrompt");
+      if (status) status.textContent = "Ücretsiz açık kaynaklarda yeni komedi ustaları ve akademik mizah araştırması aranıyor…";
       try {
         const payload = await performLiveResearch();
         await copyOutput(studyPrompt(payload), area, status, "Komedi ustaları ve psikoloji araştırma görevi");
