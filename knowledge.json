@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updated": "2026-10-18",
+  "updated": "2026-10-19",
   "note": "Panel her paket oluşturmada bu dosyayı okur. findings kaynaklı bulguları, learningProtocol kalıcı üretim/hakem kurallarını ve artistResearchCandidates henüz sahne düzeyinde doğrulanmamış araştırma adaylarını içerir. topics, tekrar etmemek için yayınlanan videoların kısa özetlerini taşır.",
   "findings": [
     {
@@ -99,6 +99,18 @@
       "title": "One Bar — Dedeler Sinyal Arıyor",
       "summary": "Üç dede insan kulesiyle telefon sinyali arar; final: torunun evden görüntülü araması, \"Dedecim\".",
       "added": "2026-10-18",
+      "status": "yayınlandı"
+    },
+    {
+      "title": "Not Every Ice Cream Contain… (dondurma kutusu)",
+      "summary": "Mekanizma: ambalaj vaadi vs içindeki gerçek. Dondurma kutusundan önce sarma, sonra pilav çıkar; final: buzdolabı dondurma kutularıyla dolu. Yayın sonrası ortalama izleme %135, 18 günde 27,6 B görüntüleme.",
+      "added": "2026-10-19",
+      "status": "yayınlandı"
+    },
+    {
+      "title": "Not Every Cookie Tin Has Cookies (kurabiye kutusu)",
+      "summary": "Aynı mekanizma, ikinci uygulama: genç adam kurabiye kutusunu umutla açar, içinden iğne iplik çıkar; ikinci kutuda düğme ve vida; final: dolap kapalı tenekelerle dolu (üçüncü kutu açılmaz).",
+      "added": "2026-10-19",
       "status": "yayınlandı"
     }
   ],
