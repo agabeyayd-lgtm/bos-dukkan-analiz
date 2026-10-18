@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "updated": "2026-10-17",
-  "note": "Panel her paket oluşturmada bu dosyayı okur. findings kaynaklı bulguları, learningProtocol kalıcı üretim/hakem kurallarını ve artistResearchCandidates henüz sahne düzeyinde doğrulanmamış araştırma adaylarını içerir. Üretilen konular bu açık dosyada tutulmaz.",
+  "updated": "2026-10-18",
+  "note": "Panel her paket oluşturmada bu dosyayı okur. findings kaynaklı bulguları, learningProtocol kalıcı üretim/hakem kurallarını ve artistResearchCandidates henüz sahne düzeyinde doğrulanmamış araştırma adaylarını içerir. topics, tekrar etmemek için yayınlanan videoların kısa özetlerini taşır.",
   "findings": [
     {
       "added": "2026-10-17",
@@ -94,7 +94,14 @@
       "finding": "Kuram tartışması tek güdülü açıklamaların sınırlarını vurgular: üstünlük, rahatlama ve uyumsuzluk yaklaşımlarının her mizah türünü açıklamadığı örnekler vardır. Motor bir teoriyi zorunlu reçete değil, olası açıklama aracı olarak kullanmalı."
     }
   ],
-  "topics": [],
+  "topics": [
+    {
+      "title": "One Bar — Dedeler Sinyal Arıyor",
+      "summary": "Üç dede insan kulesiyle telefon sinyali arar; final: torunun evden görüntülü araması, \"Dedecim\".",
+      "added": "2026-10-18",
+      "status": "yayınlandı"
+    }
+  ],
   "learningProtocol": [
     {
       "id": "evidence-labels",
