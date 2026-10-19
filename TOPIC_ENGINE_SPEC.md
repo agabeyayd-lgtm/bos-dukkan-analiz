@@ -10,7 +10,7 @@ Her çalıştırmada canlı komedi araştırması ve davranış psikolojisi öğ
 - Dikey 9:16, YouTube Shorts.
 - Diyalog yok; ASMR odaklı doğal ses.
 
-Bunların dışında tek sabit yaratıcı kural duygu ilkesidir (aşağıdaki “Duygu ilkesi” bölümü).
+Bunların dışında zorunlu bir mizah mekanizması, duygu, gerçekçilik, kamera dili veya final türü yoktur. Yaratıcı pusula için aşağıdaki “Dikkat ritmi ve komedi ödülü” bölümüne bak.
 
 ## Varsayılan bağımsız araştırma → senaryo → hakem akışı
 
@@ -22,6 +22,21 @@ Bağımsız senaryo motoru varsayılandır. **YouTube trendi, kaynak video, kana
 - Tek zorunlu çıktı koşulları: **tam 10 saniye, dikey 9:16, diyalogsuz, doğal ASMR odaklı ses**. Diğer tüm mizah türleri ve yaratıcı yaklaşımlar serbesttir; sabit mekanizma, gerçekçilik, oyunculuk, konu veya puan eşiği dayatılmaz (duygu ilkesi mekanizma değil, kanal kuralıdır).
 - Motor kullanıcıya fikir listesi değil bir tek yeni senaryo, tam 0–10 saniye akışı ve üretim aracına doğrudan verilecek İngilizce promptu hazırlayan bir görev verir. Çıktının komik olup olmadığı garanti edilmez; yayın sonrası gerçek verilerle test edilmelidir.
 - GitHub Pages statik bir JavaScript sayfasıdır: açık kaynak araştırması gerçekten tarayıcıdan yapılır, ancak sayfanın içinde dil modeli çalışmaz. Kopyalanan görev web erişimli ChatGPT'ye gönderildiğinde senaryo üretimi ve hakemlik dil modeli tarafından yapılır.
+
+## Dikkat ritmi ve komedi ödülü — yaratıcı DNA
+
+Bu bölüm, tek bir komedi fikrinin 10 saniyelik dikkat akışına nasıl dönüştürüleceğini tanımlar. Amaç, izleyiciyi yalnızca meraklandırmak değil, her yeni anda izlemeye devam etmesi için gerçek bir neden sunmaktır.
+
+- **Kanca final değildir.** İlk kare güçlü ve görsel olarak okunabilir bir merak/eylem başlatır; sonucu erkenden tüketmez.
+- **Her an yeni değer taşır.** Eylem, bilgi, tepki, karakter ilişkisi veya beklentideki değişim akışı ileri taşır. Her saniyeye zorla şaka sıkıştırılmaz; boş bekleyiş de yaratılmaz.
+- **Dozajlı yükseliş:** Orta bölüm merakı sadece uzatmaz; olayın kendisini geliştirir. Karakterlerin kararları ve birbirlerine tepkileri yeni, nedensel gelişmeler doğurur.
+- **Final hak edilmiş ödüldür.** Sonuç, önceki birikimin karşılığını veren komik ve anlaşılır bir payoff olmalıdır. Sürpriz tek başına komedi değildir. İkinci komik vuruş veya yeniden izlemeyi ödüllendiren ayrıntı kullanılabilir ama zorunlu değildir.
+- **Ritim mekanikleşmez.** Her 1–2 saniyede sabit bir olay olması şart değildir; süre, kesme ve tempo fikrin komedi ritmine göre seçilir. Bekletme ancak beklentiyi veya komik etkiyi artırıyorsa kalır.
+- **Kamera ve stil özgürdür.** Kesme, yakın plan, açı değişimi, kamera hareketi, fiziksel komedi, absürtlük ve karakter etkileşimi serbesttir. Tek kamera, gerçekçilik, insan duygusu veya belirli bir final türü zorunlu tutulmaz.
+- **Önce komedi, sonra üretim koruması.** Önce en güçlü komik sahne tasarlanır; ardından yalnızca belirli olası üretim hatalarını önleyen açık prompt talimatları eklenir. Guardrail yaratıcı alanı gereksiz yere daraltamaz.
+- **Tek güçlü çıktı.** İç değerlendirmede zayıf veya uzatılmış anları düzelt; kullanıcıya tek en güçlü fikir, tam 0–10 saniye akışı ve doğrudan kullanılabilir İngilizce prompt ver.
+
+Bu ilkeler dikkat/retention için yaratıcı tasarım hedefleridir; izleyicinin davranışı veya başarı garantisi olarak sunulmaz. Sonuç yayın sonrası metriklerle test edilir; korelasyon tek başına nedensellik kanıtı değildir.
 
 ## Komedi psikolojisi ve usta öğrenme çekirdeği
 
@@ -36,7 +51,7 @@ Panel üç bölüme ayrılmıştır:
 - `knowledge.json` içindeki `learningProtocol`, yalnızca arşiv notu değildir: `comedy-learning.js` bunu canlı pakete ekler; bağımsız senaryo motoru, komedi araştırma görevi, trend tabanlı üretim görevi ve hakem görevi aynı kuralları kullanır.
 - `artistResearchCandidates` alanı daha az tanınan ustaları yeniden araştırmak için saklar. Her adayın kanıt durumu korunur; aday, sahne tekniği doğrulanmış kişi gibi sunulmaz.
 - Kanıt etiketleri: `DOĞRULANMIŞ BİLGİ`, `İNCELENEN SAHNE`, `KURAMSAL AÇIKLAMA`, `YARATICI HİPOTEZ`. Wikipedia snippet'i/özeti, filmografi/katalog tanıtımı, akademik künye ve erişilen abstract farklı kanıt derinlikleridir.
-- Komedi mekanizması karakter amacı → karar/varsayım → nedensel eylemler → somut ve tamamlanmış final zinciriyle tasarlanır. İlk yaklaşık 0,3 saniyede okunabilir görsel kanca hedeflenir; bu bir garanti veya evrensel mizah yasası değildir.
+- Komedi mekanizması karakter amacı → karar/varsayım → nedensel eylemler → somut ve tamamlanmış final zinciriyle tasarlanabilir; bu yararlı bir araçtır, her mizah türü için zorunlu şablon değildir. İlk kare güçlü ve anlaşılır bir kanca hedefler; sabit milisaniye kuralı yoktur.
 - Uyumsuzluk, statü/üstünlük, benign violation ve gerilim-boşalma ayrı psikolojik merceklerdir. Hiçbiri her sahnede zorunlu kılınmaz; tek teori bütün mizahı açıklıyor diye sunulmaz.
 - Kalite hakemi aynı protokolü kullanır ancak sabit puan eşiğiyle yaratıcı üretimi kilitlemez. Tek güçlü öneri seçilir; yayın sonrası metrikler hipotezi sınar, fakat neden-sonuç ispatı sayılmaz.
 - Kaynaklar ulaşılamadığında sistem başarısızlığı açıklar ve üretime devam eder. Tam 10 saniye, 9:16, diyalogsuz ve doğal ASMR ses şartları korunur.
@@ -70,13 +85,9 @@ Kanal sahibi OAuth ile ölçümleri getirdiğinde panel, yorum metinlerini ve er
 
 Kaynaklar teknikleri araştırmak içindir; birebir sahne, karakter veya bitiş kopyalanmaz. Psikoloji teorileri kesin ve evrensel komedi formülleri olarak sunulmaz.
 
-## Duygu ilkesi (kanal kuralı)
+## Duygu kullanımı (seçenek, zorunluluk değil)
 
-Bu bir hipotez değil, kanalın net kuralıdır: komedi net bir insani duygudan (gurur, merak, yas, utanç, özlem, sahiplenme gibi) beslenir ve bu duygu gag'e çevrilir. Duygusuz, yalnızca mekanik bir gag tek başına yeterli sayılmaz.
-
-- Duygu ilk karede veya ilk saniyelerde okunabilmelidir; açıklama, diyalog veya altyazı gerektirmemelidir.
-- Duygu mekanizma değildir: hangi komedi mekanizmasının (tekrar, ölçek, uyumsuzluk, statü vb.) kullanılacağını dayatmaz.
-- Kanıt notu: bu kural kanal sahibinin kararıdır. Kanal verisi duygunun tek başına başarıyı garanti etmediğini gösteriyor (sanayi ustası videoları duygu açısından güçlü olduğu hâlde düşük izlendi); bu yüzden duygu, tanıdık ve ilk karede anlaşılan bir durumla birlikte kurulmalıdır.
+Gurur, merak, utanç, özlem veya başka bir insani duygu komediyi güçlendirebilir; ancak duygu zorunlu bir kanal kuralı değildir. Nesne odaklı, fiziksel, absürt, mekanik veya başka komedi biçimleri fikir için daha güçlüyse serbestçe kullanılabilir. Hiçbir duygu, gerçekçilik anlayışı ya da mizah mekanizması yaratıcı üretimi otomatik olarak veto etmez.
 
 ## Kanal gözlemleri (YARATICI HİPOTEZ — kural değil)
 
