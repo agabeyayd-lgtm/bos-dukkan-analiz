@@ -12,6 +12,18 @@ En komik görsel fikri üret ve doğrudan video aracına verilebilecek tam promp
 
 Başka hiçbir konu, mizah türü, anlatı yapısı, duygu, oyunculuk biçimi, fizik kuralı, görsel stil veya final türü zorunlu değildir.
 
+## Dikkat ritmi: kanca → gelişme → komedi ödülü
+
+İzleyiciyi 10 saniye boyunca tutmak, yalnızca sonucu saklamak değildir. Her yeni an izlemeye devam etmek için yeni bir neden vermelidir.
+
+- İlk karede güçlü, anlaşılır görsel kanca kur; finali kancayla karıştırma.
+- Orta bölümde her an yeni bilgi, hareket, tepki veya nedensel gelişme ekle. Tek şakayı uzatma; boş suspense üretme.
+- Komediyi dozajlı biçimde yükselt. Karakter kararları ve karşılıklı tepkiler olayın ilerlemesini sağlasın.
+- Final, izleme süresinin komik ve tatmin edici ödülü olsun. Sırf şaşırtıcılık yetmez; ikinci vuruş veya tekrar izleme ayrıntısı mümkün ama zorunlu değildir.
+- Kesme, yakın plan, farklı kamera açıları/hareketleri, fiziksel komedi ve absürtlük serbesttir. Tek kamera, gerçekçilik, insan duygusu, her saniye zorunlu şaka veya sabit bir final biçimi dayatma.
+- Önce komediyi güçlendir; sonra yalnızca somut üretim risklerini çözen prompt guardrail'leri ekle.
+- Bunlar yaratıcı tasarım hedefleridir, başarı garantisi değildir. Yayın sonrası metrikler hipotezleri sınar.
+
 ## Veri kullanımı ve kanıt ayrımı
 
 - Görüntülenme ve gözlenen günlük izlenme hızı erişimle ilgili sinyallerdir. Ortalama izleme süresi, ortalama izlenen yüzde, beğeniler ve abone kazanımı ayrı sonuçlardır; tek bir puanmış gibi birleştirilmemelidir.
