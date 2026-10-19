@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Boş Dükkân · Konu üret</title>
+<style>
+  :root {
+    --zemin: #ffffff;
+    --yazi: #1d1d1f;
+    --soluk: #6b6b70;
+    --cizgi: #d9d9dc;
+    --sari: #f5c400;
+    --sari-yazi: #1d1d1f;
+    --alan: #f4f4f5;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --zemin: #1b1b1d;
+      --yazi: #f2f2f3;
+      --soluk: #a0a0a6;
+      --cizgi: #3a3a3e;
+      --alan: #26262a;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--zemin);
+    color: var(--yazi);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+    padding: max(20px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom));
+  }
+  main { max-width: 620px; margin: 0 auto; }
+  h1 { font-size: 1.55rem; line-height: 1.2; margin: 8px 0 6px; font-weight: 800; letter-spacing: -0.01em; }
+  .alt { color: var(--soluk); margin: 0 0 26px; max-width: 46ch; }
+  #uret {
+    display: block; width: 100%; min-height: 76px;
+    border: 0; border-radius: 14px;
+    background: var(--sari); color: var(--sari-yazi);
+    font: inherit; font-size: 1.3rem; font-weight: 800;
+    cursor: pointer;
+  }
+  #uret:active { transform: scale(0.99); }
+  #uret:disabled { opacity: 0.55; cursor: progress; }
+  #uret:focus-visible, #kopyala:focus-visible { outline: 3px solid var(--yazi); outline-offset: 3px; }
+  #durum { min-height: 1.5em; margin: 14px 0 0; color: var(--soluk); }
+  #durum.hata { color: #c4271c; }
+  @media (prefers-color-scheme: dark) { #durum.hata { color: #ff8a80; } }
+  #sonuc { margin-top: 10px; }
+  #cikti {
+    width: 100%; height: 34vh; min-height: 190px;
+    border: 1px solid var(--cizgi); border-radius: 10px;
+    background: var(--alan); color: var(--yazi);
+    font: 0.78rem/1.45 ui-monospace, Menlo, Consolas, monospace;
+    padding: 12px; resize: vertical;
+  }
+  #kopyala {
+    display: block; width: 100%; min-height: 60px; margin-top: 12px;
+    border: 2px solid var(--yazi); border-radius: 14px;
+    background: transparent; color: var(--yazi);
+    font: inherit; font-size: 1.15rem; font-weight: 700; cursor: pointer;
+  }
+  #kopyala:active { transform: scale(0.99); }
+  .not { color: var(--soluk); font-size: 0.9rem; margin-top: 12px; }
+  footer { margin-top: 34px; font-size: 0.85rem; color: var(--soluk); }
+  footer a { color: inherit; }
+  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: reduce) { #uret:active, #kopyala:active { transform: none; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Konu üret</h1>
+  <p class="alt">Düğmeye bas, paket hazırlansın, kopyala ve Claude'a yapıştır. Fikri o yazacak.</p>
+
+  <button id="uret" type="button">Konu paketini hazırla</button>
+  <p id="durum" role="status" aria-live="polite"></p>
+
+  <section id="sonuc" hidden>
+    <textarea id="cikti" readonly aria-label="Konu paketi"></textarea>
+    <button id="kopyala" type="button">Kopyala</button>
+    <p class="not" id="kopyaDurum"></p>
+  </section>
+
+  <footer><a href="index.html">Eski panel</a></footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var USTA_HAVUZU = ["Buster_Keaton","Charlie_Chaplin","Harold_Lloyd","Jacques_Tati","Laurel_and_Hardy","Rowan_Atkinson","Lucille_Ball","Peter_Sellers","Pierre_Étaix","Stephen_Chow","Max_Linder","Roscoe_Arbuckle","Mabel_Normand","Jackie_Chan","Harpo_Marx","Charley_Bowers"];
+  var PSIKOLOJI = ["Theories_of_humor","Physical_comedy","Slapstick","Deadpan"];
+  var DUNYA_ARAMA = [
+    "silent film comedians physical comedy",
+    "women comedians silent film history",
+    "Indian film comedians physical comedy",
+    "Turkish comedy film history",
+    "pantomime clown tradition",
+    "puppet theatre comedy history",
+    "sketch comedy visual gags history",
+    "Japanese comedy performers physical"
+  ];
+  var AKADEMIK_ARAMA = [
+    'TITLE_ABS:(humor OR humour) AND TITLE_ABS:(psychology OR theory)',
+    'TITLE_ABS:"benign violation" AND OPEN_ACCESS:Y',
+    'TITLE_ABS:(laughter) AND TITLE_ABS:(incongruity OR surprise)',
+    'TITLE_ABS:(slapstick OR "physical comedy")',
+    'TITLE_ABS:(deadpan OR irony) AND TITLE_ABS:humor'
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var dugme = $("uret"), durum = $("durum"), sonuc = $("sonuc"),
+      cikti = $("cikti"), kopyala = $("kopyala"), kopyaDurum = $("kopyaDurum");
+
+  function sec(dizi, n) {
+    var kopya = dizi.slice(), sonucDizi = [];
+    while (sonucDizi.length < n && kopya.length) {
+      sonucDizi.push(kopya.splice(Math.floor(Math.random() * kopya.length), 1)[0]);
+    }
+    return sonucDizi;
+  }
+  function kisalt(s, n) {
+    s = String(s || "").replace(/\s+/g, " ").trim();
+    return s.length > n ? s.slice(0, n) : s;
+  }
+  function htmlTemizle(s) {
+    try { return new DOMParser().parseFromString(String(s || ""), "text/html").documentElement.textContent || ""; }
+    catch (e) { return String(s || "").replace(/<[^>]+>/g, ""); }
+  }
+  function getJSON(url, ms) {
+    var c = new AbortController();
+    var t = setTimeout(function () { c.abort(); }, ms || 9000);
+    return fetch(url, { signal: c.signal }).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function (d) { clearTimeout(t); return d; },
+            function (e) { clearTimeout(t); throw e; });
+  }
+  function wikiOzet(baslik, kanitTuru) {
+    return getJSON("https://en.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(baslik)).then(function (d) {
+      return {
+        title: d.title || baslik.replace(/_/g, " "),
+        summary: kisalt(d.extract, 260),
+        url: (d.content_urls && d.content_urls.desktop && d.content_urls.desktop.page) || ("https://en.wikipedia.org/wiki/" + encodeURIComponent(baslik)),
+        evidenceType: kanitTuru
+      };
+    });
+  }
+
+  var BASLIK = [
+"ROLÜN: Bağımsız görsel komedi senaryo yazarı + komedi psikolojisi araştırmacısı + kendi çıktısını sertçe yeniden düşünen yaratıcı yönetmen.",
+"",
+"AMAÇ: Her seferinde kendi başına yeni bir konu keşfet ve tek bir güçlü 10 saniyelik ASMR video senaryosu üret. Bu, trend videosu uyarlama aracı değildir.",
+"",
+"BAĞIMSIZLIK: Bir YouTube trend videosu, kullanıcının kanal istatistikleri, rakip başlığı, kaynak sahne, popüler nesne, sabit konu ailesi veya önceden tanımlanmış başarı formülü seçmek zorunda değilsin. Bunlardan hiçbiri konu kaynağı değildir. Araştırma verileri yalnızca komedinin nasıl çalıştığını öğrenmek içindir; konuyu kendi yaratıcı yargınla seç.",
+"",
+"TEK ZORUNLU FORMAT: Tam 10 saniye; dikey 9:16; diyalog ve konuşma yok; doğal ASMR odaklı ses. Başka tür, konu, oyunculuk, gerçekçilik, kurgu, fizik veya komedi mekanizması filtresi koyma. Gerçekçi, absürt, fiziksel, deadpan, karakter odaklı, nesne odaklı veya başka herhangi bir yaratıcı biçim serbesttir.",
+"",
+"KANIT ETİKETLERİ (zorunlu): Her iddiayı DOĞRULANMIŞ BİLGİ, İNCELENEN SAHNE, KURAMSAL AÇIKLAMA veya YARATICI HİPOTEZ olarak ayır. Wikipedia arama sonucu/snippet'i, biyografi, filmografi, katalog notu, yayın künyesi ve abstract aynı kanıt değildir. Abstract veya metaveri dönmüş olması tam metnin okunduğu anlamına gelmez; hiçbir sahne incelenmediyse sahne analiz edilmiş gibi anlatma.",
+"",
+"USTA BAŞINA KAYIT: Ülke/dönem, kaynak URL, gerçekten incelenen materyal türü, komedi mekanizması, karakter motivasyonu/seyirci psikolojisi, özgün 10 saniyelik kurguya aktarılabilir soyut teknik ve kopyalanmaması gereken sahne/ifade öğesini yaz. Biyografi veya arama snippet'inden belirli sahne koreografisi çıkarma; kanıt yoksa araştırma adayı olarak bırak.",
+"",
+"PSİKOLOJİYİ ÇOKLU MERCEKLE KULLAN: Uyumsuzluk, statü/üstünlük, benign violation ve gerilim-boşalma teorilerini olası açıklama araçları olarak ayrı tart. Her birinin açıkladığı şeyi ve kanıt sınırını belirt. Bir teorinin her komedide bulunmasını şart koşma; tek teoriyle bütün mizahı açıklama.",
+"",
+"ÖĞRENME → ÖZGÜN NEDENSEL MEKANİZMA: Karakterin amacı veya gündelik arzusu görünür olsun; bir seçim, alışkanlık veya yanlış varsayım ilk eylemi başlatsın; her hareket sonraki sonucu doğursun; final hem beklenmedik hem önceki eylemlerin somut sonucu olsun. Salt tuhaflık, nedensiz rastgelelik, açıklama yazısına bağımlılık veya yalnızca nesne değiştirerek tekrar üretmek komediyi kanıtlamaz. Biçimi mekanizmaya göre seç; tek bir mizah türüne mahkûm olma.",
+"",
+"10 SANİYELİK GÖRSEL UYGULAMA: İlk yaklaşık 0,3 saniyede okunabilir bir görsel kanca hedefle; karakterin amacı konuşma olmadan anlaşılmalı. Eylemler net ve nedensel ilerlesin; final tamamlanmış somut sonuçla bitsin. Kesin format: tam 10 saniye, dikey 9:16, diyalogsuz, doğal ASMR sesleri.",
+"",
+"ACIMASIZ ÖZ-DENETİM: Son seçimi yapmadan önce zayıf/klişe/tekrara benzeyen alternatifleri kendi içinde karşılaştır. İzleyicinin amacı ilk anda okuyup okuyamadığını, hareketlerin birbirini doğurup doğurmadığını, finalin ana olaydan çıkıp çıkmadığını ve sahnenin gerçekten komik bir mekanizma taşıyıp taşımadığını kontrol et. Bu düşünme denetimi sabit puan kapısı değildir; tek bir güçlü aday üret, liste verme.",
+"",
+"TEST SINIRI: Başarı tahmini garanti değildir. Fikri test edilmemiş yaratıcı hipotez olarak işaretle; yayın sonrası veriyi farklı metriklerle karşılaştır ama görüntülenme/izlenme oranından sahnenin neden komik olduğunu veya kesin nedenselliği çıkarsama."
+  ].join("\n");
+
+  var SIRA = [
+"ÇIKTI SIRASI: (1) Tek fikir başlığı. (2) Neden çalışabileceği — kısa ve somut. (3) Tam 10 saniyelik zaman çizelgesi. (4) Doğrudan kopyalanabilir tam İngilizce video promptu. (5) Kullanılan 2–4 araştırma kaynağı ve her birinden çıkarılan somut teknik; kaynakları gerçekten inceleyemediysen bunu belirt. Fikir başarısı garanti değildir; fikir test edilmemiş yaratıcı hipotezdir."
+  ].join("\n");
+
+  function durumYaz(metin, hata) {
+    durum.textContent = metin;
+    durum.className = hata ? "hata" : "";
+  }
+
+  function paketUret() {
+    var basarisiz = [];
+    var bilgi;
+
+    durumYaz("Bilgi dosyası okunuyor…");
+    return getJSON("knowledge.json?v=" + Date.now(), 12000).then(function (k) {
+      bilgi = k;
+      durumYaz("Araştırma toplanıyor…");
+
+      var ustalar = [], psikoloji = [], liderler = [], kesifler = [], akademik = [];
+      var ustaBasliklari = sec(USTA_HAVUZU, 6);
+      var dunyaSorgulari = sec(DUNYA_ARAMA, 2);
+      var akademikSorgular = sec(AKADEMIK_ARAMA, 2);
+
+      var isler = [];
+
+      ustaBasliklari.forEach(function (t) {
+        isler.push(wikiOzet(t, "Wikipedia REST summary only; not scene-level analysis")
+          .then(function (x) { ustalar.push(x); })
+          .catch(function () { basarisiz.push("Wikipedia özet: " + t); }));
+      });
+      PSIKOLOJI.forEach(function (t) {
+        isler.push(wikiOzet(t, "Wikipedia REST summary only; not full theory review")
+          .then(function (x) { psikoloji.push(x); })
+          .catch(function () { basarisiz.push("Wikipedia özet: " + t); }));
+      });
+      dunyaSorgulari.forEach(function (q) {
+        isler.push(getJSON("https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" +
+          encodeURIComponent(q) + "&srlimit=5&format=json&origin=*").then(function (d) {
+            ((d.query && d.query.search) || []).forEach(function (s) {
+              liderler.push({
+                title: s.title,
+                snippet: kisalt(htmlTemizle(s.snippet), 200),
+                query: q,
+                url: "https://en.wikipedia.org/wiki/" + encodeURIComponent(s.title.replace(/ /g, "_"))
+              });
+            });
+          }).catch(function () { basarisiz.push("Wikipedia arama: " + q); }));
+      });
+      akademikSorgular.forEach(function (q) {
+        isler.push(getJSON("https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=" +
+          encodeURIComponent(q) + "&format=json&resultType=core&pageSize=3").then(function (d) {
+            ((d.resultList && d.resultList.result) || []).forEach(function (r) {
+              akademik.push({
+                query: q,
+                title: kisalt(r.title, 200),
+                authors: kisalt(r.authorString, 120),
+                year: r.firstPublicationDate || r.pubYear || "",
+                abstract: kisalt(htmlTemizle(r.abstractText), 700),
+                url: r.doi ? ("https://doi.org/" + r.doi) : (r.pmcid ? ("https://europepmc.org/articles/" + r.pmcid) : ""),
+                openAccess: r.isOpenAccess === "Y",
+                pmid: r.pmid || null,
+                pmcid: r.pmcid || null,
+                evidenceType: "Europe PMC metadata + abstract returned by API"
+              });
+            });
+          }).catch(function () { basarisiz.push("Europe PMC: " + q); }));
+      });
+
+      return Promise.all(isler).then(function () {
+        var gorulen = {};
+        ustalar.forEach(function (u) { gorulen[u.title] = true; });
+        var adaylar = [];
+        liderler.forEach(function (l) {
+          if (!gorulen[l.title]) { gorulen[l.title] = true; adaylar.push(l.title); }
+        });
+        var secilen = sec(adaylar, 3);
+        durumYaz("Dünya taraması tamamlanıyor…");
+        return Promise.all(secilen.map(function (t) {
+          return wikiOzet(t.replace(/ /g, "_"), "Wikipedia REST page summary returned by API; summary/biography only, not a scene-level analysis")
+            .then(function (x) { kesifler.push(x); })
+            .catch(function () { basarisiz.push("Wikipedia özet: " + t); });
+        })).then(function () {
+          return { ustalar: ustalar, psikoloji: psikoloji, liderler: liderler, kesifler: kesifler, akademik: akademik };
+        });
+      });
+    }).then(function (ar) {
+      var bulgular = (bilgi.findings || []).map(function (f) {
+        return { source: f.source, finding: f.finding, url: f.url };
+      });
+      var arastirma = {
+        fetchedAt: new Date().toISOString(),
+        sourceMethod: "Browser-fetched public Wikipedia REST/API and Europe PMC APIs; each source below identifies what was actually returned.",
+        baseLearning: {
+          masters: ar.ustalar,
+          psychology: ar.psikoloji,
+          learnedFindings: bulgular
+        },
+        worldDiscoveries: ar.kesifler,
+        worldSearchLeads: ar.liderler,
+        academicSources: ar.akademik,
+        failedLookups: basarisiz
+      };
+
+      var eskiFikirler = (bilgi.topics || []).map(function (t) {
+        return { title: t.title, summary: t.summary };
+      });
+
+      var parcalar = [
+        BASLIK,
+        "",
+        "KALICI MOTOR ÖĞRENME PROTOKOLÜ (knowledge.json; senaryo ve hakem görevlerine bağlanmıştır):",
+        "",
+        JSON.stringify(bilgi.learningProtocol || [], null, 2),
+        "",
+        "ÖNCEKİ USTALAR İÇİN ARAŞTIRMA ADAYLARI (doğrulanmış sahne bulguları değildir; kaynak ve materyal türü ayrıca doğrulanmalı):",
+        "",
+        JSON.stringify(bilgi.artistResearchCandidates || [], null, 2),
+        "",
+        "ARAŞTIRMA VERİSİNİ GERÇEKTEN KULLAN: Aşağıdaki canlı Wikipedia keşiflerini, psikoloji/komedi sayfası özetlerini ve erişilebilen akademik özetleri incele. Araştırma başarısızsa bunu açıkça belirt; fikir üretimini durdurma.",
+        "",
+        "KAYNAK ARAŞTIRMA PAKETİ (bu çalıştırmada alınan; kaynağın durumu ve URL'si korunmalı):",
+        "",
+        JSON.stringify(arastirma, null, 2),
+        "",
+        "ÖNCEKİ FİKİRLER (yalnızca tekrar etmemeye yardımcı bağlam; yeni konuyu kısıtlamak için değil):",
+        "",
+        JSON.stringify(eskiFikirler, null, 2),
+        "",
+        "KULLANICININ AÇIKÇA KAÇINILMASINI İSTEDİĞİ FİKİRLER / MEKANİZMALAR (varsa):",
+        "",
+        "Belirtilmedi.",
+        "",
+        SIRA
+      ];
+      return { metin: parcalar.join("\n"), hata: basarisiz.length, kaynak: ar.ustalar.length + ar.psikoloji.length + ar.kesifler.length + ar.akademik.length };
+    });
+  }
+
+  function panoyaKopyala(metin) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(metin);
+    }
+    return new Promise(function (coz, red) {
+      try {
+        cikti.focus(); cikti.select(); cikti.setSelectionRange(0, metin.length);
+        if (document.execCommand("copy")) coz(); else red(new Error("kopyalanamadı"));
+      } catch (e) { red(e); }
+    });
+  }
+
+  dugme.addEventListener("click", function () {
+    dugme.disabled = true;
+    sonuc.hidden = true;
+    kopyaDurum.textContent = "";
+    paketUret().then(function (p) {
+      cikti.value = p.metin;
+      sonuc.hidden = false;
+      durumYaz("Paket hazır. " + p.kaynak + " kaynak toplandı" + (p.hata ? ", " + p.hata + " kaynak alınamadı (pakette yazıyor)." : "."));
+    }).catch(function (e) {
+      durumYaz("Paket hazırlanamadı: knowledge.json okunamadı (" + (e && e.message ? e.message : "bilinmeyen hata") + "). Sayfayı yenileyip tekrar dene.", true);
+    }).then(function () {
+      dugme.disabled = false;
+    });
+  });
+
+  kopyala.addEventListener("click", function () {
+    panoyaKopyala(cikti.value).then(function () {
+      kopyaDurum.textContent = "Kopyalandı. Şimdi Claude'a yapıştır.";
+    }, function () {
+      cikti.focus(); cikti.select();
+      kopyaDurum.textContent = "Otomatik kopyalanamadı. Metin seçildi, basılı tutup Kopyala'yı seç.";
+    });
+  });
+})();
+</script>
+</body>
+</html>
