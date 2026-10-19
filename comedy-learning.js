@@ -58,6 +58,22 @@
   {
     "id": "output-contract",
     "rule": "Araştırma çıktısında kaynak ve kanıt türünü göster; üretim çıktısında tek fikir, kısa komik mekanizma, 0-10 saniye akışı, doğrudan kullanılabilir İngilizce video promptu ve yayın sonrası sınanacak metrikleri ver."
+  },
+  {
+    "id": "retention-dramaturgy",
+    "rule": "Her videoyu yalnızca komik bir fikir olarak değil, 10 saniyelik dikkat ve komedi akışı olarak tasarla: ilk karede güçlü, anında okunabilir bir kanca; devamında her an yeni görsel bilgi, eylem, tepki, ilişki veya gelişme; sonunda izleme süresine değen güçlü bir komedi ödülü. İzleyiciyi sadece bekletme; her yeni an izlemeye devam etmek için yeni bir neden sunsun."
+  },
+  {
+    "id": "escalation-not-padding",
+    "rule": "Merakı boş geciktirme veya tek bir şakayı gereksiz uzatma. Olay nedensel biçimde büyüsün; karakterlerin kararları ve birbirlerine tepkileri yeni gelişmeler doğursun. Her saniyeye zorla şaka sıkıştırma; sakin bir an yalnızca gerilimi/komediyi gerçekten artırıyorsa kalsın."
+  },
+  {
+    "id": "payoff-is-earned",
+    "rule": "Kanca, finalin kendisi değildir. Kanca merak başlatır; orta bölüm beklentiyi aşamalı biçimde geliştirir ve yeni bilgi verir; final bu birikimin karşılığını veren, açıkça görülen, komik ve tatmin edici bir ödül olmalıdır. Sırf şaşırtıcı olmak komik olmak demek değildir. Mümkünse finalde ikinci bir komik vuruş veya yeniden izleyince fark edilen bir ayrıntı bulunabilir; zorunlu değildir."
+  },
+  {
+    "id": "creative-freedom-targeted-guardrails",
+    "rule": "Önce komedinin en güçlü hâlini tasarla, sonra üretim promptunu netleştir. Kesme, yakın plan, farklı kamera açıları/hareketleri, fiziksel komedi, absürtlük ve karakter etkileşimi serbesttir; tek kamera veya gerçekçilik gibi gereksiz genel yasaklar koyma. AI guardrail'lerini yalnızca belirli bir olası üretim hatasını önlemek için kullan; yaratıcı alanı daraltma."
   }
 ];
   const HISTORY_KEY = 'bd_topic_history';
